@@ -26,7 +26,7 @@ class BasicSearch extends React.Component {
           <Form.Control type="text" placeholder="Try 'New Haven, CT'"/>
           <Button className="d-block d-sm-none" type="submit" variant="primary" onClick={this.handleSubmit}>Search</Button>
         </InputGroup>
-    </Form>
+      </Form>
     );
   }
 }

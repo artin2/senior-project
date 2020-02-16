@@ -2,3 +2,8 @@
 /* .bg-dark{
   background-color: #bbe1fa !important;
 } */
+
+.searchBar {
+  padding-right: 1rem;
+  padding-left: 1rem;
+}

@@ -3,6 +3,7 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import AdvancedSearch from '../Search/AdvancedSearch';
+import Carousel from '../Carousel';
 import './Homepage.css';
 
 class Homepage extends React.Component {
@@ -14,7 +15,10 @@ class Homepage extends React.Component {
     return (
       <Container fluid>
         <Row className="justify-content-center">
-          <Col xs={12} sm={9} md={7}><AdvancedSearch/></Col>
+          <Col xs={8} sm={7} md={6} lg={5}>
+            <AdvancedSearch/>
+            <Carousel/>
+          </Col>
         </Row>
       </Container>
     );

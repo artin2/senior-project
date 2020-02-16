@@ -1,9 +1,10 @@
 import React from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
+import { Link } from "react-router-dom";
 import BasicSearch from '../Search/BasicSearch';
-import './ResponsiveNavbar.css'
+import './MainNavbar.css'
 
-class ResponsiveNavbar extends React.Component {
+class MainNavbar extends React.Component {
   // constructor(props) {
   //   super(props);
   // }
@@ -11,19 +12,19 @@ class ResponsiveNavbar extends React.Component {
   render() {
     return (
       <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark" sticky="top">
-        <Navbar.Brand href="#home">Bloom</Navbar.Brand>
+        <Link to="/" className="navbar-brand">Bloom</Link>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="mr-auto">
-            <Nav.Link href="#help">Help</Nav.Link>
-            <Nav.Link href="#aboutus">About</Nav.Link>
-            <Nav.Item className="mr-auto d-none d-sm-block">
+            <Link to="/help" className="nav-link">Help</Link>
+            <Link to="/about" className="nav-link">About</Link>
+            <Nav.Item className="mr-auto d-none d-sm-block searchBar">
               <BasicSearch/>
             </Nav.Item>
           </Nav>
           <Nav>
-            <Nav.Link href="#login">Login</Nav.Link>
-            <Nav.Link href="#signup">Signup</Nav.Link>
+            <Link to="/login" className="nav-link">Login</Link>
+            <Link to="/signup" className="nav-link">Signup</Link>
           </Nav>
         </Navbar.Collapse>
       </Navbar>
@@ -31,4 +32,4 @@ class ResponsiveNavbar extends React.Component {
   }
 }
 
-export default ResponsiveNavbar;
+export default MainNavbar;
