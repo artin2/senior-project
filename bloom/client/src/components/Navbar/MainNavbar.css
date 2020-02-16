@@ -1,0 +1,9 @@
+/* If we want to later change the exact color of the navbar */
+/* .bg-dark{
+  background-color: #bbe1fa !important;
+} */
+
+.searchBar {
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
