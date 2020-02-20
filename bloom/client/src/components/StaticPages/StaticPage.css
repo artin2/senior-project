@@ -1,4 +1,9 @@
-/* .backStuff {
+.backStuff {
    background-image: url("/office.jpg");
    height: 100vh;
-} */
+}
+
+.body {
+  width: 80%;
+  text-align: center;
+}

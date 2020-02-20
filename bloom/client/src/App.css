@@ -19,7 +19,10 @@
 
 .App-body {
   background-color: #0f4c75;
-  height: 100vh;
+  position: absolute;
+  overflow:auto;
+  height:100%;
+  width:100%;
 }
 
 @keyframes App-logo-spin {
