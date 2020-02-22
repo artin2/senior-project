@@ -5,6 +5,14 @@ const cors = require('cors');
 const serveStatic = require('serve-static');
 const path = require("path")
 
+const db = require('./db.js');
+
+function getFormattedDate() {
+    let date = new Date();
+    return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " +  date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+}
+
+
 // //CITATION: https://stackoverflow.com/questions/40876599/express-js-force-https-ssl-redirect-error-too-many-redirects
 // //HTTPS redirect middleware
 // function ensureSecure(req, res, next) {
@@ -89,8 +97,43 @@ app.post('/postMenuItem', async (req, res) => {
   });
 });
 
+
+app.post('/signUp', (req, res) => {
+    if (req.query.email && req.query.password && req.query.first_name && req.query.last_name) {
+
+        console.log('Request Received');
+        let timestamp = getFormattedDate();
+        let query = 'INSERT INTO users(email, first_name, last_name, password, role, created_at, phone) VALUES ($1, $2, $3, $4, $5, $6, $7);'
+        let values = [req.query.email, req.query.first_name, req.query.last_name, req.query.password, req.query.role, timestamp, req.query.phone]
+
+        db.client.connect(function(err) {
+
+            db.client.query(query, values,
+              (err, result) => {
+
+                // console.log(res);
+                if (result) {
+                  res.send({status: "SUCCESS", email: req.query.email, first_name: req.query.first_name, last_name: req.query.last_name});
+                  res.status(200)
+                }
+
+                if (err) {
+                  console.log("Error Signing Up");
+                  res.send(err);
+                }
+
+                // if (fields) console.log(fields);
+            });
+        });
+    } else {
+        console.log('Missing a Parameter');
+    }
+});
+
+
+
 let port = process.env.PORT || 8081;
 
 app.listen(port, function () {
-    console.log('Node js at port', port);
+    console.log('Node Server is listening at port', port);
 });
