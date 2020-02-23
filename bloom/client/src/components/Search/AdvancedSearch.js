@@ -1,5 +1,7 @@
 import React from 'react';
 import './AdvancedSearch.css'
+import { Form } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
 
 class AdvancedSearch extends React.Component {
   constructor(props) {
@@ -8,7 +10,9 @@ class AdvancedSearch extends React.Component {
                   city: '',
                   state: '',
                   zip: '',
-                  arrive: 0};
+                  time: 0,
+                  nails: false,
+                  hair: false};
     this.autocomplete = null
 
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
@@ -29,54 +33,75 @@ class AdvancedSearch extends React.Component {
     this.setState({
       street: `${address[0].long_name} ${address[1].long_name}`,
       city: address[4].long_name,
-      state: address[6].short_name,
-      zip: address[8].short_name,
+      state: address[5].short_name,
+      zip: address[7].short_name,
     })
   }
 
   handleChange(event) {
-    if (event.target.name) {
-      this.setState({[event.target.name]: event.target.value})
+    if (event.target.type === "checkbox") {
+      this.setState({[event.target.id]: !this.state[event.target.id]})
     }
     else{
-      this.setState({arrive: event.target.value});
+      this.setState({[event.target.id]: parseInt(event.target.value) || event.target.value});
     }
   }
 
-  handleSubmit() {
-      alert("Submit");
+  handleSubmit(event) {
+    event.preventDefault();
+    // form validation would go here
+    // example post to DB
+    // fetch('http://localhost:4000/api/users/register' , {
+    //   method: "POST",
+    //   headers: {
+    //     'Content-type': 'application/json'
+    //   },
+    //   body: JSON.stringify(this.state)
+    // })
+    // .then((result) => result.json())
+    // .then((info) => { console.log(info); })
+    alert(JSON.stringify(this.state));
   }
 
   render() {
     return (
-      <form className="formBody rounded">
+      <Form className="formBody rounded" onSubmit={this.handleSubmit}>
         <h3>Book Now</h3>
-        <div className="form-group">
-          <label>Address</label>
-          <input id="autocomplete"
-            ref="input"
+        <Form.Group controlId="autocomplete">
+          <Form.Label>Address</Form.Label>
+          <Form.Control
             type="text"
+            placeholder="Try 'New Haven, CT'"
             autoComplete="new-password"
-            className="form-control"/>
-        </div>
-        <div className="form-group">
-          <label>Time</label>
-          <select
-            className="form-control"
-            id="formSearchArrive"
-            value={this.state.arrive}
-            onChange={this.handleChange}>
+          />
+        </Form.Group>
+    
+        <Form.Group>
+          <Form.Label>Time</Form.Label>
+          <Form.Control as="select" id="time" onChange={this.handleChange}>
             <option>1</option>
             <option>2</option>
             <option>3</option>
             <option>4</option>
             <option>5</option>
-          </select>
-        </div>
-        <button type="submit" className="btn btn-primary" onClick={this.handleSubmit}>
-          Submit
-        </button>
-      </form>
+          </Form.Control>
+        </Form.Group>
+
+        <Form.Group controlId="service">
+          <Form.Label>Service</Form.Label>
+          <Form.Check 
+            id="nails"
+            label="Nails"
+            onChange={this.handleChange}
+          />
+          <Form.Check 
+            id="hair"
+            label="Hair"
+            onChange={this.handleChange}
+          />
+        </Form.Group>
+        <Button type="submit">Submit</Button>
+      </Form>
     );
   }
 }

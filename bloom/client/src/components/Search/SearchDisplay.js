@@ -4,6 +4,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import SearchCard from './SearchCard'
 import './SearchDisplay.css'
+import MapContainer from '../Map/MapContainer'
 
 
 class SearchDisplay extends React.Component {
@@ -17,7 +18,8 @@ class SearchDisplay extends React.Component {
           "/salon.jpg"
         ],
         "name": "Nails For You",
-        "description": "We are easily the best in the business and if you think otherwise then you are mistaken."
+        "description": "We are easily the best in the business and if you think otherwise then you are mistaken.",
+        "id": 1
       },
       {
         "urls": [
@@ -26,7 +28,8 @@ class SearchDisplay extends React.Component {
           "/salon.jpg"
         ],
         "name": "Nails For Me",
-        "description": "We are probably the best in the business and if you think otherwise then you are mistaken."
+        "description": "We are probably the best in the business and if you think otherwise then you are mistaken.",
+        "id": 2
       },
       {
         "urls": [
@@ -35,7 +38,8 @@ class SearchDisplay extends React.Component {
           "/salon.jpg"
         ],
         "name": "Hair For You",
-        "description": "We are definitely the best in the business and if you think otherwise then you are mistaken."
+        "description": "We are definitely the best in the business and if you think otherwise then you are mistaken.",
+        "id": 3
       },
       {
         "urls": [
@@ -44,7 +48,8 @@ class SearchDisplay extends React.Component {
           "/salon.jpg"
         ],
         "name": "Hair For Me",
-        "description": "We are maybe the best in the business and if you think otherwise then you are mistaken."
+        "description": "We are maybe the best in the business and if you think otherwise then you are mistaken.",
+        "id": 4
       },
       {
         "urls": [
@@ -53,8 +58,15 @@ class SearchDisplay extends React.Component {
           "/salon.jpg"
         ],
         "name": "Test For Me",
-        "description": "We are maybe the best in the business and if you think otherwise then you are mistaken."
-      }]
+        "description": "We are maybe the best in the business and if you think otherwise then you are mistaken.",
+        "id":5
+      }],
+      center: {lat: 40.73, lng: -73.93},
+      zoom: 12,
+      mapStyles: {
+        width: '50%',
+        height: '50%'
+      }
     }
   }
 
@@ -63,10 +75,13 @@ class SearchDisplay extends React.Component {
       <Container fluid>
         <Row className="justify-content-center">
           {this.state.data.map(vendor => (
-            <Col>
-              <SearchCard salon={vendor}/>
+            <Col key={"vendor-" + vendor.id}>
+              <SearchCard vendor={vendor}/>
             </Col>
           ))}
+        </Row>
+        <Row>
+          <MapContainer center={this.state.center} zoom={this.state.zoom} mapStyles={this.state.mapStyles}/>
         </Row>
       </Container>
     );
@@ -74,3 +89,6 @@ class SearchDisplay extends React.Component {
 }
 
 export default SearchDisplay;
+
+
+// <MapContaienr center={this.state.center} zoom={this.state.zoom} height={this.state.height} width={this.state.width}/>
