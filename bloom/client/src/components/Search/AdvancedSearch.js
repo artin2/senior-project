@@ -2,6 +2,9 @@ import React from 'react';
 import './AdvancedSearch.css'
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
+import {
+  withRouter
+} from "react-router-dom";
 
 class AdvancedSearch extends React.Component {
   constructor(props) {
@@ -48,7 +51,7 @@ class AdvancedSearch extends React.Component {
   }
 
   handleSubmit(event) {
-    event.preventDefault();
+    // event.preventDefault();
     // form validation would go here
     // example post to DB
     // fetch('http://localhost:4000/api/users/register' , {
@@ -61,6 +64,7 @@ class AdvancedSearch extends React.Component {
     // .then((result) => result.json())
     // .then((info) => { console.log(info); })
     alert(JSON.stringify(this.state));
+    this.props.history.push('/search');
   }
 
   render() {
@@ -100,10 +104,10 @@ class AdvancedSearch extends React.Component {
             onChange={this.handleChange}
           />
         </Form.Group>
-        <Button type="submit">Submit</Button>
+          <Button type="submit">Submit</Button>
       </Form>
     );
   }
 }
 
-export default AdvancedSearch;
+export default withRouter(AdvancedSearch);

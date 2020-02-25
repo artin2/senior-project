@@ -2,7 +2,8 @@ import React from 'react';
 import {
   BrowserRouter as Router,
   Switch,
-  Route
+  Route,
+  withRouter
 } from "react-router-dom";
 import LoginForm from './components/User/LoginForm';
 import SignupForm from './components/User/SignupForm';
@@ -11,6 +12,7 @@ import Homepage from './components/Home/Homepage';
 import StaticPage from './components/StaticPages/StaticPage';
 import SearchDisplay from './components/Search/SearchDisplay';
 import VendorPage from './components/Vendor/VendorPage';
+import ReservationPage from './components/Reservation/ReservationPage'
 import './App.css';
 
 
@@ -28,6 +30,7 @@ function App() {
             <Route exact path="/signup" component={SignupForm} />
             <Route exact path="/search" component={SearchDisplay} />
             <Route exact path="/vendor" component={VendorPage} />
+            <Route path="/book/:id" component={ReservationPage} />
           </Switch>
         </div>
       </Router>
