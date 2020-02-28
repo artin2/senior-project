@@ -1,0 +1,7 @@
+.error {
+    border: 2px solid #FF6565;
+}
+.error-message {
+    color: #FF6565;
+    font-size: .8em;
+}
