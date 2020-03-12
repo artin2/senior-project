@@ -86,7 +86,7 @@ class SearchDisplay extends React.Component {
         <Row className="justify-content-center">
           {this.state.vendors.map(vendor => (
             <Col key={"vendor-" + vendor.id}>
-              <SearchCard vendor={vendor} carousel={true} styleVal={{ width: '18rem' }}/>
+              <SearchCard vendor={vendor} carousel={true} styleVal={{ width: '18rem' }} onClickFunction={() =>  window.location.href='/book/' + vendor.id}/>
             </Col>
           ))}
         </Row>

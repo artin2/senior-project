@@ -3,9 +3,10 @@ import LargeCarousel from '../LargeCarousel';
 import Card from 'react-bootstrap/Card'
 
 class SearchCard extends React.Component {
-  // constructor(props) {
-  //   super(props);
-  // }
+  constructor(props) {
+    super(props);
+    console.log(this.props.onClickFunction)
+  }
 
   render() {
     let image;
@@ -19,7 +20,7 @@ class SearchCard extends React.Component {
     return (
       <Card style={this.props.styleVal}>
         {image}
-        <Card.Body onClick={event =>  window.location.href='/book/' + this.props.vendor.id} style={{cursor: 'pointer'}}>
+        <Card.Body onClick={() => this.props.onClickFunction(this.props.vendor.id)} style={{cursor: 'pointer'}}>
           <Card.Title>{this.props.vendor.name}</Card.Title>
           <Card.Text>{this.props.vendor.description}</Card.Text>
         </Card.Body>

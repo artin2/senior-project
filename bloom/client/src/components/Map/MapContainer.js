@@ -43,6 +43,12 @@ class MapContainer extends Component {
     }
   };
 
+  onClickFunction (id) {
+    console.log("Here1")
+    // Currently not working...
+    // window.location.href='/book/' + id
+  }
+
   render() {
     return (
       <Map
@@ -57,7 +63,7 @@ class MapContainer extends Component {
         visible={this.state.showingInfoWindow}
         onClose={this.onClose}
         >
-          <SearchCard vendor={this.props.vendors[this.state.activeMarkerIndex]} styleVal={{ width: '10rem', height: '10rem' }}/>
+          <SearchCard vendor={this.props.vendors[this.state.activeMarkerIndex]} styleVal={{ width: '10rem', height: '10rem' }} onClickFunction={this.onClickFunction}/>
         </InfoWindow>
       </Map>
     );
@@ -66,5 +72,7 @@ class MapContainer extends Component {
 
 export default MapContainer;
 
-// for fixing clicking within infowindow, some resources: https://github.com/fullstackreact/google-maps-react/issues/70
+
+// for fixing clicking within infowindow, some resources: https://stackoverflow.com/questions/60426907/reactjs-onclick-not-triggered-on-click-of-button-inside-google-maps-marker-inf
+// https://github.com/fullstackreact/google-maps-react/issues/70
 // https://www.google.com/search?q=onclick+within+infowindow+not+working+react&rlz=1C5CHFA_enUS821US821&oq=onclick+within+infowindow+not+working+react&aqs=chrome..69i57.7600j0j7&sourceid=chrome&ie=UTF-8
