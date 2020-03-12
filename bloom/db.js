@@ -1,15 +1,16 @@
 
 
 const pg = require('pg');
+require('dotenv').config();
 
 // exports.handler = function(event, context) {
 // pg.types.setTypeParser(1114, str => str);
 
     const dbConfig = {
-      host: 'bloom-db.cvtddlfbioiq.us-east-1.rds.amazonaws.com',
-      user: 'roula',
-      password: 'cpsc490!',
-      database: 'bloom_db',
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       port: 5432
     };
 

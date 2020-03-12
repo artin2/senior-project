@@ -1,48 +1,122 @@
-const { Issuer } = require('openid-client');
-Issuer.discover('https://accounts.google.com') // => Promise
-  .then(function (googleIssuer) {
-    console.log('Discovered issuer %s %O', googleIssuer.issuer, googleIssuer.metadata);
+
+
+
+const argon2 = require('argon2');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+
+async function generateSalt() {
+
+  try {
+    const salt = await crypto.randomBytes(32).toString('base64');
+    console.log("Created Salt")
+    return salt;
+  }
+  catch(err) {
+    console.log(err);
+  }
+
+}
+
+
+async function generateHash(pw) {
+
+  try {
+
+    const salt = await generateSalt();
+    const hash = await argon2.hash(pw, salt);
+    console.log('Successfully created Argon2 hash:', hash);
+    return hash;
+
+  }
+  catch(err) {
+
+    console.log(err);
+    return null
+  }
+
+
+  //
+  // console.log(hash);
+  //
+  // crypto.randomBytes(32).toString('base64').then(salt => {
+  //
+  //   console.log(salt);
+  //
+  //   await argon2.hash(pw, salt).then(hash => {
+  //     console.log('Successfully created Argon2 hash:', hash);
+  //     console.log(hash);
+  //     return hash;
+  //   });
+  //
+  //   // return null;
+  // })
+  //
+  // .catch((err) => {
+  //   console.log(err)
+  // });
+
+}
+
+async function verifyHash(dbPw, userPw) {
+
+  try {
+
+    const verified = await argon2.verify(dbPw, userPw);
+
+    if(verified) {
+      console.log('Successful Password Supplied!');
+      return true;
+    }
+    else {
+      console.log('Invalid Password Supplied!');
+      return false;
+    }
+
+  }
+  catch(err) {
+
+    console.log('Invalid password supplied!');
+    return false;
+  };
+
+}
+
+
+const generateToken = (res, id, first_name, last_name) => {
+  const expiration = process.env.DB_ENV === 'dev' ? 100 : 604800000;
+  const token = jwt.sign({ id, first_name, last_name }, process.env.JWT_SECRET, {
+    expiresIn: process.env.DB_ENV === 'dev' ? '1d' : '7d',
   });
-
-  const client = new googleIssuer.Client({
-  client_id: '127645252410-8tui8lsltfpdnumb5s1ha0ft6q6rl8m1.apps.googleusercontent.com',
-  client_secret: 'vkfzqwlk4ROk3mGyP0cwq-XM',
-  redirect_uris: ['http://localhost:3000/cb'],
-  response_types: ['code'], // profile too?
-  // id_token_signed_response_alg (default "RS256")
-  // token_endpoint_auth_method (default "client_secret_basic")
-}); // => Client
-
-
-const { generators } = require('openid-client');
-const code_verifier = generators.codeVerifier();
-// store the code_verifier in your framework's session mechanism, if it is a cookie based solution
-// it should be httpOnly (not readable by javascript) and encrypted.
-
-const code_challenge = generators.codeChallenge(code_verifier);
-
-client.authorizationUrl({
-  scope: 'openid email profile',
-  resource: 'https://my.api.example.com/resource/32178',
-  code_challenge,
-  code_challenge_method: 'S256',
-});
-
-const params = client.callbackParams(req);
-client.callback('https://client.example.com/callback', params, { code_verifier }) // => Promise
-  .then(function (tokenSet) {
-    console.log('received and validated tokens %j', tokenSet);
-    console.log('validated ID Token claims %j', tokenSet.claims());
+  return res.cookie('token', token, {
+    expires: new Date(Date.now() + expiration),
+    secure: false, // set to true if your using https
+    httpOnly: true,
   });
+};
 
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies.token || '';
+  try {
+    if (!token) {
+      return res.status(401).json('You need to Login')
+    }
+    const decrypt = await jwt.verify(token, process.env.JWT_SECRET);
 
-  client.userinfo(access_token) // => Promise
-  .then(function (userinfo) {
-    console.log('userinfo %j', userinfo);
-  });
+    req.user = {
+      id: decrypt.id,
+      first_name: decrypt.first_name,
+      last_name: decrypt.last_name
+    };
+    next();
+  } catch (err) {
+    return res.status(500).json(err.toString());
+  }
+};
 
-  client.refresh(refresh_token) // => Promise
-  .then(function (tokenSet) {
-    console.log('refreshed and validated tokens %j', tokenSet);
-    console.log('refreshed ID Token claims %j', tokenSet.claims());
-  });
+module.exports = {
+    generateHash: generateHash,
+    verifyHash: verifyHash,
+    generateToken: generateToken,
+    verifyToken: verifyToken,
+};
