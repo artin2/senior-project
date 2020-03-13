@@ -40,17 +40,36 @@ const failureFacebook = (response) => {
 class LoginForm extends React.Component {
   constructor(props) {
     super(props);
-    // this.state = {email: '',
-    //               password: ''};
-    // this.autocomplete = null
-    //
-    //
+    this.state = {email: '',
+                  password: ''};
+
+    this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  handleChange(event) {
+    this.setState({[event.target.id]: parseInt(event.target.value) || event.target.value});
+  }
 
-  handleSubmit() {
-      alert("Submit");
+  handleSubmit(event) {
+    event.preventDefault();
+    fetch('http://localhost:8081/login' , {
+      method: "POST",
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify(this.state)
+    })
+    .then(function(response){
+      if(response.status!==200){
+        console.log("Error!", response.status)
+        // throw new Error(response.status)
+      }
+      else{
+        // redirect to home page signed in
+        console.log("Successful login!", response.status)
+      }
+    })
   }
 
   render() {
@@ -67,7 +86,7 @@ class LoginForm extends React.Component {
                           <FaEnvelope/>
                       </InputGroup.Text>
                   </InputGroup.Prepend>
-                  <Form.Control type="email" placeholder="Email"/>
+                  <Form.Control id="email" type="email" placeholder="Email" onChange={this.handleChange}/>
                 </InputGroup>
               </Form.Group>
 
@@ -78,7 +97,7 @@ class LoginForm extends React.Component {
                           <FaLock/>
                       </InputGroup.Text>
                   </InputGroup.Prepend>
-                  <Form.Control type="password" placeholder="Password"/>
+                  <Form.Control id="password" type="password" placeholder="Password" onChange={this.handleChange}/>
 
 
                 </InputGroup>
@@ -107,7 +126,7 @@ class LoginForm extends React.Component {
                 callback={successFacebook}
                  />
               </Row>
-              <Button  className="" type="submit" variant="primary" onClick={this.handleSubmit}>Submit</Button>
+              <Button  className="" type="submit" variant="primary" onClick={this.handleSubmit}>Login</Button>
               </Col>
             </Form>
           </Col>
