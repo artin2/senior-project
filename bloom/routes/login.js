@@ -31,7 +31,7 @@ async function login(req, res) {
                     }
                     else {
                       res.send({status: "Password Provided is Incorrect"});
-
+                      res.status(400);
                     }
                   }
 
@@ -55,6 +55,7 @@ async function login(req, res) {
         });
     } else {
         res.send('Missing a Parameter');
+        res.status(400);
     }
 
 }
@@ -102,6 +103,7 @@ async function signup(req, res) {
         });
     } else {
         res.send('Missing a Parameter');
+        res.status(400);
     }
 
 }

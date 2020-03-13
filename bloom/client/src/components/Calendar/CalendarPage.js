@@ -60,7 +60,7 @@ const Appointment = ({
     style={{
       ...style,
       backgroundColor: '#597096',
-      borderRadius: '28px',
+      borderRadius: '25px',
     }}
   >
     {children}
@@ -83,12 +83,13 @@ class Calendar extends React.Component {
     return (
       <Container fluid>
         <Row className="justify-content-center">
-
+          <Col>
+            <p className="title">~ Manage Your Appointments ~</p>
            <Paper className="react-calendar">
           <Scheduler
             data={[
-              { startDate: '2020-03-13 10:00', endDate: '2020-03-13 11:00', title: 'Meeting' },
-              { startDate: '2020-03-13 09:00', endDate: '2020-03-13 11:00', title: 'Go to a gym' },
+              { startDate: '2020-03-13 10:00', endDate: '2020-03-13 11:00', title: 'Manicure' },
+              { startDate: '2020-03-13 09:00', endDate: '2020-03-13 11:00', title: 'Hair Blowout' },
             ]}
 
           >
@@ -119,7 +120,7 @@ class Calendar extends React.Component {
             appointmentComponent={Appointment}/>
           </Scheduler>
           </Paper>
-
+          </Col>
         </Row>
       </Container>
     );

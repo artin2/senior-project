@@ -60,7 +60,7 @@ async function generateHash(pw) {
 async function verifyHash(dbPw, userPw) {
 
   try {
-
+    
     const verified = await argon2.verify(dbPw, userPw);
 
     if(verified) {

@@ -6,7 +6,8 @@
   width: 1000px !important;
   max-width: 1500px !important;
   background-color: purple;
-  margin-top: 100px;
+  margin-top: 20px;
+  margin-left: 200px;
   height: 620px;
   /* height: 600px !important; */
 
@@ -14,6 +15,13 @@
 
 .weekend {
 
-  background-color: #e0e0e0;
+  background-color: #cbd1d6;
+
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 20px;
 
 }
