@@ -1,0 +1,19 @@
+
+
+
+.react-calendar {
+
+  width: 1000px !important;
+  max-width: 1500px !important;
+  background-color: purple;
+  margin-top: 100px;
+  height: 620px;
+  /* height: 600px !important; */
+
+}
+
+.weekend {
+
+  background-color: #e0e0e0;
+
+}

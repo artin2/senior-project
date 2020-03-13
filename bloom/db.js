@@ -15,8 +15,7 @@ require('dotenv').config();
     };
 
  // };
-
- const client = new pg.Client(dbConfig);
+ const client = new pg.Pool(dbConfig);
  // client.connect(function(err) {
  //     if (err) throw err;
  //     console.log("Connected!");

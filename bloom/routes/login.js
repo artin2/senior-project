@@ -56,6 +56,7 @@ async function login(req, res) {
     } else {
         res.send('Missing a Parameter');
     }
+
 }
 
 
@@ -102,6 +103,7 @@ async function signup(req, res) {
     } else {
         res.send('Missing a Parameter');
     }
+
 }
 
 module.exports = {

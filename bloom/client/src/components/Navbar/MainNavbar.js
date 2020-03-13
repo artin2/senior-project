@@ -18,6 +18,7 @@ class MainNavbar extends React.Component {
           <Nav className="mr-auto">
             <Link to="/help" className="nav-link">Help</Link>
             <Link to="/about" className="nav-link">About</Link>
+            <Link to="/store" className="nav-link">Store</Link>
             <Nav.Item className="mr-auto d-none d-sm-block searchBar">
               <BasicSearch/>
             </Nav.Item>
