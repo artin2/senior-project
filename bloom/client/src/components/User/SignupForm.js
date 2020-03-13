@@ -1,5 +1,5 @@
 import React from 'react';
-import './SignupForm.css'
+import '../../App.css';
 
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
@@ -14,15 +14,7 @@ import * as Yup from 'yup';
 class SignupForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {first_name: '',
-                  last_name: '',
-                  email: '',
-                  role: false,
-                  phone: '',
-                  password: '',
-                  password_confirmation: ''};
-   
-                  // RegEx for phone number validation
+    // RegEx for phone number validation
     this.phoneRegExp = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
     this.emailRegExp = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/
     // Schema for yup
@@ -43,45 +35,16 @@ class SignupForm extends React.Component {
       .matches(this.phoneRegExp, "Phone number is not valid"),
       password: Yup.string()
       .min(6, "Password must have at least 6 characters")
-      .required("Password required")
+      .max(100, "Password can't be longer than 100 characters")
+      .required("Password required"),
+      password_confirmation: Yup.string()
+      .oneOf([Yup.ref('password')], 'Passwords do not match')
+      .required("Password Confirmation required"),
+      role: Yup.string()
+      .required("Role is required")
     });
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
-
-  handleChange(event) {
-    if (event.target.type === "checkbox") {
-      this.setState({[event.target.id]: !this.state[event.target.id]})
-    }
-    else{
-      this.setState({[event.target.id]: parseInt(event.target.value) || event.target.value});
-    }
-  }
-
-  handleSubmit(event) {
-    // event.preventDefault();
-    // console.log(JSON.stringify(this.state))
-    console.log(event)
-    fetch('http://localhost:8081/signUp' , {
-      method: "POST",
-      headers: {
-        'Content-type': 'application/json'
-      },
-      body: JSON.stringify(this.state)
-    })
-    .then(function(response){
-      if(response.status!==200){
-        console.log("Error!", response.status)
-        throw new Error(response.status)
-      }
-      else{
-        // redirect to home page signed in
-        console.log("Successful login!")
-      }
-    })
-  }
-
+    
   render() {
     return (
       <Container fluid>
@@ -92,7 +55,7 @@ class SignupForm extends React.Component {
                 first_name: '',
                 last_name: '',
                 email: '',
-                role: false,
+                role: '',
                 phone: '',
                 password: '',
                 password_confirmation: ''
@@ -109,7 +72,7 @@ class SignupForm extends React.Component {
                 .then(function(response){
                   if(response.status!==200){
                     console.log("Error!", response.status)
-                    throw new Error(response.status)
+                    // throw new Error(response.status)
                   }
                   else{
                     // redirect to home page signed in
@@ -123,149 +86,171 @@ class SignupForm extends React.Component {
                 touched,
                 handleChange,
                 handleBlur,
-                handleSubmit,
-                isSubmitting }) => (
-                  <Form className="formBody rounded">
-                    <h3>Sign Up</h3>
+                handleSubmit}) => (
+              <Form className="formBody rounded">
+                <h3>Sign Up</h3>
 
-                    <Form.Group controlId="formFirstName">
-                      <InputGroup>
-                        <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                <FaUser/>
-                            </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control 
-                          type="text" 
-                          name="first_name"
-                          value={values.first_name} 
-                          placeholder="First Name" 
-                          onChange={handleChange} 
-                          onBlur={handleBlur}
-                          className={touched.first_name && errors.first_name ? "error" : null}/>
-                      </InputGroup>
-                      {touched.first_name && errors.first_name ? (
-                        <div className="error-message">{errors.first_name}</div>
-                      ): null}
-                    </Form.Group>
-
-
-                    <Form.Group controlId="formLastName">
-                      <InputGroup>
-                        <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                <FaUser/>
-                            </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control type="text" 
-                        value={values.last_name}
-                        placeholder="Last Name" 
-                        name="last_name" 
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className={touched.last_name && errors.last_name ? "error" : null}/>
-                      </InputGroup>
-                      {touched.last_name && errors.last_name ? (
-                        <div className="error-message">{errors.last_name}</div>
-                      ): null}
-                    </Form.Group>
-
-                    <Form.Group controlId="formPhone">
-                      <InputGroup>
-                        <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                <FaPhone/>
-                            </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control type="text" 
-                          value={values.phone} 
-                          placeholder="Phone Number" 
-                          name="phone" 
-                          onChange={handleChange} 
-                          onBlur={handleBlur}
-                          className={touched.phone && errors.phone ? "error" : null}/>
-                      </InputGroup>
-                      {touched.phone && errors.phone ? (
-                        <div className="error-message">{errors.phone}</div>
-                      ): null}
-                    </Form.Group>
-
-                    <Form.Group controlId="formEmail">
-                      <InputGroup>
-                        <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                <FaEnvelope/>
-                            </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control 
-                          type="email"
-                          value={values.email}
-                          placeholder="Email" 
-                          name="email" 
-                          onChange={handleChange} 
-                          onBlur={handleBlur}
-                          className={touched.email && errors.email ? "error" : null}/>
-                      </InputGroup>
-                      {touched.email && errors.email ? (
-                        <div className="error-message">{errors.email}</div>
-                      ): null}
-                    </Form.Group>
-
-                    <Form.Group controlId="formPassword">
-                      <InputGroup>
-                        <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                <FaLockOpen/>
-                            </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control 
-                          type="password" 
-                          value={values.password} 
-                          placeholder="Password" 
-                          name="password" 
-                          onChange={handleChange} 
-                          onBlur={handleBlur}
-                          className={touched.password && errors.password ? "error" : null}/>
-                      </InputGroup>
-                      {touched.password && errors.password ? (
-                        <div className="error-message">{errors.password}</div>
-                      ): null}
-                    </Form.Group>
-
-                    <Form.Group controlId="formPasswordConfirmation">
-                      <InputGroup>
-                        <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                <FaLock/>
-                            </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control 
-                          type="password" 
-                          value={values.password_confirmation}
-                          placeholder="Confirm Password" 
-                          name="password_confirmation" 
-                          onChange={handleChange} 
-                          onBlur={handleBlur}
-                          className={touched.password_confirmation && errors.password_confirmation ? "error" : null}/>
-                      </InputGroup>
-                      {touched.password_confirmation && errors.password_confirmation ? (
-                        <div className="error-message">{errors.password_confirmation}</div>
-                      ): null}
-                    </Form.Group>
-
-    
-                  <Form.Group controlId="formService">
-                    <Form.Check
-                      value={values.role}
-                      name="role"
-                      label="Salon Owner"
+                <Form.Group controlId="formFirstName">
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                            <FaUser/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control 
+                      type="text" 
+                      name="first_name"
+                      value={values.first_name} 
+                      placeholder="First Name" 
                       onChange={handleChange} 
                       onBlur={handleBlur}
-                    />
-                  </Form.Group>
-                  <Button onClick={handleSubmit}>Submit</Button>
-                </Form>
-              )}
+                      className={touched.first_name && errors.first_name ? "error" : null}/>
+                  </InputGroup>
+                  {touched.first_name && errors.first_name ? (
+                    <div className="error-message">{errors.first_name}</div>
+                  ): null}
+                </Form.Group>
+
+
+                <Form.Group controlId="formLastName">
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                            <FaUser/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control type="text" 
+                    value={values.last_name}
+                    placeholder="Last Name" 
+                    name="last_name" 
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={touched.last_name && errors.last_name ? "error" : null}/>
+                  </InputGroup>
+                  {touched.last_name && errors.last_name ? (
+                    <div className="error-message">{errors.last_name}</div>
+                  ): null}
+                </Form.Group>
+
+                <Form.Group controlId="formPhone">
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                            <FaPhone/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control type="text" 
+                      value={values.phone} 
+                      placeholder="Phone Number" 
+                      name="phone" 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.phone && errors.phone ? "error" : null}/>
+                  </InputGroup>
+                  {touched.phone && errors.phone ? (
+                    <div className="error-message">{errors.phone}</div>
+                  ): null}
+                </Form.Group>
+
+                <Form.Group controlId="formEmail">
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                            <FaEnvelope/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control 
+                      type="email"
+                      value={values.email}
+                      placeholder="Email" 
+                      name="email" 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.email && errors.email ? "error" : null}/>
+                  </InputGroup>
+                  {touched.email && errors.email ? (
+                    <div className="error-message">{errors.email}</div>
+                  ): null}
+                </Form.Group>
+
+                <Form.Group controlId="formPassword">
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                            <FaLockOpen/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control 
+                      type="password" 
+                      value={values.password} 
+                      placeholder="Password" 
+                      name="password" 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.password && errors.password ? "error" : null}/>
+                  </InputGroup>
+                  {touched.password && errors.password ? (
+                    <div className="error-message">{errors.password}</div>
+                  ): null}
+                </Form.Group>
+
+                <Form.Group controlId="formPasswordConfirmation">
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                            <FaLock/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control 
+                      type="password" 
+                      value={values.password_confirmation}
+                      placeholder="Confirm Password" 
+                      name="password_confirmation" 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.password_confirmation && errors.password_confirmation ? "error" : null}/>
+                  </InputGroup>
+                  {touched.password_confirmation && errors.password_confirmation ? (
+                    <div className="error-message">{errors.password_confirmation}</div>
+                  ): null}
+                </Form.Group>
+
+
+                <Form.Group controlId="formRole">
+                  <Form.Check
+                    type="radio"
+                    name="role"
+                    value="2"
+                    checked={values.role === "2"}
+                    label="Salon Owner"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                  <Form.Check
+                    type="radio"
+                    value="1"
+                    checked={values.role === "1"}
+                    name="role"
+                    label="Salon Worker"
+                    onChange={handleChange} 
+                    onBlur={handleBlur}
+                  />
+                  <Form.Check
+                    type="radio"
+                    value="0"
+                    checked={values.role === "0"}
+                    name="role"
+                    label="Customer"
+                    onChange={handleChange} 
+                    onBlur={handleBlur}
+                  />
+                  {touched.role && errors.role ? (
+                      <div className="error-message">{errors.role}</div>
+                    ): null}
+                </Form.Group>
+                <Button onClick={handleSubmit}>Submit</Button>
+              </Form>
+            )}
             </Formik>
           </Col>
         </Row>

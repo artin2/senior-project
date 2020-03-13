@@ -107,7 +107,7 @@ class LoginForm extends React.Component {
                 callback={successFacebook}
                  />
               </Row>
-              <Button  className="" type="submit" variant="primary" onClick={this.handleSubmit}>Search</Button>
+              <Button  className="" type="submit" variant="primary" onClick={this.handleSubmit}>Submit</Button>
               </Col>
             </Form>
           </Col>

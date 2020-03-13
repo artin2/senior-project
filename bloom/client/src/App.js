@@ -13,6 +13,7 @@ import SearchDisplay from './components/Search/SearchDisplay';
 import VendorPage from './components/Vendor/VendorPage';
 import ReservationPage from './components/Reservation/ReservationPage'
 import './App.css';
+import StoreSignupForm from './components/Store/StoreSignupForm';
 
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
             <Route exact path="/search" component={SearchDisplay} />
             <Route exact path="/vendor" component={VendorPage} />
             <Route path="/book/:id" component={ReservationPage} />
+            <Route exact path="/store/signup" component={StoreSignupForm} />
           </Switch>
         </div>
       </Router>
