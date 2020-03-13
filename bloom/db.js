@@ -17,11 +17,11 @@ require('dotenv').config();
  // };
 
  const client = new pg.Client(dbConfig);
- client.connect(function(err) {
-     if (err) throw err;
-     console.log("Connected!");
- //     client.end();
- })
+ // client.connect(function(err) {
+ //     if (err) throw err;
+ //     console.log("Connected!");
+ //     // client.end();
+ // })
 
 
  module.exports = {
