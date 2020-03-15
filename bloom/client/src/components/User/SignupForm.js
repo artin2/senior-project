@@ -39,9 +39,7 @@ class SignupForm extends React.Component {
       .required("Password required"),
       password_confirmation: Yup.string()
       .oneOf([Yup.ref('password')], 'Passwords do not match')
-      .required("Password Confirmation required"),
-      role: Yup.string()
-      .required("Role is required")
+      .required("Password Confirmation required")
     });
   }
     
@@ -55,7 +53,7 @@ class SignupForm extends React.Component {
                 first_name: '',
                 last_name: '',
                 email: '',
-                role: '',
+                role: '0',
                 phone: '',
                 password: '',
                 password_confirmation: ''
@@ -213,40 +211,6 @@ class SignupForm extends React.Component {
                   {touched.password_confirmation && errors.password_confirmation ? (
                     <div className="error-message">{errors.password_confirmation}</div>
                   ): null}
-                </Form.Group>
-
-
-                <Form.Group controlId="formRole">
-                  <Form.Check
-                    type="radio"
-                    name="role"
-                    value="2"
-                    checked={values.role === "2"}
-                    label="Salon Owner"
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                  />
-                  <Form.Check
-                    type="radio"
-                    value="1"
-                    checked={values.role === "1"}
-                    name="role"
-                    label="Salon Worker"
-                    onChange={handleChange} 
-                    onBlur={handleBlur}
-                  />
-                  <Form.Check
-                    type="radio"
-                    value="0"
-                    checked={values.role === "0"}
-                    name="role"
-                    label="Customer"
-                    onChange={handleChange} 
-                    onBlur={handleBlur}
-                  />
-                  {touched.role && errors.role ? (
-                      <div className="error-message">{errors.role}</div>
-                    ): null}
                 </Form.Group>
                 <Button onClick={handleSubmit}>Submit</Button>
               </Form>

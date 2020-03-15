@@ -17,12 +17,12 @@ class MapContainer extends Component {
   }
 
   displayMarkers() { 
-    return this.props.vendors.map((vendor, index) => { 
-      return <Marker key={"vendor-" + index} id={index} position={{ 
-                     lat: vendor.lat, 
-                     lng: vendor.lng }} 
+    return this.props.stores.map((store, index) => { 
+      return <Marker key={"store-" + index} id={index} position={{ 
+                     lat: store.lat, 
+                     lng: store.lng }} 
                      onClick={this.onMarkerClick}
-                     name={vendor.name} /> 
+                     name={store.name} /> 
     }) 
   } 
 
@@ -63,7 +63,7 @@ class MapContainer extends Component {
         visible={this.state.showingInfoWindow}
         onClose={this.onClose}
         >
-          <SearchCard vendor={this.props.vendors[this.state.activeMarkerIndex]} styleVal={{ width: '10rem', height: '10rem' }} onClickFunction={this.onClickFunction}/>
+          <SearchCard store={this.props.stores[this.state.activeMarkerIndex]} styleVal={{ width: '10rem', height: '10rem' }} onClickFunction={this.onClickFunction}/>
         </InfoWindow>
       </Map>
     );

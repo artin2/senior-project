@@ -16,9 +16,6 @@ import Select from 'react-select';
 class StoreSignupForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      selectedOption: null
-    };
     
     this.options = [
       { value: 'nails', label: 'Nails' },
@@ -47,19 +44,11 @@ class StoreSignupForm extends React.Component {
       zip: Yup.string()
       .max(20, "Zip can't be longer than 100 characters")
       .required("Zip is required"),
-      category: Yup.string()
-      .max(20, "Zip can't be longer than 100 characters")
-      .required("Zip is required")
+      category: Yup.array()
+      .required("Category is required")
+      .nullable()
     });
-
-    this.handleChange = this.handleChange.bind(this);
   }
-
-  handleChange = selectedOption => {
-    this.setState(
-      { selectedOption }
-    );
-  };
 
 
   render() {
@@ -78,10 +67,9 @@ class StoreSignupForm extends React.Component {
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-                values.category = this.state.selectedOption.map(function(val){ 
+                values.category = values.category.map(function(val){ 
                   return val.label; 
-                }) 
-                console.log(values)
+                })
                 fetch('http://localhost:8081/storeSignUp' , {
                   method: "POST",
                   headers: {
@@ -106,7 +94,9 @@ class StoreSignupForm extends React.Component {
                 touched,
                 handleChange,
                 handleBlur,
-                handleSubmit}) => (
+                handleSubmit,
+                setFieldValue
+                }) => (
                   <Form className="formBody rounded">
                     <h3>Store Sign Up</h3>
 
@@ -130,7 +120,6 @@ class StoreSignupForm extends React.Component {
                         <div className="error-message">{errors.name}</div>
                       ): null}
                     </Form.Group>
-
 
                     <Form.Group controlId="formStreet">
                       <InputGroup>
@@ -211,14 +200,21 @@ class StoreSignupForm extends React.Component {
                         <div className="error-message">{errors.zip}</div>
                       ): null}
                     </Form.Group>
-
-                    <Select
-                      value={this.state.selectedOption}
-                      onChange={this.handleChange}
-                      options={this.options}
-                      isMulti={true}
-                      placeholder={"Category"}
-                    />
+                    
+                    <Form.Group controlId="formCategory">
+                      <Select
+                        value={values.category}
+                        onChange={option => setFieldValue("category", option)}
+                        name="category"
+                        options={this.options}
+                        isMulti={true}
+                        placeholder={"Category"}
+                        className={touched.category && errors.category ? "error" : null}
+                      />
+                      {touched.category && errors.category ? (
+                        <div className="error-message">{errors.category}</div>
+                      ): null}
+                    </Form.Group>
 
                   <Button onClick={handleSubmit}>Submit</Button>
                 </Form>

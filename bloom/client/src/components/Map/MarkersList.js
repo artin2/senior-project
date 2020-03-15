@@ -8,12 +8,12 @@
 //   }
 
 //   render() {
-//     return this.props.vendors.map((vendor, index) => { 
-//       return <Marker key={"vendor-" + index} id={index} position={{ 
-//                      lat: vendor.lat, 
-//                      lng: vendor.lng }} 
+//     return this.props.stores.map((store, index) => { 
+//       return <Marker key={"store-" + index} id={index} position={{ 
+//                      lat: store.lat, 
+//                      lng: store.lng }} 
 //                      onClick={this.props.onMarkerClick}
-//                      name={vendor.name} /> 
+//                      name={store.name} /> 
 //     })
 //   }
   
