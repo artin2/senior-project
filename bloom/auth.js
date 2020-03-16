@@ -60,8 +60,10 @@ async function generateHash(pw) {
 async function verifyHash(dbPw, userPw) {
 
   try {
-    
-    const verified = await argon2.verify(dbPw, userPw);
+
+
+
+    const verified = await argon2.verify(dbPw.toString(), userPw.toString());
 
     if(verified) {
       console.log('Successful Password Supplied!');
@@ -83,15 +85,19 @@ async function verifyHash(dbPw, userPw) {
 
 
 const generateToken = (res, id, first_name, last_name) => {
-  const expiration = process.env.DB_ENV === 'dev' ? 100 : 604800000;
+  const expiration = process.env.DB_ENV === 'dev' ? 1 : 7;
   const token = jwt.sign({ id, first_name, last_name }, process.env.JWT_SECRET, {
     expiresIn: process.env.DB_ENV === 'dev' ? '1d' : '7d',
   });
+  const date = new Date();
+  date.setDate(date.getDate() + expiration)
   return res.cookie('token', token, {
-    expires: new Date(Date.now() + expiration),
+    expires: date,
     secure: false, // set to true if your using https
-    httpOnly: true,
+    httpOnly: false,
+    domain: 'localhost'
   });
+
 };
 
 const verifyToken = async (req, res, next) => {

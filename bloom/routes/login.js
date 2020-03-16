@@ -25,7 +25,7 @@ async function login(req, res) {
                     if(passwordMatch) {
 
                       await auth.generateToken(res, result.rows[0]["id"], result.rows[0]["first_name"], result.rows[0]["last_name"]);
-
+                      // res.send("SUCCESS");
                       helper.querySuccess(res, {status: "Success Signing In", email: req.body.email});
 
                     }
@@ -63,6 +63,7 @@ async function login(req, res) {
 
 
 async function signup(req, res) {
+
     if (req.body.email && req.body.password && req.body.first_name && req.body.last_name) {
 
         let timestamp = helper.getFormattedDate();

@@ -54,13 +54,21 @@ class LoginForm extends React.Component {
   handleSubmit(event) {
     event.preventDefault();
     fetch('http://localhost:8081/login' , {
-      method: "POST",
+
+
       headers: {
-        'Content-type': 'application/json'
+        // 'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        // 'Cache': 'no-cache'
+
       },
+      // withCredentials: tru
+      credentials: 'include',
+      method: "POST",
       body: JSON.stringify(this.state)
     })
     .then(function(response){
+
       if(response.status!==200){
         console.log("Error!", response.status)
         // throw new Error(response.status)
