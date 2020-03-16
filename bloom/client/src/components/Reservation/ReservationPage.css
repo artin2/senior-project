@@ -1,0 +1,17 @@
+.shoppingCart {
+  width: '18rem';
+  margin-top: 1.2rem;
+}
+
+.shoppingCartSmall {
+  position: fixed;
+  bottom: 0;
+}
+
+.smallText {
+  font-size: x-small;
+}
+
+.largeMarginBottom {
+  margin-bottom: 12rem;
+}

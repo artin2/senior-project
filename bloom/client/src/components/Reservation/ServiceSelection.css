@@ -1,0 +1,18 @@
+.custom-control.custom-checkbox{
+    padding-left: 0;
+    border-radius: 200px;
+}
+
+label.custom-control-label {
+  position: relative;
+  padding-top: 0.5rem;
+  padding-left: 1rem;
+  padding-bottom: 1rem;
+  font-size: large;
+  margin-left: 2rem;
+}
+
+label.custom-control-label::before, label.custom-control-label::after{
+  height: 2rem;
+  width: 2rem;
+}
