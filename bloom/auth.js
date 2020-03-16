@@ -90,7 +90,7 @@ const generateToken = (res, id, first_name, last_name) => {
   return res.cookie('token', token, {
     expires: new Date(Date.now() + expiration),
     secure: false, // set to true if your using https
-    httpOnly: true,
+    httpOnly: false,
   });
 };
 

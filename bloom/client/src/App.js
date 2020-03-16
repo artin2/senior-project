@@ -16,9 +16,12 @@ import StoreSignupForm from './components/Store/StoreSignupForm';
 import Calendar from './components/Calendar/CalendarPage';
 import StoreDisplay from './components/Store/StoreDisplay';
 import StoreEditForm from './components/Store/StoreEditForm';
+import withAuth from './components/withAuth';
+import EditProfileForm from './components/User/EditProfileForm';
 
 
 function App() {
+  console.log(localStorage.getItem("token"))
   return (
     <div className="App">
       <Router>
@@ -33,9 +36,10 @@ function App() {
             <Route exact path="/search" component={SearchDisplay} />
             <Route exact path="/store" component={Calendar} />
             <Route path="/book/:id" component={ReservationPage} />
-            <Route exact path="/store/signup" component={StoreSignupForm} />
+            <Route exact path="/store/signup" component={withAuth(StoreSignupForm)} />
             <Route path="/store/edit/:id" component={StoreEditForm}/>
             <Route path="/store/:id" component={StoreDisplay}/>
+            <Route path="/users/edit/:id" component={EditProfileForm}/>
           </Switch>
         </div>
       </Router>

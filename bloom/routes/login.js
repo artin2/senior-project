@@ -25,7 +25,6 @@ async function login(req, res) {
                     if(passwordMatch) {
 
                       await auth.generateToken(res, result.rows[0]["id"], result.rows[0]["first_name"], result.rows[0]["last_name"]);
-
                       helper.querySuccess(res, {status: "Success Signing In", email: req.body.email});
 
                     }
@@ -36,20 +35,18 @@ async function login(req, res) {
                   }
 
                   catch (err) {
-                    console.log("User is Not Found");
+                    console.log(err.toString())
                     res.status(400).json(err.toString());
                   }
                 }
 
                 if (err) {
-
                   helper.queryError(res, err);
 
                 }
             });
 
             if (err) {
-
                 helper.dbConnError(res, err);
             }
         });

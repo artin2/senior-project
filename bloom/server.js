@@ -11,12 +11,31 @@ const auth = require('./auth.js');
 const helper = require('./helper.js')
 const stores = require('./routes/stores.js');
 const login = require('./routes/login.js');
+const jwt = require('jsonwebtoken');
+
 require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors());
+// app.use(cors());
+// there might be a CORS issue, can't make a request in front end without event.preventDefault()
+var allowedOrigins = ['http://localhost:3000'];
+app.use(cors({
+  credentials: true,
+  //CITATION: https://medium.com/@alexishevia/using-cors-in-express-cac7e29b005b
+  origin: function(origin, callback){
+    // allow requests with no origin 
+    // (like mobile apps or curl requests)
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      var msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+}));
 
 app.use(cookieParser());
 // app.all('*', ensureSecure)
@@ -35,6 +54,25 @@ app.use(serveStatic(path.join(__dirname, 'client', '/build')));
 //     res.redirect('https://' + req.hostname + req.url);
 //   }
 // }
+
+// //CITATION https://medium.com/@faizanv/authentication-for-your-react-and-express-application-w-json-web-tokens-923515826e0
+const secret = process.env.JWT_SECRET;
+const withAuth = function(req, res, next) {
+  const token = req.cookies.token;
+  if (!token) {
+    res.status(401).send('Unauthorized: No token provided');
+  } else {
+    jwt.verify(token, secret, function(err, decoded) {
+      if (err) {
+        res.status(401).send('Unauthorized: Invalid token');
+      } else {
+        req.email = decoded.email;
+        next();
+      }
+    });
+  }
+}
+module.exports = withAuth;
 
 
 // Inserted this so that client-side routing works
@@ -101,14 +139,20 @@ app.post('/login', async (req, res) => {
   await login.login(req, res);
 });
 
+app.get('/checkToken', withAuth, function(req, res) {
+  //if it gets in here, that means withAuth passed and your token is valid
+  res.sendStatus(200);
+});
+
 
 //**** STORE ROUTES ****//
 
-app.post('/addStore', async (req, res, next) => {
+app.post('/addStore', withAuth, async (req, res, next) => {
   await stores.addStore(req, res, next);
 });
 
-app.post('/addWorker', async (req, res, next) => {
+// should include the store id? and should restrict so only owners can do this
+app.post('/addWorker', withAuth, async (req, res, next) => {
   await stores.addWorker(req, res, next);
 });
 

@@ -14,6 +14,9 @@ import FacebookLogin from 'react-facebook-login';
 // import { useGoogleLogin } from 'react-google-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import {TiSocialFacebookCircular, TiSocialGooglePlus} from 'react-icons/ti';
+// import { useHistory } from 'react-router'
+import Cookies from 'js-cookie';
+
 
 const successGoogle = (response) => {
 
@@ -52,24 +55,46 @@ class LoginForm extends React.Component {
   }
 
   handleSubmit(event) {
+    //there might be a CORS issue with the backend, this doesn't work without preventDefault..
     event.preventDefault();
+      
     fetch('http://localhost:8081/login' , {
       method: "POST",
       headers: {
         'Content-type': 'application/json'
       },
-      body: JSON.stringify(this.state)
+      body: JSON.stringify(this.state),
+      credentials: 'include'
     })
     .then(function(response){
-      if(response.status!==200){
+      if(response.status !== 200){
         console.log("Error!", response.status)
-        // throw new Error(response.status)
+        const error = new Error(response.error);
+        throw error;
       }
       else{
         // redirect to home page signed in
-        console.log("Successful login!", response)
+        console.log("Successful login!")
+
+        //CITATION: https://stackoverflow.com/questions/10730362/get-cookie-by-name
+        // parse the cookie from document.cookie to get the value
+        function escape(s) { return s.replace(/([.*+?\^${}()|\[\]\/\\])/g, '\\$1'); };
+        var match = document.cookie.match(RegExp('(?:^|;\\s*)' + escape("token") + '=([^;]*)'));
+        let cookieVal = match ? match[1] : null;
+
+        // store the cookie in local storage
+        // localStorage.setItem("token", cookieVal)
+        
+        // store the cookie as a cookie
+        Cookies.set('token', cookieVal);
+        console.log(Cookies.get('token'))
+
+        window.location.href='/'
       }
-    })
+    }).catch(err => {
+      console.error(err);
+      alert('Error logging in please try again');
+    });
   }
 
   render() {

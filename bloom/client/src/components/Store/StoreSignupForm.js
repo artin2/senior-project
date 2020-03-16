@@ -70,7 +70,7 @@ class StoreSignupForm extends React.Component {
                 values.category = values.category.map(function(val){ 
                   return val.label; 
                 })
-                fetch('http://localhost:8081/storeSignUp' , {
+                fetch('http://localhost:8081/addStore' , {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json'
