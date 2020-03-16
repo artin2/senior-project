@@ -20,10 +20,17 @@ function queryError(res, err) {
   res.send(err);
 }
 
+function authError(res, err) {
+  console.log('Auth error', err, err.message, err.stack);
+  res.status(400);
+  res.send(err);
+}
+
 function querySuccess(res, msg) {
   console.error(msg.status);
   res.status(200);
-  res.send(msg);
+  res.json(msg.store);
+  // res.send(msg);
 }
 
 

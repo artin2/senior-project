@@ -7,7 +7,7 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
-import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe } from 'react-icons/fa';
+import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPhone } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
@@ -21,11 +21,12 @@ class StoreEditForm extends React.Component {
         urls: [],
         name: "",
         description: "",
+        phone: "",
         id: "",
         street: "",
         city: "",
         state: "",
-        zip: "",
+        zipcode: "",
         category: []
       },
       selectedOption: null
@@ -36,6 +37,9 @@ class StoreEditForm extends React.Component {
       { value: 'hair', label: 'Hair' },
 
     ];
+
+    // RegEx for phone number validation
+    this.phoneRegExp = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
    
     // Schema for yup
     this.yupValidationSchema = Yup.object().shape({
@@ -43,6 +47,12 @@ class StoreEditForm extends React.Component {
       .min(2, "Store name must have at least 2 characters")
       .max(100, "Store name can't be longer than 100 characters")
       .required("Name is required"),
+      description: Yup.string()
+      .min(20, "Description must have at least 20 characters")
+      .required("Description is required"),
+      phone: Yup.string()
+      .matches(this.phoneRegExp, "Phone number is not valid")
+      .required("Phone number is required"),
       street: Yup.string()
       .min(6, "Street must have at least 6 characters")
       .max(100, "Street can't be longer than 100 characters")
@@ -55,9 +65,9 @@ class StoreEditForm extends React.Component {
       .min(2, "State must have at least 2 characters")
       .max(12, "State can't be longer than 12 characters")
       .required("State is required"),
-      zip: Yup.string()
-      .max(20, "Zip can't be longer than 100 characters")
-      .required("Zip is required"),
+      zipcode: Yup.string()
+      .max(20, "Zipcode can't be longer than 100 characters")
+      .required("Zipcode is required"),
       category: Yup.array()
       .required("Category is required")
       .nullable()
@@ -74,11 +84,12 @@ class StoreEditForm extends React.Component {
       ],
       name: "Nails For You",
       description: "We are easily the best in the business and if you think otherwise then you are mistaken.",
+      phone: "8186449302",
       id: 1,
       street: "11421 Clybourn Ave",
       city: "Sylmar",
       state: "CA",
-      zip: "91342",
+      zipcode: "91342",
       category: ["Nails"]
     }
     let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
@@ -116,10 +127,12 @@ class StoreEditForm extends React.Component {
           <Formik 
               initialValues={{
                 name: this.state.store.name,
+                description: this.state.store.description,
+                phone: this.state.store.phone,
                 street: this.state.store.street,
                 city: this.state.store.city,
                 state: this.state.store.state,
-                zip: this.state.store.zip,
+                zipcode: this.state.store.zipcode,
                 category: this.state.selectedOption
               }}
               validationSchema={this.yupValidationSchema}
@@ -237,7 +250,7 @@ class StoreEditForm extends React.Component {
                   ): null}
                 </Form.Group>
 
-                <Form.Group controlId="formZip">
+                <Form.Group controlId="formZipcode">
                   <InputGroup>
                     <InputGroup.Prepend>
                         <InputGroup.Text>
@@ -245,15 +258,15 @@ class StoreEditForm extends React.Component {
                         </InputGroup.Text>
                     </InputGroup.Prepend>
                     <Form.Control 
-                      value={values.zip} 
-                      placeholder="Zip" 
-                      name="zip" 
+                      value={values.zipcode} 
+                      placeholder="Zipcode" 
+                      name="zipcode" 
                       onChange={handleChange} 
                       onBlur={handleBlur}
-                      className={touched.zip && errors.zip ? "error" : null}/>
+                      className={touched.zipcode && errors.zipcode ? "error" : null}/>
                   </InputGroup>
-                  {touched.zip && errors.zip ? (
-                    <div className="error-message">{errors.zip}</div>
+                  {touched.zipcode && errors.zipcode ? (
+                    <div className="error-message">{errors.zipcode}</div>
                   ): null}
                 </Form.Group>
                 

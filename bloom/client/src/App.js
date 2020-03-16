@@ -23,7 +23,6 @@ import Cookies from 'js-cookie';
 function App() {
   function handleLogout() {
     Cookies.remove("token");
-    // history.push("/login");
     window.location.href='/'
   }
 
@@ -42,8 +41,8 @@ function App() {
             <Route exact path="/store" component={withAuth(Calendar)} />
             <Route path="/book/:id" component={ReservationPage} />
             <Route exact path="/store/signup" component={withAuth(StoreSignupForm)} />
-            <Route path="/store/edit/:id" component={withAuth(StoreEditForm)}/>
-            <Route path="/store/:id" component={StoreDisplay}/>
+            <Route path="/stores/edit/:id" component={withAuth(StoreEditForm)}/>
+            <Route path="/stores/:id" component={StoreDisplay}/>
             <Route path="/users/edit/:id" component={withAuth(EditProfileForm)}/>
             <Route path="/logout" component={handleLogout}/>
           </Switch>

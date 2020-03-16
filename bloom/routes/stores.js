@@ -1,5 +1,3 @@
-
-
 const helper = require('../helper.js')
 const db = require('../db.js');
 const auth = require('../auth.js');
@@ -8,32 +6,57 @@ const auth = require('../auth.js');
 async function addStore(req, res, next) {
 
         //verify user cookie -- or header??
-        await auth.verifyToken(res, req, next);
+        try{
+          // not sure if we are doing this correctly...
+          await auth.verifyToken(req, res, next);
+          let timestamp = helper.getFormattedDate();
+          // need to update this to include description and phone number, and when we add a store, service is not created, so take that out
+          // for now going to insert service and owners manually until someone updates db
+          let query = 'INSERT INTO stores(name, street, city, state, zipcode, created_at, category, phone, service, owners) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, name, street, city, state, zipcode, created_at, category, phone, service, owners;'
+          let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, timestamp, req.body.category, req.body.phone, [0], [0]]
 
-        let timestamp = helper.getFormattedDate();
-        let query = 'INSERT INTO stores(name, street, city, state, zipcode, created_at, category, service, phone) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);'
-        let values = [req.body.name, req.body.address, req.body.city, req.body.state, req.body.zipcode, timestamp, req.body.category, req.body.service, req.body.phone]
-
-        db.client.connect(function(err) {
-
+          db.client.connect(function(err) {
             db.client.query(query, values,
               async (err, result) => {
 
-                try {
-                  helper.querySuccess(res, {status: "Success Adding Store", store: req.body.name});
+                if (result) {
+                  console.log(result)
+                  helper.querySuccess(res, {status: "Success Adding Store", store: result.rows[0]});
                 }
 
-                catch (err) {
-                    helper.queryError(res, err);
-                  }
-              });
-
+                if (err) {
+                  helper.queryError(res, err);
+                }
+            });
             if (err) {
-
-                helper.dbConnError(res, err);
+              helper.dbConnError(res, err);
             }
+          });
+        }
+        catch(err){
+          helper.authError(res, err);
+        }
 
-      });
+      //   db.client.connect(function(err) {
+
+      //       db.client.query(query, values,
+      //         async (err, result) => {
+
+      //           try {
+      //             helper.querySuccess(res, {status: "Success Adding Store", store: req.body.name});
+      //           }
+
+      //           catch (err) {
+      //               helper.queryError(res, err);
+      //             }
+      //         });
+
+      //       if (err) {
+
+      //           helper.dbConnError(res, err);
+      //       }
+
+      // });
 };
 
 

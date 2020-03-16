@@ -7,7 +7,7 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
-import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe } from 'react-icons/fa';
+import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPhone } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
@@ -22,6 +22,9 @@ class StoreSignupForm extends React.Component {
       { value: 'hair', label: 'Hair' },
 
     ];
+
+    // RegEx for phone number validation
+    this.phoneRegExp = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
    
     // Schema for yup
     this.yupValidationSchema = Yup.object().shape({
@@ -29,6 +32,12 @@ class StoreSignupForm extends React.Component {
       .min(2, "Store name must have at least 2 characters")
       .max(100, "Store name can't be longer than 100 characters")
       .required("Name is required"),
+      description: Yup.string()
+      .min(20, "Description must have at least 20 characters")
+      .required("Description is required"),
+      phone: Yup.string()
+      .matches(this.phoneRegExp, "Phone number is not valid")
+      .required("Phone number is required"),
       street: Yup.string()
       .min(6, "Street must have at least 6 characters")
       .max(100, "Street can't be longer than 100 characters")
@@ -41,9 +50,9 @@ class StoreSignupForm extends React.Component {
       .min(2, "State must have at least 2 characters")
       .max(12, "State can't be longer than 12 characters")
       .required("State is required"),
-      zip: Yup.string()
-      .max(20, "Zip can't be longer than 100 characters")
-      .required("Zip is required"),
+      zipcode: Yup.string()
+      .max(20, "Zipcode can't be longer than 100 characters")
+      .required("Zipcode is required"),
       category: Yup.array()
       .required("Category is required")
       .nullable()
@@ -59,10 +68,12 @@ class StoreSignupForm extends React.Component {
             <Formik 
               initialValues={{
                 name: '',
+                description: '',
+                phone: '',
                 street: '',
                 city: '',
                 state: '',
-                zip: '',
+                zipcode: '',
                 category: []
               }}
               validationSchema={this.yupValidationSchema}
@@ -75,6 +86,7 @@ class StoreSignupForm extends React.Component {
                   headers: {
                     'Content-type': 'application/json'
                   },
+                  credentials: 'include',
                   body: JSON.stringify(values)
                 })
                 .then(function(response){
@@ -84,8 +96,13 @@ class StoreSignupForm extends React.Component {
                   }
                   else{
                     // redirect to home page signed in
-                    console.log("Successful signup!", response.status)
+                    return response.json();
                   }
+                })
+                .then(function(data){
+                  // redirect to home page signed in
+                  console.log("Successful signup!", data)
+                  window.location.href='/stores/' + data.id 
                 })
               }}
             >
@@ -118,6 +135,48 @@ class StoreSignupForm extends React.Component {
                       </InputGroup>
                       {touched.name && errors.name ? (
                         <div className="error-message">{errors.name}</div>
+                      ): null}
+                    </Form.Group>
+
+                    <Form.Group controlId="formDescription">
+                      <InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text>
+                                <FaPen/>
+                            </InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <Form.Control 
+                          as="textarea" 
+                          rows={3}
+                          name="description"
+                          value={values.description} 
+                          placeholder="Description" 
+                          onChange={handleChange} 
+                          onBlur={handleBlur}
+                          className={touched.description && errors.description ? "error" : null}/>
+                      </InputGroup>
+                      {touched.name && errors.description ? (
+                        <div className="error-message">{errors.description}</div>
+                      ): null}
+                    </Form.Group>
+
+                    <Form.Group controlId="formPhone">
+                      <InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text>
+                                <FaPhone/>
+                            </InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <Form.Control type="text" 
+                          value={values.phone} 
+                          placeholder="Phone Number" 
+                          name="phone" 
+                          onChange={handleChange} 
+                          onBlur={handleBlur}
+                          className={touched.phone && errors.phone ? "error" : null}/>
+                      </InputGroup>
+                      {touched.phone && errors.phone ? (
+                        <div className="error-message">{errors.phone}</div>
                       ): null}
                     </Form.Group>
 
@@ -181,7 +240,7 @@ class StoreSignupForm extends React.Component {
                       ): null}
                     </Form.Group>
 
-                    <Form.Group controlId="formZip">
+                    <Form.Group controlId="formZipcode">
                       <InputGroup>
                         <InputGroup.Prepend>
                             <InputGroup.Text>
@@ -189,15 +248,15 @@ class StoreSignupForm extends React.Component {
                             </InputGroup.Text>
                         </InputGroup.Prepend>
                         <Form.Control 
-                          value={values.zip} 
-                          placeholder="Zip" 
-                          name="zip" 
+                          value={values.zipcode} 
+                          placeholder="Zipcode" 
+                          name="zipcode" 
                           onChange={handleChange} 
                           onBlur={handleBlur}
-                          className={touched.zip && errors.zip ? "error" : null}/>
+                          className={touched.zipcode && errors.zipcode ? "error" : null}/>
                       </InputGroup>
-                      {touched.zip && errors.zip ? (
-                        <div className="error-message">{errors.zip}</div>
+                      {touched.zipcode && errors.zipcode ? (
+                        <div className="error-message">{errors.zipcode}</div>
                       ): null}
                     </Form.Group>
                     

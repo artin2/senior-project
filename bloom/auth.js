@@ -100,11 +100,12 @@ const generateToken = (res, id, first_name, last_name) => {
 
 };
 
-const verifyToken = async (req, res, next) => {
+async function verifyToken(req, res, next) {
   const token = req.cookies.token || '';
   try {
     if (!token) {
-      return res.status(401).json('You need to Login')
+      throw new Error("You need to Login");
+      // return res.status(401).json('You need to Login')
     }
     const decrypt = await jwt.verify(token, process.env.JWT_SECRET);
 
@@ -113,9 +114,10 @@ const verifyToken = async (req, res, next) => {
       first_name: decrypt.first_name,
       last_name: decrypt.last_name
     };
-    next();
+    // next();
   } catch (err) {
-    return res.status(500).json(err.toString());
+    throw err;
+    // return res.status(500).json(err.toString());
   }
 };
 

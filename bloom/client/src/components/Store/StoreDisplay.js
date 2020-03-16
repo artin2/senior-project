@@ -37,7 +37,7 @@ class StoreDisplay extends React.Component {
       lng: "-73.999100"
     }
 
-    // fetch('http://localhost:8081/store/' + this.props.match.params.id , {
+    // fetch('http://localhost:8081/stores/' + this.props.match.params.id , {
     //   method: "GET",
     //   headers: {
     //       'Content-type': 'application/json'
@@ -63,14 +63,14 @@ class StoreDisplay extends React.Component {
   render() {
     let editButton;
     if(this.state.owner){
-      editButton = <Button onClick={() =>  window.location.href='/store/' + this.state.store.id + "/edit"}>Edit Store</Button>
+      editButton = <Button onClick={() =>  window.location.href='/stores/edit/' + this.state.store.id}>Edit Store</Button>
     }
 
     return (
       <Container fluid>
         <Row className="justify-content-center">
             <Col>
-              <Button onClick={() =>  window.location.href='/store/edit/' + this.state.store.id}>Edit Store</Button>
+              {editButton}
               <h1>{this.state.store.name}</h1>
               <p>{this.state.store.description}</p>
             </Col>
