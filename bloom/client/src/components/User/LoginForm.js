@@ -8,10 +8,10 @@ import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
 import { FaEnvelope, FaLock } from 'react-icons/fa';
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
 import GoogleLogin from 'react-google-login';
 import FacebookLogin from 'react-facebook-login';
-import { useGoogleLogin } from 'react-google-login';
+// import { useGoogleLogin } from 'react-google-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import {TiSocialFacebookCircular, TiSocialGooglePlus} from 'react-icons/ti';
 
@@ -48,7 +48,7 @@ class LoginForm extends React.Component {
   }
 
   handleChange(event) {
-    this.setState({[event.target.id]: parseInt(event.target.value) || event.target.value});
+    this.setState({[event.target.id]: event.target.value});
   }
 
   handleSubmit(event) {
@@ -75,7 +75,7 @@ class LoginForm extends React.Component {
       }
       else{
         // redirect to home page signed in
-        console.log("Successful login!", response.status)
+        console.log("Successful login!", response)
       }
     })
   }

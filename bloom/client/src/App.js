@@ -10,11 +10,12 @@ import MainNavbar from './components/Navbar/MainNavbar';
 import Homepage from './components/Home/Homepage';
 import StaticPage from './components/StaticPages/StaticPage';
 import SearchDisplay from './components/Search/SearchDisplay';
-import VendorPage from './components/Vendor/VendorPage';
 import ReservationPage from './components/Reservation/ReservationPage'
 import './App.css';
 import StoreSignupForm from './components/Store/StoreSignupForm';
 import Calendar from './components/Calendar/CalendarPage';
+import StoreDisplay from './components/Store/StoreDisplay';
+import StoreEditForm from './components/Store/StoreEditForm';
 
 
 function App() {
@@ -30,10 +31,11 @@ function App() {
             <Route exact path="/login" component={LoginForm} />
             <Route exact path="/signup" component={SignupForm} />
             <Route exact path="/search" component={SearchDisplay} />
-            <Route exact path="/vendor" component={VendorPage} />
             <Route exact path="/store" component={Calendar} />
             <Route path="/book/:id" component={ReservationPage} />
             <Route exact path="/store/signup" component={StoreSignupForm} />
+            <Route path="/store/edit/:id" component={StoreEditForm}/>
+            <Route path="/store/:id" component={StoreDisplay}/>
           </Switch>
         </div>
       </Router>
