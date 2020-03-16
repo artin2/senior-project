@@ -18,10 +18,15 @@ import StoreDisplay from './components/Store/StoreDisplay';
 import StoreEditForm from './components/Store/StoreEditForm';
 import withAuth from './components/withAuth';
 import EditProfileForm from './components/User/EditProfileForm';
-
+import Cookies from 'js-cookie';
 
 function App() {
-  console.log(localStorage.getItem("token"))
+  function handleLogout() {
+    Cookies.remove("token");
+    // history.push("/login");
+    window.location.href='/'
+  }
+
   return (
     <div className="App">
       <Router>
@@ -34,12 +39,13 @@ function App() {
             <Route exact path="/login" component={LoginForm} />
             <Route exact path="/signup" component={SignupForm} />
             <Route exact path="/search" component={SearchDisplay} />
-            <Route exact path="/store" component={Calendar} />
+            <Route exact path="/store" component={withAuth(Calendar)} />
             <Route path="/book/:id" component={ReservationPage} />
             <Route exact path="/store/signup" component={withAuth(StoreSignupForm)} />
-            <Route path="/store/edit/:id" component={StoreEditForm}/>
+            <Route path="/store/edit/:id" component={withAuth(StoreEditForm)}/>
             <Route path="/store/:id" component={StoreDisplay}/>
-            <Route path="/users/edit/:id" component={EditProfileForm}/>
+            <Route path="/users/edit/:id" component={withAuth(EditProfileForm)}/>
+            <Route path="/logout" component={handleLogout}/>
           </Switch>
         </div>
       </Router>

@@ -15,7 +15,6 @@ import FacebookLogin from 'react-facebook-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import {TiSocialFacebookCircular, TiSocialGooglePlus} from 'react-icons/ti';
 // import { useHistory } from 'react-router'
-import Cookies from 'js-cookie';
 
 
 const successGoogle = (response) => {
@@ -57,17 +56,12 @@ class LoginForm extends React.Component {
   handleSubmit(event) {
     //there might be a CORS issue with the backend, this doesn't work without preventDefault..
     event.preventDefault();
-      
     fetch('http://localhost:8081/login' , {
-
-
       headers: {
         // 'Accept': 'application/json',
         'Content-Type': 'application/json',
         // 'Cache': 'no-cache'
-
       },
-      // withCredentials: tru
       credentials: 'include',
       method: "POST",
       body: JSON.stringify(this.state)
@@ -82,20 +76,6 @@ class LoginForm extends React.Component {
       else{
         // redirect to home page signed in
         console.log("Successful login!")
-
-        //CITATION: https://stackoverflow.com/questions/10730362/get-cookie-by-name
-        // parse the cookie from document.cookie to get the value
-        function escape(s) { return s.replace(/([.*+?\^${}()|\[\]\/\\])/g, '\\$1'); };
-        var match = document.cookie.match(RegExp('(?:^|;\\s*)' + escape("token") + '=([^;]*)'));
-        let cookieVal = match ? match[1] : null;
-
-        // store the cookie in local storage
-        // localStorage.setItem("token", cookieVal)
-        
-        // store the cookie as a cookie
-        Cookies.set('token', cookieVal);
-        console.log(Cookies.get('token'))
-
         window.location.href='/'
       }
     }).catch(err => {
@@ -130,7 +110,6 @@ class LoginForm extends React.Component {
                       </InputGroup.Text>
                   </InputGroup.Prepend>
                   <Form.Control id="password" type="password" placeholder="Password" onChange={this.handleChange}/>
-
 
                 </InputGroup>
               </Form.Group>
