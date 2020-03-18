@@ -84,13 +84,24 @@ async function verifyHash(dbPw, userPw) {
 }
 
 
-const generateToken = (res, id, first_name, last_name) => {
+const generateToken = (res, user) => {
+  let id = user["id"] 
+  let first_name = user["first_name"]
+  let last_name = user["last_name"]
+  delete user.password
+
   const expiration = process.env.DB_ENV === 'dev' ? 1 : 7;
   const token = jwt.sign({ id, first_name, last_name }, process.env.JWT_SECRET, {
     expiresIn: process.env.DB_ENV === 'dev' ? '1d' : '7d',
   });
   const date = new Date();
   date.setDate(date.getDate() + expiration)
+  res.cookie('user', user, {
+    expires: date,
+    secure: false, // set to true if your using https
+    httpOnly: false,
+    domain: 'localhost'
+  })
   return res.cookie('token', token, {
     expires: date,
     secure: false, // set to true if your using https

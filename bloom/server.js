@@ -10,7 +10,7 @@ const db = require('./db.js');
 const auth = require('./auth.js');
 const helper = require('./helper.js')
 const stores = require('./routes/stores.js');
-const login = require('./routes/login.js');
+const users = require('./routes/users.js');
 const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
@@ -140,13 +140,17 @@ module.exports = withAuth;
 
 
 app.post('/signUp', async (req, res) => {
-  await login.signup(req, res);
+  await users.signup(req, res);
 });
-
 
 app.post('/login', async (req, res) => {
-  await login.login(req, res);
+  await users.login(req, res);
 });
+
+app.post('/users/:id', async (req, res) => {
+  await users.edit(req, res);
+});
+
 
 app.get('/checkToken', withAuth, function(req, res) {
   //if it gets in here, that means withAuth passed and your token is valid

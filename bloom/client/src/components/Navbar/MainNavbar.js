@@ -11,13 +11,18 @@ class MainNavbar extends React.Component {
 
     this.state = {
       loggedIn: false,
-      user: { id: 1 } // temporary
+      user: null
     }
   }
 
   componentDidMount() {
     if(Cookies.get('token') != null) {
-      this.setState({ loggedIn: true });
+      let s = JSON.parse(Cookies.get('user').substring(2))
+  
+      this.setState({ 
+        loggedIn: true,
+        user: s
+      });
     }
   }
 

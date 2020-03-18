@@ -19,10 +19,12 @@ import StoreEditForm from './components/Store/StoreEditForm';
 import withAuth from './components/withAuth';
 import EditProfileForm from './components/User/EditProfileForm';
 import Cookies from 'js-cookie';
+import Profile from './components/User/Profile';
 
 function App() {
   function handleLogout() {
     Cookies.remove("token");
+    Cookies.remove("user");
     window.location.href='/'
   }
 
@@ -44,6 +46,7 @@ function App() {
             <Route path="/stores/edit/:id" component={withAuth(StoreEditForm)}/>
             <Route path="/stores/:id" component={StoreDisplay}/>
             <Route path="/users/edit/:id" component={withAuth(EditProfileForm)}/>
+            <Route path="/users/:id" component={withAuth(Profile)}/>
             <Route path="/logout" component={handleLogout}/>
           </Switch>
         </div>
