@@ -54,13 +54,54 @@ async function getStores(req, res, next) {
   try{
     // not sure if we are doing this correctly...
     await auth.verifyToken(req, res, next);
-    let query = 'SELECT * FROM stores'
+    let geocodeResult = await geocoder.geocode({address: req.query.street, city: req.query.city, state: req.query.state, zipcode: req.query.zipcode})
+    let lat = geocodeResult[0].latitude
+    let lng = geocodeResult[0].longitude
+    let distance = req.query.distance
+    let categories = ['Nails', 'Hair']
+    let categoryQueryArray = []
+
+    // check to see which categories where marked as true
+    let j = categories.length
+    while (j--) {
+      cat = categories[j].toLowerCase()
+      if (req.query[cat] == "true") { 
+        categoryQueryArray.push(categories[j])
+      }
+    }
+
+    // if client didn't mark any categories then they want all of them
+    if(categoryQueryArray.length == 0){
+      categoryQueryArray = categories
+    }
+
+    // convert the category array to a string literal array that postgres can understand
+    var categoryQuery = '\'{';
+    for(var i = 0; i < categoryQueryArray.length; i++) {
+      if(i == categoryQueryArray.length - 1){
+        categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'";
+      }
+      else if(categoryQueryArray.length == 1){
+        categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'"
+      }
+      else{
+        categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\", "
+      }
+    }
+
+    // query for stores within the given distance, and that have any of the categories checked by the client
+    let query = `SELECT *, ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) ) AS distance
+                FROM stores
+                WHERE ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) )
+                  < ` + distance + ` AND category && ` + categoryQuery + `
+                ORDER BY distance;`
 
     db.client.connect(function(err) {
       db.client.query(query,
         async (err, result) => {
           if (result) {
             if(result.rows.length == 0){
+              // need to handle this error case..
               let error = { error: "No Results" }
               helper.queryError(res, error);
             }

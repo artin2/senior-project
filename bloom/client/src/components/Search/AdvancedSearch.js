@@ -15,14 +15,17 @@ class AdvancedSearch extends React.Component {
                   state: '',
                   zip: '',
                   time: 0,
+                  distance: 0,
                   nails: false,
                   hair: false,
                   redirect: false};
     this.autocomplete = null
+    this.redirect = false
 
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.queryString = this.queryString.bind(this);
   }
 
   componentDidMount() {
@@ -52,9 +55,24 @@ class AdvancedSearch extends React.Component {
     }
   }
 
+  queryString(query) {
+    // get array of key value pairs ([[k1, v1], [k2, v2]])
+    const qs = Object.entries(query)
+      // filter pairs with undefined value
+      .filter(pair => pair[1] !== undefined)
+      // encode keys and values, remove the value if it is null, but leave the key
+      .map(pair => pair.filter(i => i !== null).map(encodeURIComponent).join('='))
+      .join('&');
+  
+    return qs && '?' + qs;
+  }
+
   handleSubmit(event) {
+    // for some reason doesn't work without this..
+    let query = this.queryString(this.state)
     event.preventDefault();
-    fetch('http://localhost:8081/stores', {
+
+    fetch('http://localhost:8081/stores' + query, {
       method: "GET",
       headers: {
           'Content-type': 'application/json'
@@ -88,7 +106,6 @@ class AdvancedSearch extends React.Component {
         center: searchCenter
       })
     });
-    // this.props.history.push('/search');
   }
 
   render() {
@@ -124,6 +141,17 @@ class AdvancedSearch extends React.Component {
             <option>3</option>
             <option>4</option>
             <option>5</option>
+          </Form.Control>
+        </Form.Group>
+
+        <Form.Group>
+          <Form.Label>Distance</Form.Label>
+          <Form.Control as="select" id="distance" onChange={this.handleChange}>
+            <option>1 mile</option>
+            <option>5 miles</option>
+            <option>10 miles</option>
+            <option>25 miles</option>
+            <option>50 miles</option>
           </Form.Control>
         </Form.Group>
 
