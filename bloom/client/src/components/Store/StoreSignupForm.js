@@ -81,6 +81,12 @@ class StoreSignupForm extends React.Component {
                 values.category = values.category.map(function(val){ 
                   return val.label; 
                 })
+                // temporary
+                values.pictures = [
+                  "/hair.jpg",
+                  "/nails.jpg",
+                  "/salon.jpg"
+                ]
                 fetch('http://localhost:8081/addStore' , {
                   method: "POST",
                   headers: {
@@ -95,7 +101,6 @@ class StoreSignupForm extends React.Component {
                     // throw new Error(response.status)
                   }
                   else{
-                    // redirect to home page signed in
                     return response.json();
                   }
                 })
@@ -155,7 +160,7 @@ class StoreSignupForm extends React.Component {
                           onBlur={handleBlur}
                           className={touched.description && errors.description ? "error" : null}/>
                       </InputGroup>
-                      {touched.name && errors.description ? (
+                      {touched.description && errors.description ? (
                         <div className="error-message">{errors.description}</div>
                       ): null}
                     </Form.Group>

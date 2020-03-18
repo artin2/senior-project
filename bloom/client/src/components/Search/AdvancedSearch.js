@@ -3,7 +3,8 @@ import './AdvancedSearch.css'
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import {
-  withRouter
+  withRouter,
+  Redirect
 } from "react-router-dom";
 
 class AdvancedSearch extends React.Component {
@@ -15,7 +16,8 @@ class AdvancedSearch extends React.Component {
                   zip: '',
                   time: 0,
                   nails: false,
-                  hair: false};
+                  hair: false,
+                  redirect: false};
     this.autocomplete = null
 
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
@@ -51,23 +53,57 @@ class AdvancedSearch extends React.Component {
   }
 
   handleSubmit(event) {
-    // event.preventDefault();
-    // form validation would go here
-    // example post to DB
-    // fetch('http://localhost:4000/api/users/register' , {
-    //   method: "POST",
-    //   headers: {
-    //     'Content-type': 'application/json'
-    //   },
-    //   body: JSON.stringify(this.state)
-    // })
-    // .then((result) => result.json())
-    // .then((info) => { console.log(info); })
-    alert(JSON.stringify(this.state));
-    this.props.history.push('/search');
+    event.preventDefault();
+    fetch('http://localhost:8081/stores', {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    .then(function(response){
+      if(response.status!==200){
+        // should throw an error here
+        console.log("Error!", response.status)
+        // throw new Error(response.status)
+        window.location.href='/'
+      }
+      else{
+        // console.log(response)
+        return response.json();
+      }
+    })
+    .then(data => {
+      console.log("Retrieved store data successfully!")
+      
+      // have to pass center at the end based on the forms input
+      let searchCenter = {
+        lat: "34.277639",
+        lng: "-118.3741806"
+      }
+
+      this.setState({
+        stores: data,
+        redirect: true,
+        center: searchCenter
+      })
+    });
+    // this.props.history.push('/search');
   }
 
   render() {
+    const redirect = this.state.redirect;
+    if (redirect === true) {
+      return <Redirect to={{
+              pathname: '/search',
+              state: { 
+                stores: this.state.stores,
+                center: this.state.center
+               }
+              }}
+             />
+    }
+    
     return (
       <Form className="formBody rounded" onSubmit={this.handleSubmit}>
         <h3>Book Now</h3>

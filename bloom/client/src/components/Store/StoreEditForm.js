@@ -7,7 +7,7 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
-import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPhone } from 'react-icons/fa';
+import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPhone } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
@@ -18,7 +18,7 @@ class StoreEditForm extends React.Component {
     super(props);
     this.state = {
       store: {
-        urls: [],
+        pictures: [],
         name: "",
         description: "",
         phone: "",
@@ -49,7 +49,7 @@ class StoreEditForm extends React.Component {
       .required("Name is required"),
       description: Yup.string()
       .min(20, "Description must have at least 20 characters")
-      .required("Description is required"),
+      .required("Description is required"), // will make it required soon
       phone: Yup.string()
       .matches(this.phoneRegExp, "Phone number is not valid")
       .required("Phone number is required"),
@@ -74,48 +74,36 @@ class StoreEditForm extends React.Component {
     });
   }
 
-  // temporary, change so that we pass as prop the store data and set that as initial value to rubik
-  UNSAFE_componentWillMount() {
-    let data = {
-      urls: [
-        "/hair.jpg",
-        "/nails.jpg",
-        "/salon.jpg"
-      ],
-      name: "Nails For You",
-      description: "We are easily the best in the business and if you think otherwise then you are mistaken.",
-      phone: "8186449302",
-      id: 1,
-      street: "11421 Clybourn Ave",
-      city: "Sylmar",
-      state: "CA",
-      zipcode: "91342",
-      category: ["Nails"]
-    }
-    let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
-
-    // fetch('http://localhost:8081/store/' + this.props.match.params.id , {
-    //   method: "GET",
-    //   headers: {
-    //       'Content-type': 'application/json'
-    //   },
-    //   body: JSON.stringify(this.state)
-    //   })
-    //   .then(function(response){
-    //   if(response.status!==200){
-    //       console.log("Error!", response.status)
-    //       // throw new Error(response.status)
-    //   }
-    //   else{
-    //       // redirect to home page signed in
-    //       console.log("Successfully got business information!", response)
-    //   }
-    // })
-
-    this.setState({
-      store: data,
-      selectedOption: convertedCategory
+  componentDidMount() {
+    fetch('http://localhost:8081/stores/' + this.props.match.params.id , {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include'
     })
+    .then(function(response){
+      console.log(response)
+      if(response.status!==200){
+        // should throw an error here
+        console.log("Error!", response.status)
+        // throw new Error(response.status)
+        window.location.href='/'
+      }
+      else{
+        return response.json();
+      }
+    })
+    .then(data => {
+      console.log("Retrieve store data successfully!", data)
+      let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+      this.setState({
+        store: data,
+        selectedOption: convertedCategory
+      })
+
+      console.log(this.state)
+    });
   }
 
 
@@ -125,6 +113,7 @@ class StoreEditForm extends React.Component {
         <Row className="justify-content-center">
           <Col xs={8} sm={7} md={6} lg={5}>
           <Formik 
+              enableReinitialize
               initialValues={{
                 name: this.state.store.name,
                 description: this.state.store.description,
@@ -133,18 +122,27 @@ class StoreEditForm extends React.Component {
                 city: this.state.store.city,
                 state: this.state.store.state,
                 zipcode: this.state.store.zipcode,
-                category: this.state.selectedOption
+                category: this.state.selectedOption,
+                service: null,
+                owners: null,
+                pictures: null
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
                 values.category = values.category.map(function(val){ 
                   return val.label; 
                 })
-                fetch('http://localhost:8081/storeEdit' , {
-                  method: "PATCH",
+                console.log(values.category)
+                values.service = this.state.store.service
+                values.owners = this.state.store.owners
+                values.pictures = this.state.store.pictures
+                values.id = this.state.store.id
+                fetch('http://localhost:8081/stores/edit/' + this.state.store.id , {
+                  method: "POST",
                   headers: {
                     'Content-type': 'application/json'
                   },
+                  credentials: 'include',
                   body: JSON.stringify(values)
                 })
                 .then(function(response){
@@ -155,6 +153,7 @@ class StoreEditForm extends React.Component {
                   else{
                     // redirect to home page signed in
                     console.log("Successful edit!", response.status)
+                    window.location.href='/stores/' + values.id
                   }
                 })
               }}
@@ -187,6 +186,48 @@ class StoreEditForm extends React.Component {
                   </InputGroup>
                   {touched.name && errors.name ? (
                     <div className="error-message">{errors.name}</div>
+                  ): null}
+                </Form.Group>
+
+                <Form.Group controlId="formDescription">
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                            <FaPen/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control 
+                      as="textarea" 
+                      rows={3}
+                      name="description"
+                      value={values.description} 
+                      placeholder="Description" 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.description && errors.description ? "error" : null}/>
+                  </InputGroup>
+                  {touched.description && errors.description ? (
+                    <div className="error-message">{errors.description}</div>
+                  ): null}
+                </Form.Group>
+
+                <Form.Group controlId="formPhone">
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                            <FaPhone/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control type="text" 
+                      value={values.phone} 
+                      placeholder="Phone Number" 
+                      name="phone" 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.phone && errors.phone ? "error" : null}/>
+                  </InputGroup>
+                  {touched.phone && errors.phone ? (
+                    <div className="error-message">{errors.phone}</div>
                   ): null}
                 </Form.Group>
 

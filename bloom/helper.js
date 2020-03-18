@@ -27,9 +27,8 @@ function authError(res, err) {
 }
 
 function querySuccess(res, msg) {
-  console.error(msg.status);
   res.status(200);
-  res.json(msg.store);
+  res.json(msg);
   // res.send(msg);
 }
 
@@ -38,5 +37,6 @@ module.exports = {
     getFormattedDate: getFormattedDate,
     dbConnError: dbConnError,
     queryError: queryError,
-    querySuccess: querySuccess
+    querySuccess: querySuccess,
+    authError: authError
 };

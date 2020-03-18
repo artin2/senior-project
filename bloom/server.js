@@ -156,6 +156,19 @@ app.get('/checkToken', withAuth, function(req, res) {
 
 //**** STORE ROUTES ****//
 
+app.get('/stores/:id', withAuth, async (req, res, next) => {
+  await stores.getStore(req, res, next);
+});
+
+app.get('/stores', withAuth, async (req, res, next) => {
+  await stores.getStores(req, res, next);
+});
+
+//should this be a patch?
+app.post('/stores/edit/:id', withAuth, async (req, res, next) => {
+  await stores.editStore(req, res, next);
+});
+
 app.post('/addStore', withAuth, async (req, res, next) => {
   await stores.addStore(req, res, next);
 });

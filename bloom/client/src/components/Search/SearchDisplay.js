@@ -12,62 +12,62 @@ class SearchDisplay extends React.Component {
     super(props);
     this.state ={
       stores: [{
-        urls: [
+        pictures: [
           "/hair.jpg",
           "/nails.jpg",
           "/salon.jpg"
         ],
         name: "Nails For You",
         description: "We are easily the best in the business and if you think otherwise then you are mistaken.",
-        id: 1,
+        id: 8,
         lat: "40.740494",
         lng: "-73.999100"
       },
       {
-        urls: [
+        pictures: [
           "/hair.jpg",
           "/nails.jpg",
           "/salon.jpg"
         ],
         name: "Nails For Me",
         description: "We are probably the best in the business and if you think otherwise then you are mistaken.",
-        id: 2,
+        id: 9,
         lat: "40.735812",
         lng: "-73.975754"
       },
       {
-        urls: [
+        pictures: [
           "/hair.jpg",
           "/nails.jpg",
           "/salon.jpg"
         ],
         name: "Hair For You",
         description: "We are definitely the best in the business and if you think otherwise then you are mistaken.",
-        id: 3,
+        id: 10,
         lat: "40.7",
         lng: "-73.8"
       },
       {
-        urls: [
+        pictures: [
           "/hair.jpg",
           "/nails.jpg",
           "/salon.jpg"
         ],
         name: "Hair For Me",
         description: "We are maybe the best in the business and if you think otherwise then you are mistaken.",
-        id: 4,
+        id: 11,
         lat: "40.713956",
         lng: "-73.997383"
       },
       {
-        urls: [
+        pictures: [
           "/hair.jpg",
           "/nails.jpg",
           "/salon.jpg"
         ],
         name: "Test For Me",
         description: "We are maybe the best in the business and if you think otherwise then you are mistaken.",
-        id:5,
+        id:12,
         lat: "40.745436",
         lng: "-73.930435"
       }],
@@ -84,20 +84,20 @@ class SearchDisplay extends React.Component {
     return (
       <Container fluid>
         <Row className="justify-content-center">
-          {this.state.stores.map(store => (
+          {this.props.location.state.stores.map(store => (
             <Col key={"store-" + store.id}>
               <SearchCard store={store} 
                           carousel={true} 
                           styleVal={{ width: '18rem' }} 
                           onClickFunctionBook={() =>  window.location.href='/book/' + store.id} 
-                          onClickFunctionStore={() =>  window.location.href='/store/' + store.id}/>
+                          onClickFunctionStore={() =>  window.location.href='/stores/' + store.id}/>
             </Col>
           ))}
         </Row>
         <Row>
           <MapContainer google={window.google} 
-                        stores={this.state.stores} 
-                        center={this.state.center} 
+                        stores={this.props.location.state.stores} 
+                        center={this.props.location.state.center} 
                         zoom={this.state.zoom} 
                         mapStyles={this.state.mapStyles}/>
         </Row>

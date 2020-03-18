@@ -11,53 +11,47 @@ class StoreDisplay extends React.Component {
     super(props);
     this.state ={
       store: {
-        urls: [
+        pictures: [
         ],
         name: "",
         description: "",
         id: "",
         lat: "",
-        lng: ""
+        lng: "",
+        category: []
       },
       owner: true
     }
   }
 
   componentDidMount() {
-    let data = {
-      urls: [
-        "/hair.jpg",
-        "/nails.jpg",
-        "/salon.jpg"
-      ],
-      name: "Nails For You",
-      description: "We are easily the best in the business and if you think otherwise then you are mistaken.",
-      id: 1,
-      lat: "40.740494",
-      lng: "-73.999100"
-    }
-
-    // fetch('http://localhost:8081/stores/' + this.props.match.params.id , {
-    //   method: "GET",
-    //   headers: {
-    //       'Content-type': 'application/json'
-    //   },
-    //   body: JSON.stringify(this.state)
-    //   })
-    //   .then(function(response){
-    //   if(response.status!==200){
-    //       console.log("Error!", response.status)
-    //       // throw new Error(response.status)
-    //   }
-    //   else{
-    //       // redirect to home page signed in
-    //       console.log("Successfully got business information!", response)
-    //   }
-    // })
-
-    this.setState({
-      store: data
+    fetch('http://localhost:8081/stores/' + this.props.match.params.id , {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include'
     })
+    .then(function(response){
+      console.log(response)
+      if(response.status!==200){
+        // should throw an error here
+        console.log("Error!", response.status)
+        // throw new Error(response.status)
+        window.location.href='/'
+      }
+      else{
+        return response.json();
+      }
+    })
+    .then(data => {
+      console.log("Retrieve store data successfully!", data)
+      let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+      this.setState({
+        store: data,
+        selectedOption: convertedCategory
+      })
+    });
   }
 
   render() {
@@ -75,7 +69,7 @@ class StoreDisplay extends React.Component {
               <p>{this.state.store.description}</p>
             </Col>
             <Col xs={8} sm={7} md={6} lg={5}>
-              <LargeCarousel urls={this.state.store.urls}/>
+              <LargeCarousel pictures={this.state.store.pictures}/>
             </Col>
         </Row>
         <Row>

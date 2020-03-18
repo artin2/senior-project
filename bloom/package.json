@@ -13,6 +13,7 @@
     "express": "^4.17.1",
     "googleapis": "^47.0.0",
     "jsonwebtoken": "^8.5.1",
+    "node-geocoder": "^3.25.1",
     "openid-client": "^3.12.2",
     "package.json": "^2.0.1",
     "passport-google-oauth": "^2.0.0",
