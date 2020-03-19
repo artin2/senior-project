@@ -11,6 +11,7 @@ import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPho
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
+import Cookies from 'js-cookie';
 
 
 class StoreSignupForm extends React.Component {
@@ -74,7 +75,8 @@ class StoreSignupForm extends React.Component {
                 city: '',
                 state: '',
                 zipcode: '',
-                category: []
+                category: [],
+                owner_id: 0
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
@@ -87,6 +89,7 @@ class StoreSignupForm extends React.Component {
                   "/nails.jpg",
                   "/salon.jpg"
                 ]
+                values.owner_id = JSON.parse(Cookies.get('user').substring(2)).id
                 fetch('http://localhost:8081/addStore' , {
                   method: "POST",
                   headers: {

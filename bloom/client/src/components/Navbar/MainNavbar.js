@@ -1,7 +1,7 @@
 import React from 'react';
-import { Navbar, Nav } from 'react-bootstrap';
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import { Link } from "react-router-dom";
-import BasicSearch from '../Search/BasicSearch';
+// import BasicSearch from '../Search/BasicSearch';
 import './MainNavbar.css'
 import Cookies from 'js-cookie';
 
@@ -36,7 +36,12 @@ class MainNavbar extends React.Component {
     }
     else {
       userComponents = <Nav>
-                          <Link to="/store/signup" className="nav-link">Create Store</Link>
+                          <NavDropdown title="Manage Stores" id="basic-nav-dropdown">
+                            <NavDropdown.Item href="/storeDashboard">Dashboard</NavDropdown.Item>
+                            <NavDropdown.Item href="/storeCalendar">Calendar</NavDropdown.Item>
+                            <NavDropdown.Divider />
+                            <NavDropdown.Item href="/store/signup">Create Store</NavDropdown.Item>
+                          </NavDropdown>
                           <Link to={"/users/edit/" + this.state.user.id} className="nav-link">Edit Profile</Link>
                           <Link to="/logout" className="nav-link">Logout</Link>
                        </Nav>
@@ -49,10 +54,6 @@ class MainNavbar extends React.Component {
           <Nav className="mr-auto">
             <Link to="/help" className="nav-link">Help</Link>
             <Link to="/about" className="nav-link">About</Link>
-            <Link to="/store" className="nav-link">My Store</Link>
-            <Nav.Item className="mr-auto d-none d-sm-block searchBar">
-              <BasicSearch/>
-            </Nav.Item>
           </Nav>
           {userComponents}
         </Navbar.Collapse>

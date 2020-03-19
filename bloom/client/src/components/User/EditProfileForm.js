@@ -49,6 +49,7 @@ class EditProfileForm extends React.Component {
       .max(100, "Password can't be longer than 100 characters"),
       password_confirmation: Yup.string()
       .oneOf([Yup.ref('password')], 'Passwords do not match')
+      .required("Password confirmation is required"),
     });
   }
 

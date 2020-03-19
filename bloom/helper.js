@@ -4,19 +4,19 @@ function getFormattedDate() {
 }
 
 function dbConnError(res, err) {
-  console.error('Error acquiring client', err, err.message, err.stack);
+  console.error('Error acquiring client', err);
   res.status(400);
   res.send(err);
 }
 
 function queryError(res, err) {
-  console.log('Query error', err, err.message, err.stack);
+  console.log('Query error', err);
   res.status(400);
   res.send(err);
 }
 
 function authError(res, err) {
-  console.log('Auth error', err, err.message, err.stack);
+  console.log('Auth error', err);
   res.status(400);
   res.send(err);
 }

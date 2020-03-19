@@ -4,6 +4,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import LargeCarousel from '../LargeCarousel';
 import { Button } from 'react-bootstrap';
+import Cookies from 'js-cookie';
 
 
 class StoreDisplay extends React.Component {
@@ -11,20 +12,33 @@ class StoreDisplay extends React.Component {
     super(props);
     this.state ={
       store: {
-        pictures: [
-        ],
-        name: "",
-        description: "",
         id: "",
+        name: "",
+        street: "",
+        city: "",
+        state: "",
+        zipcode: "",
+        created_at: "",
+        category: [],
+        services: [],
+        workers: [],
+        pictures: [],
+        owners: [],
+        phone: "",
+        clients: [],
+        description: "",
         lat: "",
-        lng: "",
-        category: []
+        lng: ""
       },
-      owner: true
+      user_id: -1
     }
   }
 
   componentDidMount() {
+    this.setState({
+      user_id: JSON.parse(Cookies.get('user').substring(2)).id
+    })
+
     fetch('http://localhost:8081/stores/' + this.props.match.params.id , {
       method: "GET",
       headers: {
@@ -56,7 +70,7 @@ class StoreDisplay extends React.Component {
 
   render() {
     let editButton;
-    if(this.state.owner){
+    if(this.state.store.owners.indexOf(this.state.user_id) > -1){
       editButton = <Button onClick={() =>  window.location.href='/stores/edit/' + this.state.store.id}>Edit Store</Button>
     }
 

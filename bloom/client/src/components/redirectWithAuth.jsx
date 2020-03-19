@@ -1,10 +1,9 @@
-//CITATION: https://medium.com/@faizanv/authentication-for-your-react-and-express-application-w-json-web-tokens-923515826e0
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-export default function withAuth(ComponentToProtect) {
+export default function redirectWithAuth(ComponentToProtect) {
   return class extends Component {
-    constructor() {
-      super();
+    constructor(props) {
+      super(props);
       this.state = {
         loading: true,
         redirect: false,
@@ -19,16 +18,11 @@ export default function withAuth(ComponentToProtect) {
         credentials: 'include'
       }).then(res => {
           if (res.status === 200) {
-            this.setState({ loading: false });
+            this.setState({ loading: false, redirect: true });
           } else {
-            const error = new Error(res.error);
-            throw error;
+            this.setState({ loading: false, redirect: false });
           }
         })
-        .catch(err => {
-          console.error(err);
-          this.setState({ loading: false, redirect: true });
-        });
     }
     render() {
       const { loading, redirect } = this.state;
@@ -36,9 +30,11 @@ export default function withAuth(ComponentToProtect) {
         return null;
       }
       if (redirect) {
-        return <Redirect to="/login" />;
+        return <Redirect to="/"/>;
       }
-      return <ComponentToProtect {...this.props} />;
+      else {
+        return <ComponentToProtect {...this.props}/>;
+      }
     }
   }
 }

@@ -25,11 +25,13 @@ async function login(req, res) {
                 res.status(400);
               }
             }
-
             catch (err) {
               console.log(err.toString())
               res.status(400).json(err.toString());
             }
+          }
+          else{
+            console.log("We should handle this case...")
           }
 
           if (err) {

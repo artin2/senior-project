@@ -35,7 +35,6 @@ class StoreEditForm extends React.Component {
     this.options = [
       { value: 'nails', label: 'Nails' },
       { value: 'hair', label: 'Hair' },
-
     ];
 
     // RegEx for phone number validation
@@ -123,7 +122,7 @@ class StoreEditForm extends React.Component {
                 state: this.state.store.state,
                 zipcode: this.state.store.zipcode,
                 category: this.state.selectedOption,
-                service: null,
+                services: null,
                 owners: null,
                 pictures: null
               }}
@@ -133,7 +132,7 @@ class StoreEditForm extends React.Component {
                   return val.label; 
                 })
                 console.log(values.category)
-                values.service = this.state.store.service
+                values.services = this.state.store.services
                 values.owners = this.state.store.owners
                 values.pictures = this.state.store.pictures
                 values.id = this.state.store.id
