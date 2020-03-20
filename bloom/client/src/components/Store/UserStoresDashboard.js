@@ -66,6 +66,12 @@ class UserStoresDashboard extends React.Component {
     })
   }
 
+  triggerAddService(id) {
+    this.props.history.push({
+      pathname: '/stores/addService/' + id,
+    })
+  }
+
   componentDidMount() {
     if(this.props.location.state && this.props.location.state.stores){
       this.setState({
@@ -111,6 +117,7 @@ class UserStoresDashboard extends React.Component {
               <Button onClick={() => this.triggerStoreEdit(store)}>Edit Store</Button>
               <Button onClick={() => this.triggerShowWorkers(store.id)}>Show Workers</Button>
               <Button onClick={() => this.triggerAddWorker(store.id)}>Add Worker</Button>
+              <Button onClick={() => this.triggerAddService(store.id)}>Add Service</Button>
               <SearchCard store={store} 
                           carousel={true} 
                           styleVal={{ width: '18rem' }}
