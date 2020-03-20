@@ -76,7 +76,7 @@ class ReservationPage extends React.Component {
     let that = this;
     const DisplayByStep = (props) => {
       if (this.state.currentStep == 1) {
-        return <ServiceSelection updateReservation={this.updateReservation} selectedServices={this.state.selectedServices} time={this.state.time} total={this.state.total} handleSubmit={this.handleSubmit} timeConvert={this.timeConvert} pluralize={this.pluralize} />
+        return <ServiceSelection store_id={this.props.match.params.store_id} updateReservation={this.updateReservation} selectedServices={this.state.selectedServices} time={this.state.time} total={this.state.total} handleSubmit={this.handleSubmit} timeConvert={this.timeConvert} pluralize={this.pluralize} />
       } else {
         return <DateSelection time={this.state.time} selectedServices={this.state.selectedServices}/>
       }

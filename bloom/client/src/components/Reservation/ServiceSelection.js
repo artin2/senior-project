@@ -33,6 +33,35 @@ class ServiceSelection extends React.Component {
     this.setState({ [event.target.id]: !this.state[event.target.id] }, () => console.log('wtf', this.state[event.target.id]))
   }
 
+  componentDidMount() {
+    // need to get store category, fetch?
+    fetch('http://localhost:8081/stores/' + this.props.store_id + "/getServices" , {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    .then(function(response){
+      console.log(response)
+      if(response.status!==200){
+        // should throw an error here
+        console.log("Error!", response.status)
+        // throw new Error(response.status)
+        // window.location.href='/'
+      }
+      else{
+        return response.json();
+      }
+    })
+    .then(data => {
+      console.log("Services retreived from server:", data)
+      this.setState({
+        services: data
+      })
+    });
+  }
+
   render() {
     let that = this;
     const ServiceCheckBoxes = (props) => {
