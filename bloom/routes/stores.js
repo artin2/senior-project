@@ -443,6 +443,43 @@ async function addWorker(req, res, next) {
   }
 };
 
+// NOTE: with nested queries like this, we need to revert successful queries that were made if the inner most one
+// fails...
+async function addService(req, res, next) {
+  try {
+    // lets verify that the user is logged in
+    // should add verification to check they are the store owner, maybe can do this in the front end though...
+    await auth.verifyToken(req, res, next);
+
+    db.client.connect(function(err) {
+      // check to see if the user exists
+      query = 'INSERT INTO services(name, cost, workers, store_id, category, description, pictures, duration) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;'
+      let values = [req.body.name, req.body.cost, req.body.workers, req.body.store_id, req.body.category, req.body.description, req.body.pictures, req.body.duration]
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+
+          // we were able to insert the service
+          if (result && result.rows.length == 1) {
+            helper.querySuccess(res, result.rows[0]);
+          }
+          else{
+            helper.queryError(res, new Error("Could not insert service!"));
+          }
+        }
+      );
+
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  } catch (err) {
+    helper.authError(res, err);
+  }
+};
+
 module.exports = {
   getStore: getStore,
   editStore: editStore,
@@ -452,5 +489,6 @@ module.exports = {
   getUserStores: getUserStores,
   getStoreWorkers: getStoreWorkers,
   getStoreWorker: getStoreWorker,
-  editStoreWorker: editStoreWorker
+  editStoreWorker: editStoreWorker,
+  addService: addService
 };

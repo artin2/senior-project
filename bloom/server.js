@@ -173,6 +173,10 @@ app.post('/stores/addWorker/:id', withAuth, async (req, res, next) => {
   await stores.addWorker(req, res, next);
 });
 
+app.post('/stores/addService/:id', withAuth, async (req, res, next) => {
+  await stores.addService(req, res, next);
+});
+
 app.post('/stores/:store_id/workers/:worker_id', withAuth, async (req, res, next) => {
   await stores.editStoreWorker(req, res, next);
 });

@@ -6,27 +6,23 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
-import { FaDollarSign, FaHandshake, FaHourglassHalf } from 'react-icons/fa';
+import { FaDollarSign, FaHandshake, FaHourglassHalf, FaPen } from 'react-icons/fa';
 import { Formik } from 'formik';
 import Select from 'react-select';
-// import * as Yup from 'yup';
+import * as Yup from 'yup';
 
 class AddServiceForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      store: {
-        pictures: [],
-        name: "",
-        description: "",
-        phone: "",
-        id: "",
-        street: "",
-        city: "",
-        state: "",
-        zipcode: "",
-        category: []
-      },
+      name: '',
+      cost: '',
+      duration: '',
+      description: '',
+      pictures: [],
+      workers: [],
+      category: [],
+      store_id: '',
       categoryOptions: [
         { value: 'nails', label: 'Nails' },
         { value: 'hair', label: 'Hair' }
@@ -35,10 +31,36 @@ class AddServiceForm extends React.Component {
       selectedOption: null
     };
 
+    // Schema for yup
+    this.yupValidationSchema = Yup.object().shape({
+      name: Yup.string()
+      .min(2, "Name must have at least 2 characters")
+      .max(100, "Name can't be longer than 100 characters")
+      .required("Name is required"),
+      description: Yup.string()
+      .min(20, "Description must have at least 20 characters")
+      .required("Description is required"), // will make it required soon,
+      cost: Yup.number()
+      .positive("Cost must be positive")
+      // .integer()
+      .required("Cost is required"),
+      duration: Yup.number()
+      .positive("Duration must be positive")
+      .integer("Duration must be an integer")
+      .required("Duration is required"),
+      workers: Yup.array()
+      .required("Worker is required")
+      .nullable(),
+      category: Yup.array()
+      .required("Category is required")
+      .nullable()
+    });
+
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
   }
 
   componentDidMount() {
+    // need to get store category, fetch?
     fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/workers" , {
       method: "GET",
       headers: {
@@ -82,15 +104,27 @@ class AddServiceForm extends React.Component {
             <Formik
               enableReinitialize
               initialValues={{
-                service: '',
+                name: '',
                 cost: '',
                 duration: '',
+                description: '',
+                pictures: [],
                 workers: [],
-                category: []
+                category: [],
+                store_id: this.props.match.params.store_id
               }}
+              validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
                 let store_id = this.props.match.params.store_id
                 let triggerStoreDisplay = this.triggerStoreDisplay
+
+                values.category = values.category.map(function(val){ 
+                  return val.label; 
+                })
+
+                values.workers = values.workers.map(function(val){ 
+                  return val.value; 
+                })
 
                 fetch('http://localhost:8081/stores/addService/' + store_id, {
                   method: "POST",
@@ -101,6 +135,7 @@ class AddServiceForm extends React.Component {
                   body: JSON.stringify(values)
                 })
                 .then(function(response){
+                  console.log("HERERERER")
                   if(response.status!==200){
                     console.log("Error!", response.status)
                     // throw new Error(response.status)
@@ -135,15 +170,15 @@ class AddServiceForm extends React.Component {
                         </InputGroup.Text>
                     </InputGroup.Prepend>
                     <Form.Control type="text" 
-                      value={values.service} 
+                      value={values.name} 
                       placeholder="Name of Service" 
-                      name="service" 
+                      name="name" 
                       onChange={handleChange} 
                       onBlur={handleBlur}
-                      className={touched.service && errors.service ? "error" : null}/>
+                      className={touched.name && errors.name ? "error" : null}/>
                   </InputGroup>
-                  {touched.service && errors.service ? (
-                    <div className="error-message">{errors.service}</div>
+                  {touched.name && errors.name ? (
+                    <div className="error-message">{errors.name}</div>
                   ): null}
                 </Form.Group>
 
@@ -185,6 +220,28 @@ class AddServiceForm extends React.Component {
                   </InputGroup>
                   {touched.duration && errors.duration ? (
                     <div className="error-message">{errors.duration}</div>
+                  ): null}
+                </Form.Group>
+
+                <Form.Group controlId="formDescription">
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                          <FaPen/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control 
+                      type="textarea"
+                      rows={3}
+                      value={values.description}
+                      placeholder="Description" 
+                      name="description" 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.description && errors.description ? "error" : null}/>
+                  </InputGroup>
+                  {touched.description && errors.description ? (
+                    <div className="error-message">{errors.description}</div>
                   ): null}
                 </Form.Group>
 
