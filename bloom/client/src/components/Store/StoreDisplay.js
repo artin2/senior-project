@@ -5,7 +5,7 @@ import Col from 'react-bootstrap/Col'
 import LargeCarousel from '../LargeCarousel';
 import { Button } from 'react-bootstrap';
 import Cookies from 'js-cookie';
-
+import { withRouter } from "react-router-dom";
 
 class StoreDisplay extends React.Component {
   constructor(props) {
@@ -29,49 +29,62 @@ class StoreDisplay extends React.Component {
         description: "",
         lat: "",
         lng: ""
-      },
-      user_id: -1
+      }
     }
   }
 
-  componentDidMount() {
-    this.setState({
-      user_id: JSON.parse(Cookies.get('user').substring(2)).id
+  triggerStoreEdit() {
+    this.props.history.push({
+      pathname: '/stores/edit/' + this.props.match.params.store_id,
+      state: this.state
     })
+  }
 
-    fetch('http://localhost:8081/stores/' + this.props.match.params.id , {
-      method: "GET",
-      headers: {
-          'Content-type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    .then(function(response){
-      console.log(response)
-      if(response.status!==200){
-        // should throw an error here
-        console.log("Error!", response.status)
-        // throw new Error(response.status)
-        window.location.href='/'
-      }
-      else{
-        return response.json();
-      }
-    })
-    .then(data => {
-      console.log("Retrieve store data successfully!", data)
-      let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+  componentDidMount() {
+    // if we were passed the store data from calling component
+    if(this.props.location.state && this.props.location.state.store){
+      let convertedCategory = this.props.location.state.store.category.map((str) => ({ value: str.toLowerCase(), label: str }));
       this.setState({
-        store: data,
+        store: this.props.location.state.store,
         selectedOption: convertedCategory
       })
-    });
+    }
+    else{
+      // retrieve the store data from the database
+      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id , {
+        method: "GET",
+        headers: {
+            'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(function(response){
+        console.log(response)
+        if(response.status!==200){
+          // should throw an error here
+          console.log("Error!", response.status)
+          // throw new Error(response.status)
+          window.location.href='/'
+        }
+        else{
+          return response.json();
+        }
+      })
+      .then(data => {
+        console.log("Retrieve store data successfully!", data)
+        let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+        this.setState({
+          store: data,
+          selectedOption: convertedCategory
+        })
+      });
+    }
   }
 
   render() {
     let editButton;
-    if(this.state.store.owners.indexOf(this.state.user_id) > -1){
-      editButton = <Button onClick={() =>  window.location.href='/stores/edit/' + this.state.store.id}>Edit Store</Button>
+    if(this.state.store.owners.indexOf(JSON.parse(Cookies.get('user').substring(2)).id) > -1){
+      editButton = <Button onClick={() =>  this.triggerStoreEdit()}>Edit Store</Button>
     }
 
     return (
@@ -97,4 +110,4 @@ class StoreDisplay extends React.Component {
   }
 }
 
-export default StoreDisplay;
+export default withRouter(StoreDisplay);

@@ -6,72 +6,15 @@ import SearchCard from './SearchCard'
 import './SearchDisplay.css'
 import MapContainer from '../Map/MapContainer'
 
-
 class SearchDisplay extends React.Component {
   constructor(props) {
     super(props);
     this.state ={
-      stores: [{
-        pictures: [
-          "/hair.jpg",
-          "/nails.jpg",
-          "/salon.jpg"
-        ],
-        name: "Nails For You",
-        description: "We are easily the best in the business and if you think otherwise then you are mistaken.",
-        id: 8,
-        lat: "40.740494",
-        lng: "-73.999100"
+      stores: [],
+      center: { 
+        lat: 0.0, 
+        lng: 0.0 
       },
-      {
-        pictures: [
-          "/hair.jpg",
-          "/nails.jpg",
-          "/salon.jpg"
-        ],
-        name: "Nails For Me",
-        description: "We are probably the best in the business and if you think otherwise then you are mistaken.",
-        id: 9,
-        lat: "40.735812",
-        lng: "-73.975754"
-      },
-      {
-        pictures: [
-          "/hair.jpg",
-          "/nails.jpg",
-          "/salon.jpg"
-        ],
-        name: "Hair For You",
-        description: "We are definitely the best in the business and if you think otherwise then you are mistaken.",
-        id: 10,
-        lat: "40.7",
-        lng: "-73.8"
-      },
-      {
-        pictures: [
-          "/hair.jpg",
-          "/nails.jpg",
-          "/salon.jpg"
-        ],
-        name: "Hair For Me",
-        description: "We are maybe the best in the business and if you think otherwise then you are mistaken.",
-        id: 11,
-        lat: "40.713956",
-        lng: "-73.997383"
-      },
-      {
-        pictures: [
-          "/hair.jpg",
-          "/nails.jpg",
-          "/salon.jpg"
-        ],
-        name: "Test For Me",
-        description: "We are maybe the best in the business and if you think otherwise then you are mistaken.",
-        id:12,
-        lat: "40.745436",
-        lng: "-73.930435"
-      }],
-      center: {lat: 40.73, lng: -73.93},
       zoom: 12,
       mapStyles: {
         width: '50%',
@@ -80,27 +23,53 @@ class SearchDisplay extends React.Component {
     }
   }
 
+  componentDidMount(){
+    if(this.props.location.state && this.props.location.state.stores){
+      this.setState({
+        stores: this.props.location.state.stores
+      })
+    }
+
+    if(this.props.location.state && this.props.location.state.center){
+      this.setState({
+        center: this.props.location.state.center
+      })
+    }
+  }
+
   render() {
+    let storeCards = null
+    let map = null
+    if(this.state.stores.length > 0){
+      console.log(this.state.stores)
+      storeCards = this.state.stores.map(store => (
+        <Row key={"store-" + store.id} className="justify-content-center">
+          <Col>
+            <SearchCard store={store} 
+                        carousel={true} 
+                        styleVal={{ width: '18rem' }} 
+                        onClickFunctionBook={() =>  window.location.href='/book/' + store.id} 
+                        onClickFunctionStore={() =>  window.location.href='/stores/' + store.id}/>
+          </Col>
+        </Row>
+      ))
+
+      map = <Row>
+              <MapContainer google={window.google} 
+                            stores={this.state.stores} 
+                            center={this.state.center} 
+                            zoom={this.state.zoom} 
+                            mapStyles={this.state.mapStyles}/>
+            </Row>
+    }
+    else{
+      storeCards = <h1>No Results!</h1>
+    }
+
     return (
       <Container fluid>
-        <Row className="justify-content-center">
-          {this.props.location.state.stores.map(store => (
-            <Col key={"store-" + store.id}>
-              <SearchCard store={store} 
-                          carousel={true} 
-                          styleVal={{ width: '18rem' }} 
-                          onClickFunctionBook={() =>  window.location.href='/book/' + store.id} 
-                          onClickFunctionStore={() =>  window.location.href='/stores/' + store.id}/>
-            </Col>
-          ))}
-        </Row>
-        <Row>
-          <MapContainer google={window.google} 
-                        stores={this.props.location.state.stores} 
-                        center={this.props.location.state.center} 
-                        zoom={this.state.zoom} 
-                        mapStyles={this.state.mapStyles}/>
-        </Row>
+        {storeCards}
+        {map}
       </Container>
     );
   }

@@ -4,11 +4,8 @@ import Card from 'react-bootstrap/Card'
 import { Button } from 'react-bootstrap';
 
 class SearchCard extends React.Component {
-  // constructor(props) {
-  //   super(props);
-  // }
-
   render() {
+    console.log(this.props)
     let image;
     if(this.props.carousel){
       image = <LargeCarousel pictures={this.props.store.pictures}/>

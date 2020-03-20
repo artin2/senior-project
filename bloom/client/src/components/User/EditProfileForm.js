@@ -1,6 +1,5 @@
 import React from 'react';
 import '../../App.css';
-
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -22,7 +21,7 @@ class EditProfileForm extends React.Component {
         phone: '',
         password: '',
         password_confirmation: '',
-        id: this.props.match.params.id
+        id: ''
       }
     }
     // RegEx for phone number validation
@@ -46,19 +45,29 @@ class EditProfileForm extends React.Component {
       .matches(this.phoneRegExp, "Phone number is not valid"),
       password: Yup.string()
       .min(6, "Password must have at least 6 characters")
-      .max(100, "Password can't be longer than 100 characters"),
+      .max(100, "Password can't be longer than 100 characters")
+      .required("Password is required"),
       password_confirmation: Yup.string()
       .oneOf([Yup.ref('password')], 'Passwords do not match')
       .required("Password confirmation is required"),
     });
+
+    this.triggerUserDisplay = this.triggerUserDisplay.bind(this);
   }
 
-  // temporary, change so that we pass as prop the store data and set that as initial value to rubik
+  // redirect to the store display page and pass the new store data
+  triggerUserDisplay(returnedUser) {
+    this.props.history.push({
+      pathname: '/users/' + returnedUser.id,
+      // state: {
+      //   user: returnedUser
+      // }
+    })
+  }
+
   componentDidMount() {
-    let s = JSON.parse(Cookies.get('user').substring(2))
-  
     this.setState({ 
-      user: s
+      user: JSON.parse(Cookies.get('user').substring(2))
     });
   }
     
@@ -79,9 +88,11 @@ class EditProfileForm extends React.Component {
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-                let id = this.state.user.id
-                values.id = id
-                fetch('http://localhost:8081/users/' + id , {
+                let user_id = this.props.match.params.user_id
+                let triggerUserDisplay = this.triggerUserDisplay
+
+                values.id = this.props.match.params.user_id
+                fetch('http://localhost:8081/users/' + user_id , {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json'
@@ -97,9 +108,13 @@ class EditProfileForm extends React.Component {
                   else{
                     // redirect to home page signed in
                     console.log("Successful patch!", response.status)
-                    window.location.href='/users/' + id
+                    return response.json()
                   }
                 })
+                .then(data => {
+                  console.log("User data updated:", data)
+                  triggerUserDisplay(data)
+                });
               }}
             >
             {( {values,
@@ -131,7 +146,6 @@ class EditProfileForm extends React.Component {
                     <div className="error-message">{errors.first_name}</div>
                   ): null}
                 </Form.Group>
-
 
                 <Form.Group controlId="formLastName">
                   <InputGroup>

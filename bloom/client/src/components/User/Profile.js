@@ -4,7 +4,6 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Cookies from 'js-cookie'
 
-
 class Profile extends React.Component {
   constructor(props) {
     super(props);
@@ -15,21 +14,19 @@ class Profile extends React.Component {
         phone: '',
         password: '',
         password_confirmation: '',
-        id: this.props.match.params.id
+        id: ''
       }
     }
   }
 
   componentDidMount() {
-    let s = JSON.parse(Cookies.get('user').substring(2))
-    console.log(s)
-  
     this.setState({
-      user: s
+      user: JSON.parse(Cookies.get('user').substring(2))
     });
   }
 
   render() {
+    // fix later to render all users not just current one? this.props.match.params.user_id
     return (
       <Container fluid>
         <Row className="justify-content-center">

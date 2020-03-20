@@ -1,6 +1,5 @@
 import React from 'react';
 import '../../App.css';
-
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -22,6 +21,18 @@ class AddWorkerForm extends React.Component {
       .max(100, "Email must be less than 100 characters")
       .required("Email is required"),
     });
+
+    this.triggerWorkerDisplay = this.triggerWorkerDisplay.bind(this);
+  }
+
+  // redirect to the worker display page and pass the new worker data
+  triggerWorkerDisplay(returnedWorker) {
+    this.props.history.push({
+      pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + returnedWorker.id,
+      state: {
+        worker: returnedWorker
+      }
+    })
   }
     
   render() {
@@ -35,7 +46,9 @@ class AddWorkerForm extends React.Component {
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-                let store_id = this.props.location.state.store_id
+                let store_id = this.props.match.params.store_id
+                let triggerWorkerDisplay = this.triggerWorkerDisplay
+
                 fetch('http://localhost:8081/stores/addWorker/' + store_id, {
                   method: "POST",
                   headers: {
@@ -50,10 +63,14 @@ class AddWorkerForm extends React.Component {
                     // throw new Error(response.status)
                   }
                   else{
-                    // redirect to home page signed in
                     console.log("Successfully added worker!", response.status)
-                    window.location.href='/stores/' + store_id
+                    return response.json();
                   }
+                })
+                .then(function(data){
+                  // redirect to home page signed in
+                  console.log("Worker data returned:", data)
+                  triggerWorkerDisplay(data)
                 })
               }}
             >

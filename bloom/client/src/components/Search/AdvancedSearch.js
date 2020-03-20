@@ -2,10 +2,7 @@ import React from 'react';
 import './AdvancedSearch.css'
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
-import {
-  withRouter,
-  Redirect
-} from "react-router-dom";
+import { withRouter } from "react-router-dom";
 
 class AdvancedSearch extends React.Component {
   constructor(props) {
@@ -92,7 +89,7 @@ class AdvancedSearch extends React.Component {
       }
     })
     .then(data => {
-      console.log("Retrieved store data successfully!")
+      console.log("Store data:", data)
       
       // have to pass center at the end based on the forms input
       let searchCenter = {
@@ -105,22 +102,15 @@ class AdvancedSearch extends React.Component {
         redirect: true,
         center: searchCenter
       })
+
+      this.props.history.push({
+        pathname: '/search',
+        state: this.state
+      })
     });
   }
 
   render() {
-    const redirect = this.state.redirect;
-    if (redirect === true) {
-      return <Redirect to={{
-              pathname: '/search',
-              state: { 
-                stores: this.state.stores,
-                center: this.state.center
-               }
-              }}
-             />
-    }
-    
     return (
       <Form className="formBody rounded" onSubmit={this.handleSubmit}>
         <h3>Book Now</h3>

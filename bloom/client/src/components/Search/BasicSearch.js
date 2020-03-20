@@ -4,14 +4,9 @@ import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
 import { FaSearchLocation } from 'react-icons/fa';
 
-
 class BasicSearch extends React.Component {
-  // constructor(props) {
-  //   super(props);
-  // }
-
   handleSubmit() {
-      alert("Submit");
+    alert("Submit");
   }
 
   render() {

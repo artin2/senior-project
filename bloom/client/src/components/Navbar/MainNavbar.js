@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import { Link } from "react-router-dom";
-// import BasicSearch from '../Search/BasicSearch';
 import './MainNavbar.css'
 import Cookies from 'js-cookie';
+// import BasicSearch from '../Search/BasicSearch';
 
 class MainNavbar extends React.Component {
   constructor(props) {
@@ -37,12 +37,15 @@ class MainNavbar extends React.Component {
     else {
       userComponents = <Nav>
                           <NavDropdown title="Manage Stores" id="basic-nav-dropdown">
-                            <NavDropdown.Item href="/storeDashboard">Dashboard</NavDropdown.Item>
+                            <NavDropdown.Item href={"/users/" + this.state.user.id + "/stores"}>Dashboard</NavDropdown.Item>
                             <NavDropdown.Item href="/storeCalendar">Calendar</NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="/store/signup">Create Store</NavDropdown.Item>
                           </NavDropdown>
-                          <Link to={"/users/edit/" + this.state.user.id} className="nav-link">Edit Profile</Link>
+                          <NavDropdown title="Profile" id="basic-nav-dropdown">
+                          <NavDropdown.Item href={"/users/" + this.state.user.id}>View</NavDropdown.Item>
+                            <NavDropdown.Item href={"/users/edit/" + this.state.user.id}>Edit</NavDropdown.Item>
+                          </NavDropdown>
                           <Link to="/logout" className="nav-link">Logout</Link>
                        </Nav>
     }

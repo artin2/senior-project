@@ -1,6 +1,5 @@
 import React from 'react';
 import '../../App.css';
-
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -11,7 +10,6 @@ import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPho
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
-
 
 class StoreEditForm extends React.Component {
   constructor(props) {
@@ -32,6 +30,7 @@ class StoreEditForm extends React.Component {
       selectedOption: null
     };
     
+    // options for the categories field
     this.options = [
       { value: 'nails', label: 'Nails' },
       { value: 'hair', label: 'Hair' },
@@ -71,40 +70,59 @@ class StoreEditForm extends React.Component {
       .required("Category is required")
       .nullable()
     });
+
+    this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
+  }
+
+  // redirect to the store display page and pass the new store data
+  triggerStoreDisplay(returnedStore) {
+    this.props.history.push({
+      pathname: '/stores/' + this.props.match.params.store_id,
+      state: {
+        store: returnedStore
+      }
+    })
   }
 
   componentDidMount() {
-    fetch('http://localhost:8081/stores/' + this.props.match.params.id , {
-      method: "GET",
-      headers: {
-          'Content-type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    .then(function(response){
-      console.log(response)
-      if(response.status!==200){
-        // should throw an error here
-        console.log("Error!", response.status)
-        // throw new Error(response.status)
-        window.location.href='/'
-      }
-      else{
-        return response.json();
-      }
-    })
-    .then(data => {
-      console.log("Retrieve store data successfully!", data)
-      let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+    // if we were given the existing data from calling component use that, else fetch
+    if(this.props.location.state && this.props.location.state.store){
+      let convertedCategory = this.props.location.state.store.category.map((str) => ({ value: str.toLowerCase(), label: str }));
       this.setState({
-        store: data,
+        store: this.props.location.state.store,
         selectedOption: convertedCategory
       })
-
-      console.log(this.state)
-    });
+    }
+    else{
+      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id , {
+        method: "GET",
+        headers: {
+            'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(function(response){
+        console.log(response)
+        if(response.status!==200){
+          // should throw an error here
+          console.log("Error!", response.status)
+          // throw new Error(response.status)
+          // window.location.href='/'
+        }
+        else{
+          return response.json();
+        }
+      })
+      .then(data => {
+        console.log("Store data on mount:", data)
+        let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+        this.setState({
+          store: data,
+          selectedOption: convertedCategory
+        })
+      });
+    }
   }
-
 
   render() {
     return (
@@ -131,12 +149,15 @@ class StoreEditForm extends React.Component {
                 values.category = values.category.map(function(val){ 
                   return val.label; 
                 })
-                console.log(values.category)
+
+                let store_id = this.props.match.params.store_id
+                let triggerStoreDisplay = this.triggerStoreDisplay
+
                 values.services = this.state.store.services
                 values.owners = this.state.store.owners
                 values.pictures = this.state.store.pictures
-                values.id = this.state.store.id
-                fetch('http://localhost:8081/stores/edit/' + this.state.store.id , {
+                values.id = store_id
+                fetch('http://localhost:8081/stores/edit/' + store_id , {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json'
@@ -152,9 +173,13 @@ class StoreEditForm extends React.Component {
                   else{
                     // redirect to home page signed in
                     console.log("Successful edit!", response.status)
-                    window.location.href='/stores/' + values.id
+                    return response.json()
                   }
                 })
+                .then(data => {
+                  console.log("Store data updated:", data)
+                  triggerStoreDisplay(data)
+                });
               }}
             >
             {( {values,

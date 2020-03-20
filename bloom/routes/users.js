@@ -10,15 +10,18 @@ async function login(req, res) {
     db.client.connect(function(err) {
       db.client.query(query, values,
         async (err, result) => {
-          if (result) {
+          if (result && result.rows.length == 1) {
             try {
               let passwordMatch = await auth.verifyHash(result.rows[0]["password"], req.body.password);
 
               if(passwordMatch) {
-
-                await auth.generateToken(res, result.rows[0]);
-                // res.send("SUCCESS");
-                helper.querySuccess(res, {status: "Success Signing In", email: req.body.email});
+                try {
+                  await auth.generateToken(res, result.rows[0]);
+                  helper.querySuccess(res, { email: req.body.email });
+                } 
+                catch (err) {
+                  helper.queryError(res, err);
+                }
               }
               else {
                 res.send({status: "Password Provided is Incorrect"});
@@ -31,12 +34,11 @@ async function login(req, res) {
             }
           }
           else{
-            console.log("We should handle this case...")
+            helper.queryError(res, new Error("Could not find user!"));
           }
 
           if (err) {
             helper.queryError(res, err);
-
           }
         }
       );
@@ -57,29 +59,40 @@ async function signup(req, res) {
     let timestamp = helper.getFormattedDate();
     let hash;
 
+    // try to generate password hash
     try {
       hash = await auth.generateHash(req.body.password);
     } catch (err) {
       console.log("Couldn't Create Password Hash");
     }
-
-    let query = 'INSERT INTO users(email, first_name, last_name, password, role, created_at, phone) VALUES ($1, $2, $3, $4, $5, $6, $7);'
+    let query = 'INSERT INTO users(email, first_name, last_name, password, role, created_at, phone) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;'
     let values = [req.body.email, req.body.first_name, req.body.last_name, hash, req.body.role, timestamp, req.body.phone]
 
     db.client.connect(function(err) {
+      // try to add user to user table
       db.client.query(query, values,
-        (err, result) => {
-        // console.log(res);
-          if (result) {
-            helper.querySuccess(res, {status: "Success Signing Up", email: req.body.email, first_name: req.body.first_name, last_name: req.body.last_name});
-          }
-
+        async (err, result) => {
           if (err) {
             helper.queryError(res, err);
           }
-
-          // if (fields) console.log(fields);
-      });
+          
+          // if we were able to add the user successfuly 
+          if (result && result.rows.length == 1) {
+            try {
+              // for some reason the cookie is not being attatched to the response...
+              // cookie is successfuly generated for sure tho..
+              await auth.generateToken(res, result.rows[0]);
+              helper.querySuccess(res, result.rows[0]);
+            } 
+            catch (err) {
+              helper.queryError(res, err);
+            }
+          }
+          else{
+            helper.queryError(res, new Error("Could not create user!"));
+          }
+        }
+      );
       if (err) {
         helper.dbConnError(res, err);
       }
@@ -92,9 +105,7 @@ async function signup(req, res) {
 }
 
 async function edit(req, res, next) {
-  //verify user cookie -- or header??
   try{
-    // not sure if we are doing this correctly...
     await auth.verifyToken(req, res, next);
     // should fix this later so it only changes values that did change
     try {
@@ -108,15 +119,22 @@ async function edit(req, res, next) {
     let values = [req.body.first_name, req.body.last_name, req.body.phone, hash, req.body.id]
 
     db.client.connect(function(err) {
+      // query to update the user
       db.client.query(query, values,
         async (err, result) => {
-          if (result) {
+          if (err) {
+            helper.queryError(res, err);
+          }
+
+          // if we were able to successfuly update the user
+          if (result && result.rows.length) {
             let user = result.rows[0]
             delete user.password
             const expiration = process.env.DB_ENV === 'dev' ? 1 : 7;
             const date = new Date();
             date.setDate(date.getDate() + expiration)
 
+            // update the cookie for this user
             res.cookie('user', user, {
               expires: date,
               secure: false, // set to true if your using https
@@ -125,11 +143,8 @@ async function edit(req, res, next) {
             })
             helper.querySuccess(res, user);
           }
-
-          if (err) {
-            helper.queryError(res, err);
-          }
-      });
+        }
+      );
       if (err) {
         helper.dbConnError(res, err);
       }
@@ -139,7 +154,6 @@ async function edit(req, res, next) {
     helper.authError(res, err);
   }
 };
-
 
 module.exports = {
   login: login,

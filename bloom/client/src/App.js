@@ -21,13 +21,31 @@ import redirectWithAuth from './components/redirectWithAuth';
 import EditProfileForm from './components/User/EditProfileForm';
 import Cookies from 'js-cookie';
 import Profile from './components/User/Profile';
-import StoreDashboard from './components/Store/StoreDashboard';
+import UserStoresDashboard from './components/Store/UserStoresDashboard';
 import AddWorkerForm from './components/Worker/AddWorkerForm';
 import WorkerDashboard from './components/Worker/WorkerDashboard';
 import WorkerDisplay from './components/Worker/WorkerDisplay';
 import WorkerEditForm from './components/Worker/WorkerEditForm';
 
 function App() {
+  // general note: anyplace where we can pass information and avoid an extra call to get that information, we should
+  // example of how to pass information: 
+  // Say we want to call stores/1/workers/1
+  // this says lets get worker 1 from store 1, so we need the workers info
+  // odds are we are calling this from the store dashboard where we have the worker entry, so we can pass
+  // it to the worker display component by calling the following function on click 
+
+  // triggerWorkerDisplay(id) {
+  //   this.props.history.push({
+  //     pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + id
+  //     state: this.state.worker
+  //   })
+  // }
+
+  // and access it by doing
+  // this.props.location.state.worker
+
+
   function handleLogout() {
     Cookies.remove("token");
     Cookies.remove("user");
@@ -48,19 +66,19 @@ function App() {
             <Route exact path="/login" component={redirectWithAuth(LoginForm)} />
             <Route exact path="/logout" component={handleLogout}/>
             <Route exact path="/signup" component={SignupForm} />
-            <Route path="/users/edit/:id" component={redirectWithoutAuth(EditProfileForm)}/>
-            <Route path="/users/:id" component={redirectWithoutAuth(Profile)}/>
+            <Route path="/users/edit/:user_id" component={redirectWithoutAuth(EditProfileForm)}/>
+            <Route path="/users/:user_id/stores" component={redirectWithoutAuth(UserStoresDashboard)}/>
+            <Route path="/users/:user_id" component={redirectWithoutAuth(Profile)}/>
 
             <Route exact path="/storeCalendar" component={redirectWithoutAuth(Calendar)} />
-            <Route path="/book/:id" component={ReservationPage} />
+            <Route path="/book/:store_id" component={ReservationPage} />
             <Route exact path="/store/signup" component={redirectWithoutAuth(StoreSignupForm)} />
-            <Route path="/stores/edit/:id" component={redirectWithoutAuth(StoreEditForm)}/>
-            <Route path="/stores/addWorker/:id" component={redirectWithoutAuth(AddWorkerForm)}/>
-            <Route path="/stores/:id/workers/:id/edit" component={redirectWithoutAuth(WorkerEditForm)}/>
-            <Route path="/stores/:id/workers/:id" component={redirectWithoutAuth(WorkerDisplay)}/>
-            <Route path="/stores/:id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
-            <Route path="/stores/:id" component={StoreDisplay}/>
-            <Route path="/storeDashboard" component={redirectWithoutAuth(StoreDashboard)}/>
+            <Route path="/stores/edit/:store_id" component={redirectWithoutAuth(StoreEditForm)}/>
+            <Route path="/stores/addWorker/:store_id" component={redirectWithoutAuth(AddWorkerForm)}/>
+            <Route path="/stores/:store_id/workers/:worker_id/edit" component={redirectWithoutAuth(WorkerEditForm)}/>
+            <Route path="/stores/:store_id/workers/:worker_id" component={redirectWithoutAuth(WorkerDisplay)}/>
+            <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
+            <Route path="/stores/:store_id" component={StoreDisplay}/>
             
           </Switch>
         </div>

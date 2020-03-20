@@ -1,12 +1,8 @@
 import React from 'react';
-// import Container from 'react-bootstrap/Container'
 import './StaticPage.css';
+// import Container from 'react-bootstrap/Container'
 
 class StaticPage extends React.Component {
-  // constructor(props) {
-  //   super(props);
-  // }
-
   render() {
     return (
       <div className="backStuff">

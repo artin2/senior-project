@@ -1,6 +1,5 @@
 import React from 'react';
 import '../../App.css';
-
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -53,7 +52,7 @@ class SignupForm extends React.Component {
                 first_name: '',
                 last_name: '',
                 email: '',
-                role: '0',
+                role: '',
                 phone: '',
                 password: '',
                 password_confirmation: ''
@@ -75,6 +74,7 @@ class SignupForm extends React.Component {
                   else{
                     // redirect to home page signed in
                     console.log("Successful signup!", response.status)
+                    window.location.href='/'
                   }
                 })
               }}

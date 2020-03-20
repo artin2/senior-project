@@ -22,6 +22,7 @@ function authError(res, err) {
 }
 
 function querySuccess(res, msg) {
+  console.log(msg)
   res.status(200);
   res.json(msg);
   // res.send(msg);

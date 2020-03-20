@@ -1,6 +1,5 @@
 import React from 'react';
 import '../../App.css';
-
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -9,7 +8,6 @@ import Button from 'react-bootstrap/Button'
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
-
 
 class WorkerEditForm extends React.Component {
   constructor(props) {
@@ -37,34 +35,53 @@ class WorkerEditForm extends React.Component {
       .required("Service is required")
       // .nullable()
     });
+
+    this.triggerWorkerDisplay = this.triggerWorkerDisplay.bind(this);
+  }
+
+  // redirect to the store display page and pass the new store data
+  triggerWorkerDisplay(returnedWorker) {
+    this.props.history.push({
+      pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id,
+      state: {
+        worker: returnedWorker
+      }
+    })
   }
 
   componentDidMount() {
-    fetch('http://localhost:8081/stores/' + this.props.location.state.store_id + '/workers/' + this.props.location.state.worker_id, {
-      method: "GET",
-      headers: {
-          'Content-type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    .then(function(response){
-      console.log(response)
-      if(response.status!==200){
-        // should throw an error here
-        console.log("Error!", response.status)
-        // throw new Error(response.status)
-        // window.location.href='/'
-      }
-      else{
-        return response.json();
-      }
-    })
-    .then(data => {
-      console.log("Retrieve worker data successfully!", data)
+    if(this.props.location.state && this.props.location.state.worker){
       this.setState({
-        worker: data
+        worker: this.props.location.state.worker
       })
-    });
+    }
+    else{
+      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id, {
+        method: "GET",
+        headers: {
+            'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(function(response){
+        console.log(response)
+        if(response.status!==200){
+          // should throw an error here
+          console.log("Error!", response.status)
+          // throw new Error(response.status)
+          // window.location.href='/'
+        }
+        else{
+          return response.json();
+        }
+      })
+      .then(data => {
+        console.log("Retrieve worker data successfully!", data)
+        this.setState({
+          worker: data
+        })
+      });
+    }
   }
 
   render() {
@@ -82,8 +99,10 @@ class WorkerEditForm extends React.Component {
                 values.services = values.services.map(function(val){ 
                   return val.value; 
                 })
-                let store_id = this.props.location.state.store_id
-                let worker_id = this.props.location.state.worker_id
+                let store_id = this.props.match.params.store_id
+                let worker_id = this.props.match.params.worker_id
+                let triggerWorkerDisplay = this.triggerWorkerDisplay;
+
                 fetch('http://localhost:8081/stores/' + store_id + '/workers/' + worker_id, {
                   method: "POST",
                   headers: {
@@ -100,12 +119,13 @@ class WorkerEditForm extends React.Component {
                   else{
                     // redirect to worker page
                     console.log("Successful update of worker!", response.status)
-                    // window.location.href='/stores/' + store_id + '/workers/' + worker_id
-                    // redirect not working, need to send store id and worker id to component
-                    // this is a general problem that we need to fix...
-                    // maybe set a bunch of cookies instead?
+                    return response.json()
                   }
                 })
+                .then(data => {
+                  console.log("Worker data on return:", data)
+                  triggerWorkerDisplay()
+                });
               }}
             >
             {( {values,

@@ -1,6 +1,5 @@
 import React from 'react';
 import '../../App.css';
-
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -13,15 +12,14 @@ import * as Yup from 'yup';
 import Select from 'react-select';
 import Cookies from 'js-cookie';
 
-
 class StoreSignupForm extends React.Component {
   constructor(props) {
     super(props);
     
+    // options for store categories
     this.options = [
       { value: 'nails', label: 'Nails' },
       { value: 'hair', label: 'Hair' },
-
     ];
 
     // RegEx for phone number validation
@@ -58,8 +56,19 @@ class StoreSignupForm extends React.Component {
       .required("Category is required")
       .nullable()
     });
+
+    this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
   }
 
+  // redirect to the store display page and pass the new store data
+  triggerStoreDisplay(returnedStore) {
+    this.props.history.push({
+      pathname: '/stores/' + returnedStore.id,
+      state: {
+        store: returnedStore
+      }
+    })
+  }
 
   render() {
     return (
@@ -76,7 +85,7 @@ class StoreSignupForm extends React.Component {
                 state: '',
                 zipcode: '',
                 category: [],
-                owner_id: 0
+                owner_id: ""
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
@@ -90,6 +99,9 @@ class StoreSignupForm extends React.Component {
                   "/salon.jpg"
                 ]
                 values.owner_id = JSON.parse(Cookies.get('user').substring(2)).id
+
+                let triggerStoreDisplay = this.triggerStoreDisplay
+
                 fetch('http://localhost:8081/addStore' , {
                   method: "POST",
                   headers: {
@@ -100,18 +112,20 @@ class StoreSignupForm extends React.Component {
                 })
                 .then(function(response){
                   if(response.status!==200){
+                    // should throw an error here
                     console.log("Error!", response.status)
                     // throw new Error(response.status)
+                    // window.location.href='/'
                   }
                   else{
+                    // console.log(response)
                     return response.json();
                   }
                 })
-                .then(function(data){
-                  // redirect to home page signed in
-                  console.log("Successful signup!", data)
-                  window.location.href='/stores/' + data.id 
-                })
+                .then(data => {
+                  console.log("Returned store data:", data)
+                  triggerStoreDisplay(data)
+                });
               }}
             >
             {( {values,

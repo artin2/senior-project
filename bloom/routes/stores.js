@@ -205,7 +205,7 @@ async function editStoreWorker(req, res, next) {
           
           // we were successfuly able to get the store workers
           if (result && result.rows.length == 1) {
-            helper.querySuccess(res, result.rows);
+            helper.querySuccess(res, result.rows[0]);
           }
           else{
             helper.queryError(res, new Error("Could not edit store worker!"));
@@ -402,9 +402,9 @@ async function addWorker(req, res, next) {
                             if (errLast) {
                               helper.queryError(res, errLast);
                             }
-                            // we were able to successfully update the workers in the stores table
+                            // we were able to successfully update the workers in the stores table, return worker entry
                             if (resultLast && resultLast.rows.length == 1) {
-                              helper.querySuccess(res, {email: req.body.email});
+                              helper.querySuccess(res, resultFirst.rows[0]);
                             }
                             else{
                               // there was a problem updating the stores table 

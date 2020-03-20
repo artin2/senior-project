@@ -1,7 +1,6 @@
 import React from 'react';
 import './Marker.css';
 
-
 class Marker extends React.Component {
     constructor(props) {
       super(props);

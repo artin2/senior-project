@@ -1,11 +1,8 @@
-
-
 const argon2 = require('argon2');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
 async function generateSalt() {
-
   try {
     const salt = await crypto.randomBytes(32).toString('base64');
     console.log("Created Salt")
@@ -14,28 +11,20 @@ async function generateSalt() {
   catch(err) {
     console.log(err);
   }
-
 }
 
-
 async function generateHash(pw) {
-
   try {
-
     const salt = await generateSalt();
     const hash = await argon2.hash(pw, salt);
     console.log('Successfully created Argon2 hash:', hash);
     return hash;
-
   }
   catch(err) {
-
     console.log(err);
     return null
   }
 
-
-  //
   // console.log(hash);
   //
   // crypto.randomBytes(32).toString('base64').then(salt => {
@@ -58,13 +47,8 @@ async function generateHash(pw) {
 }
 
 async function verifyHash(dbPw, userPw) {
-
   try {
-
-
-
     const verified = await argon2.verify(dbPw.toString(), userPw.toString());
-
     if(verified) {
       console.log('Successful Password Supplied!');
       return true;
@@ -73,16 +57,12 @@ async function verifyHash(dbPw, userPw) {
       console.log('Invalid Password Supplied!');
       return false;
     }
-
   }
   catch(err) {
-
     console.log('Invalid password supplied!');
     return false;
   };
-
 }
-
 
 const generateToken = (res, user) => {
   let id = user["id"] 
