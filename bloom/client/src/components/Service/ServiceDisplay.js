@@ -3,34 +3,30 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
-class WorkerDisplay extends React.Component {
+class ServiceDisplay extends React.Component {
   constructor(props) {
     super(props);
     this.state ={
-      worker: {
-        id: 0,
-        store_id: 0,
-        services: [],
-        user_id: 0,
-        created_at: "",
-        first_name: [],
-        last_name: ""
-      },
-      serviceMapping: {
-        0: "Brazilian Blowout",
-        1: "Manicure"
+      service: {
+        id: "",
+        name: "",
+        cost: "",
+        workers: [],
+        store_id: "",
+        category: "",
+        description: ""
       }
     }
   }
 
   componentDidMount() {
-    if(this.props.location.state && this.props.location.state.worker){
+    if(this.props.location.state && this.props.location.state.service){
       this.setState({
-        worker: this.props.location.state.worker
+        service: this.props.location.state.service
       })
     }
     else{
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id, {
+      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id, {
         method: "GET",
         headers: {
             'Content-type': 'application/json'
@@ -49,9 +45,9 @@ class WorkerDisplay extends React.Component {
         }
       })
       .then(data => {
-        console.log("Retrieved worker data successfully!", data)
+        console.log("Retrieved service data successfully!", data)
         this.setState({
-          worker: data
+          service: data
         })
       });
     }
@@ -62,13 +58,8 @@ class WorkerDisplay extends React.Component {
       <Container fluid>
         <Row className="justify-content-center">
           <Col>
-            <h1>{this.state.worker.first_name}</h1>
-            <p>{this.state.worker.last_name}</p>
-            <ul>
-                {this.state.worker.services.map((service, index) => (
-                  <li key={"cat-" + index}>{this.state.serviceMapping[service]}</li>
-                ))}
-              </ul>
+            <h1>{this.state.service.name}</h1>
+            <p>{this.state.service.description}</p>
           </Col>
         </Row>
       </Container>
@@ -76,4 +67,4 @@ class WorkerDisplay extends React.Component {
   }
 }
 
-export default WorkerDisplay;
+export default ServiceDisplay;

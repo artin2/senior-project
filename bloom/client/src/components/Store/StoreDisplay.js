@@ -94,6 +94,11 @@ class StoreDisplay extends React.Component {
               {editButton}
               <h1>{this.state.store.name}</h1>
               <p>{this.state.store.description}</p>
+              <ul>
+                {this.state.store.category.map((cat, index) => (
+                  <li key={"cat-" + index}>{cat}</li>
+                ))}
+              </ul>
             </Col>
             <Col xs={8} sm={7} md={6} lg={5}>
               <LargeCarousel pictures={this.state.store.pictures}/>

@@ -27,6 +27,9 @@ import WorkerDashboard from './components/Worker/WorkerDashboard';
 import WorkerDisplay from './components/Worker/WorkerDisplay';
 import WorkerEditForm from './components/Worker/WorkerEditForm';
 import AddServiceForm from './components/Service/AddServiceForm';
+import ServiceDashboard from './components/Service/ServiceDashboard';
+import ServiceDisplay from './components/Service/ServiceDisplay';
+import ServiceEditForm from './components/Service/ServiceEditForm';
 
 function App() {
   // general note: anyplace where we can pass information and avoid an extra call to get that information, we should
@@ -75,8 +78,13 @@ function App() {
             <Route path="/book/:store_id" component={ReservationPage} />
             <Route exact path="/store/signup" component={redirectWithoutAuth(StoreSignupForm)} />
             <Route path="/stores/edit/:store_id" component={redirectWithoutAuth(StoreEditForm)}/>
-            <Route path="/stores/addWorker/:store_id" component={redirectWithoutAuth(AddWorkerForm)}/>
+           
             <Route path="/stores/addService/:store_id" component={redirectWithoutAuth(AddServiceForm)}/>
+            <Route path="/stores/:store_id/services/:service_id/edit" component={redirectWithoutAuth(ServiceEditForm)}/>
+            <Route path="/stores/:store_id/services/:service_id" component={redirectWithoutAuth(ServiceDisplay)}/>
+            <Route path="/stores/:store_id/services" component={redirectWithoutAuth(ServiceDashboard)}/>
+
+            <Route path="/stores/addWorker/:store_id" component={redirectWithoutAuth(AddWorkerForm)}/>
             <Route path="/stores/:store_id/workers/:worker_id/edit" component={redirectWithoutAuth(WorkerEditForm)}/>
             <Route path="/stores/:store_id/workers/:worker_id" component={redirectWithoutAuth(WorkerDisplay)}/>
             <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>

@@ -10,23 +10,24 @@ import { FaDollarSign, FaHandshake, FaHourglassHalf, FaPen } from 'react-icons/f
 import { Formik } from 'formik';
 import Select from 'react-select';
 import * as Yup from 'yup';
-
-class AddServiceForm extends React.Component {
+class ServiceEditForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      cost: '',
-      duration: '',
-      description: '',
-      pictures: [],
-      workers: [],
-      category: [],
-      store_id: '',
+      service: {
+        id: "",
+        name: "",
+        cost: "",
+        workers: [],
+        store_id: "",
+        category: "",
+        description: ""
+      },
       categoryOptions: [
         { value: 'nails', label: 'Nails' },
         { value: 'hair', label: 'Hair' }
       ],
+      convertedCategory: [],
       workerOptions: [],
       selectedOption: null
     };
@@ -56,77 +57,124 @@ class AddServiceForm extends React.Component {
       .nullable()
     });
 
-    this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
+    this.triggerServiceDisplay = this.triggerServiceDisplay.bind(this);
+  }
+
+  // redirect to the service display page and pass the new store data
+  triggerServiceDisplay(returnedService) {
+    this.props.history.push({
+      pathname: '/stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id,
+      state: {
+        service: returnedService
+      }
+    })
   }
 
   componentDidMount() {
-    // need to get store category, fetch?
-    fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/workers" , {
-      method: "GET",
-      headers: {
-          'Content-type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    .then(function(response){
-      console.log(response)
-      if(response.status!==200){
-        // should throw an error here
-        console.log("Error!", response.status)
-        // throw new Error(response.status)
-        // window.location.href='/'
-      }
-      else{
-        return response.json();
-      }
-    })
-    .then(data => {
-      console.log("Limited store data from server:", data)
-      let convertedWorkers = data.map((worker) => ({ value: worker.id, label: worker.first_name + " " + worker.last_name }));
+    if(this.props.location.state && this.props.location.state.service){
+      let convertedCategoryData = this.props.location.state.service.category.map((str) => ({ value: str.toLowerCase(), label: str }));
       this.setState({
-        workerOptions: convertedWorkers
+        service: this.props.location.state.service,
+        convertedCategory: convertedCategoryData
       })
-    });
+    }
+    else{
+      // first we fetch the service itself
+      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id, {
+        method: "GET",
+        headers: {
+            'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(function(response){
+        console.log(response)
+        if(response.status!==200){
+          // should throw an error here
+          console.log("Error!", response.status)
+          // throw new Error(response.status)
+          // window.location.href='/'
+        }
+        else{
+          return response.json();
+        }
+      })
+      .then(data => {
+        console.log("Retrieve service data successfully!", data)
+        let convertedCategoryData = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+        this.setState({
+          service: data,
+          convertedCategory: convertedCategoryData
+        })
+      });
+
+      // // then we get the worker data to display for user
+      // // need to get store category, fetch?
+      // // refactor later to make it a get request
+      // // maybe have to refactor the whole table to keep track of names...?
+      // fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/workers" , {
+      //   method: "POST",
+      //   headers: {
+      //       'Content-type': 'application/json'
+      //   },
+      //   credentials: 'include',
+      //   body: JSON.stringify(values)
+      // })
+      // .then(function(response){
+      //   console.log(response)
+      //   if(response.status!==200){
+      //     // should throw an error here
+      //     console.log("Error!", response.status)
+      //     // throw new Error(response.status)
+      //     // window.location.href='/'
+      //   }
+      //   else{
+      //     return response.json();
+      //   }
+      // })
+      // .then(data => {
+      //   console.log("Limited store data from server:", data)
+      //   let convertedWorkers = data.map((worker) => ({ value: worker.id, label: worker.first_name + " " + worker.last_name }));
+      //   this.setState({
+      //     workerOptions: convertedWorkers
+      //   })
+      // });
+    }
   }
 
-  // redirect to the worker display page and pass the new worker data
-  triggerStoreDisplay() {
-    this.props.history.push({
-      pathname: '/stores/' + this.props.match.params.store_id
-    })
-  }
-    
   render() {
     return (
       <Container fluid>
         <Row className="justify-content-center">
           <Col xs={8} sm={7} md={6} lg={5}>
-            <Formik
+          <Formik
               enableReinitialize
               initialValues={{
-                name: '',
-                cost: '',
-                duration: '',
-                description: '',
-                pictures: [],
-                workers: [],
-                category: [],
+                name: this.state.service.name,
+                cost: this.state.service.cost,
+                duration: this.state.service.duration,
+                description: this.state.service.description,
+                pictures: this.state.service.pictures,
+                workers: this.state.service.workers,
+                category: this.state.service.category,
                 store_id: this.props.match.params.store_id
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
                 let store_id = this.props.match.params.store_id
-                let triggerStoreDisplay = this.triggerStoreDisplay
+                let service_id = this.props.match.params.service_id
+                let triggerServiceDisplay = this.triggerServiceDisplay
 
                 values.category = values.category.map(function(val){ 
                   return val.label; 
                 })
 
-                values.workers = values.workers.map(function(val){ 
-                  return val.value; 
-                })
+                // need to figure out this...
+                // values.workers = values.workers.map(function(val){ 
+                //   return val.value; 
+                // })
 
-                fetch('http://localhost:8081/stores/addService/' + store_id, {
+                fetch('http://localhost:8081/stores/' + store_id + "/services/" + service_id, {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json'
@@ -147,7 +195,7 @@ class AddServiceForm extends React.Component {
                 .then(function(data){
                   // redirect to home page signed in
                   console.log("Service data returned:", data)
-                  triggerStoreDisplay()
+                  triggerServiceDisplay()
                 })
               }}
             >
@@ -159,7 +207,7 @@ class AddServiceForm extends React.Component {
                 handleSubmit,
                 setFieldValue}) => (
               <Form className="formBody rounded">
-                <h3>Add Service</h3>
+                <h3>Edit Service</h3>
 
                 <Form.Group controlId="formService">
                   <InputGroup>
@@ -244,7 +292,7 @@ class AddServiceForm extends React.Component {
                   ): null}
                 </Form.Group>
 
-                <Form.Group controlId="formWorkers">
+                {/* <Form.Group controlId="formWorkers">
                   <Select
                     value={values.workers}
                     onChange={option => setFieldValue("workers", option)}
@@ -257,7 +305,7 @@ class AddServiceForm extends React.Component {
                   {touched.workers && errors.workers ? (
                     <div className="error-message">{errors.workers}</div>
                   ): null}
-                </Form.Group>
+                </Form.Group> */}
 
                 <Form.Group controlId="formCategory">
                   <Select
@@ -285,4 +333,4 @@ class AddServiceForm extends React.Component {
   }
 }
 
-export default AddServiceForm;
+export default ServiceEditForm;

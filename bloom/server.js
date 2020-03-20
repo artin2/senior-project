@@ -160,36 +160,51 @@ app.get('/checkToken', withAuth, function(req, res) {
 
 //**** STORE ROUTES ****//
 
-app.get('/stores/users/:id', withAuth, async (req, res, next) => {
+app.get('/stores/users/:store_id', withAuth, async (req, res, next) => {
   await stores.getUserStores(req, res, next);
 });
 
 //should this be a patch?
-app.post('/stores/edit/:id', withAuth, async (req, res, next) => {
+app.post('/stores/edit/:store_id', withAuth, async (req, res, next) => {
   await stores.editStore(req, res, next);
 });
 
-app.post('/stores/addWorker/:id', withAuth, async (req, res, next) => {
-  await stores.addWorker(req, res, next);
-});
-
-app.post('/stores/addService/:id', withAuth, async (req, res, next) => {
+// store services 
+app.post('/stores/addService/:store_id', withAuth, async (req, res, next) => {
   await stores.addService(req, res, next);
 });
 
-app.post('/stores/:store_id/workers/:worker_id', withAuth, async (req, res, next) => {
-  await stores.editStoreWorker(req, res, next);
+app.post('/stores/:store_id/services/:item_id', withAuth, async (req, res, next) => {
+  await stores.editStoreService(req, res, next);
 });
 
-app.get('/stores/:store_id/workers/:worker_id', withAuth, async (req, res, next) => {
-  await stores.getStoreWorker(req, res, next);
+app.get('/stores/:store_id/services/:item_id', withAuth, async (req, res, next) => {
+  await stores.getStoreItem(req, res, next, "services");
 });
 
-app.get('/stores/:id/workers', withAuth, async (req, res, next) => {
-  await stores.getStoreWorkers(req, res, next);
+app.get('/stores/:store_id/services', withAuth, async (req, res, next) => {
+  await stores.getStoreItems(req, res, next, "services");
 });
 
-app.get('/stores/:id', withAuth, async (req, res, next) => {
+// store workers
+app.post('/stores/addWorker/:store_id', withAuth, async (req, res, next) => {
+  await stores.addWorker(req, res, next);
+});
+
+app.post('/stores/:store_id/workers/:item_id', withAuth, async (req, res, next) => {
+  await stores.editWorker(req, res, next);
+});
+
+app.get('/stores/:store_id/workers/:item_id', withAuth, async (req, res, next) => {
+  await stores.getStoreItem(req, res, next, "workers");
+});
+
+app.get('/stores/:store_id/workers', withAuth, async (req, res, next) => {
+  await stores.getStoreItems(req, res, next, "workers");
+});
+
+//stores
+app.get('/stores/:store_id', withAuth, async (req, res, next) => {
   await stores.getStore(req, res, next);
 });
 

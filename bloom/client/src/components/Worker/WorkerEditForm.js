@@ -19,15 +19,18 @@ class WorkerEditForm extends React.Component {
         services: [],
         user_id: 0,
         created_at: "",
-        first_name: [],
+        first_name: "",
         last_name: ""
+      },
+      options: [
+        { value: 0, label: 'Brazilian Blowout' },
+        { value: 1, label: 'Manicure' },
+      ],
+      serviceMapping: {
+        0: "Brazilian Blowout",
+        1: "Manicure"
       }
     };
-
-    this.options = [
-      { value: 0, label: 'Brazilian Blowout' },
-      { value: 1, label: 'Manicure' },
-    ];
 
     // Schema for yup
     this.yupValidationSchema = Yup.object().shape({
@@ -51,8 +54,11 @@ class WorkerEditForm extends React.Component {
 
   componentDidMount() {
     if(this.props.location.state && this.props.location.state.worker){
+      let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
+      console.log("HERERERE", convertedServices)
       this.setState({
-        worker: this.props.location.state.worker
+        worker: this.props.location.state.worker,
+        selectedOption: convertedServices
       })
     }
     else{
@@ -76,9 +82,12 @@ class WorkerEditForm extends React.Component {
         }
       })
       .then(data => {
-        console.log("Retrieve worker data successfully!", data)
+        console.log("Retrieve worker data successfully!", data.services)
+        let convertedServices = data.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
+        console.log("THERERER", convertedServices)
         this.setState({
-          worker: data
+          worker: data,
+          selectedOption: convertedServices
         })
       });
     }
@@ -92,13 +101,20 @@ class WorkerEditForm extends React.Component {
           <Formik 
               enableReinitialize
               initialValues={{
-                services: null
+                services: this.state.selectedOption,
+                id: this.state.worker.id,
+                store_id: this.state.worker.store_id,
+                user_id: this.state.worker.user_id,
+                created_at: this.state.worker.created_at,
+                first_name: this.state.worker.first_name,
+                last_name: this.state.worker.last_name
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
                 values.services = values.services.map(function(val){ 
                   return val.value; 
                 })
+                
                 let store_id = this.props.match.params.store_id
                 let worker_id = this.props.match.params.worker_id
                 let triggerWorkerDisplay = this.triggerWorkerDisplay;
@@ -143,7 +159,7 @@ class WorkerEditForm extends React.Component {
                     value={values.services}
                     onChange={option => setFieldValue("services", option)}
                     name="services"
-                    options={this.options}
+                    options={this.state.options}
                     isMulti={true}
                     placeholder={"Services"}
                     className={touched.services && errors.services ? "error" : null}

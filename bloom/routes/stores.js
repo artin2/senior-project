@@ -12,7 +12,7 @@ const geocoder = NodeGeocoder(options);
 async function getStore(req, res, next) {
   try{
     await auth.verifyToken(req, res, next);
-    let storeId = req.params.id
+    let storeId = req.params.store_id
     let query = 'SELECT * FROM stores WHERE id=' + storeId
 
     db.client.connect(function(err) {
@@ -112,115 +112,6 @@ async function getStores(req, res, next) {
   }
 };
 
-async function getStoreWorkers(req, res, next) {
-  try{
-    await auth.verifyToken(req, res, next);
-
-    // query for stores within the given distance, and that have any of the categories checked by the client
-    let query = `SELECT *
-                FROM workers
-                WHERE store_id = $1`
-
-    let values = [req.params.id]
-
-    db.client.connect(function(err) {
-      // try to get all stores registered to this user
-      db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
-          
-          // we were successfuly able to get the store workers
-          if (result && result.rows.length > 0) {
-            helper.querySuccess(res, result.rows);
-          }
-          else{
-            helper.queryError(res, new Error("No store workers!"));
-          }
-      });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
-  }
-  catch(err){
-    helper.authError(res, err);
-  }
-};
-
-async function getStoreWorker(req, res, next) {
-  try{
-    await auth.verifyToken(req, res, next);
-
-    // query for stores within the given distance, and that have any of the categories checked by the client
-    let query = `SELECT *
-                FROM workers
-                WHERE id = $1`
-
-    let values = [req.params.worker_id]
-    console.log(values)
-
-    db.client.connect(function(err) {
-      // try to get all stores registered to this user
-      db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
-          
-          // we were successfuly able to get the store workers
-          if (result && result.rows.length == 1) {
-            helper.querySuccess(res, result.rows);
-          }
-          else{
-            helper.queryError(res, new Error("Could not find store worker!"));
-          }
-      });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
-  }
-  catch(err){
-    helper.authError(res, err);
-  }
-};
-
-async function editStoreWorker(req, res, next) {
-  try{
-    await auth.verifyToken(req, res, next);
-
-    // query for stores within the given distance, and that have any of the categories checked by the client
-    let query = 'UPDATE workers SET services=$1 WHERE id=$2 RETURNING *'
-    let values = [req.body.services, req.params.worker_id]
-
-    db.client.connect(function(err) {
-      // try to get all stores registered to this user
-      db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
-          
-          // we were successfuly able to get the store workers
-          if (result && result.rows.length == 1) {
-            helper.querySuccess(res, result.rows[0]);
-          }
-          else{
-            helper.queryError(res, new Error("Could not edit store worker!"));
-          }
-      });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
-  }
-  catch(err){
-    helper.authError(res, err);
-  }
-};
-
 async function getUserStores(req, res, next) {
   try{
     await auth.verifyToken(req, res, next);
@@ -228,7 +119,7 @@ async function getUserStores(req, res, next) {
     // query for stores within the given distance, and that have any of the categories checked by the client
     let query = `SELECT *
                 FROM stores
-                WHERE ` + req.params.id + ` = ANY(owners)`
+                WHERE ` + req.params.store_id + ` = ANY(owners)`
 
     db.client.connect(function(err) {
       // try to get all stores registered to this user
@@ -348,6 +239,7 @@ async function addStore(req, res, next) {
   }
 };
 
+// Store worker functions 
 
 // NOTE: with nested queries like this, we need to revert successful queries that were made if the inner most one
 // fails...
@@ -370,7 +262,7 @@ async function addWorker(req, res, next) {
           if (result && result.rows.length == 1) {
             let timestamp = helper.getFormattedDate();
             query = 'INSERT INTO workers(first_name, last_name, services, store_id, user_id, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;'
-            let values = [result.rows[0].first_name, result.rows[0].last_name, [0], req.params.id, result.rows[0].id, timestamp]
+            let values = [result.rows[0].first_name, result.rows[0].last_name, [0], req.params.store_id, result.rows[0].id, timestamp]
             
             // try to insert the worker in the workers table
             db.client.query(query, values,
@@ -396,7 +288,7 @@ async function addWorker(req, res, next) {
                         // now we have to update the user row to make their role worker
                         // note, may want to update query to this...
                         query = 'UPDATE stores SET workers = array_append(workers, $1) WHERE id=$2 RETURNING *'
-                        values = [resultFirst.rows[0].id, req.params.id]
+                        values = [resultFirst.rows[0].id, req.params.store_id]
                         db.client.query(query, values,
                           async (errLast, resultLast) => {
                             if (errLast) {
@@ -443,6 +335,41 @@ async function addWorker(req, res, next) {
   }
 };
 
+async function editWorker(req, res, next) {
+  try{
+    await auth.verifyToken(req, res, next);
+
+    let query = 'UPDATE workers SET first_name=$1, last_name=$2, services=$3 WHERE id=$4 RETURNING *'
+    let values = [req.body.first_name, req.body.last_name, req.body.services, req.params.item_id]
+
+    db.client.connect(function(err) {
+      // update the store worker
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+          
+          // we were successfuly able to update the worker
+          if (result && result.rows.length == 1) {
+            helper.querySuccess(res, result.rows[0]);
+          }
+          else{
+            helper.queryError(res, new Error("Could not edit store worker!"));
+          }
+      });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.authError(res, err);
+  }
+};
+
+// Store service functions
+
 // NOTE: with nested queries like this, we need to revert successful queries that were made if the inner most one
 // fails...
 async function addService(req, res, next) {
@@ -453,17 +380,49 @@ async function addService(req, res, next) {
 
     db.client.connect(function(err) {
       // check to see if the user exists
-      query = 'INSERT INTO services(name, cost, workers, store_id, category, description, pictures, duration) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;'
-      let values = [req.body.name, req.body.cost, req.body.workers, req.body.store_id, req.body.category, req.body.description, req.body.pictures, req.body.duration]
+      let query = 'INSERT INTO services(name, cost, workers, store_id, category, description, pictures, duration) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;'
+      let values = [req.body.name, req.body.cost, req.body.workers, req.params.store_id, req.body.category, req.body.description, req.body.pictures, req.body.duration]
       db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
+        async (errFirst, resultFirst) => {
+          if (errFirst) {
+            helper.queryError(res, errFirst);
           }
 
           // we were able to insert the service
-          if (result && result.rows.length == 1) {
-            helper.querySuccess(res, result.rows[0]);
+          if (resultFirst && resultFirst.rows.length == 1) {
+            // add the service to each workers services array
+            for(var i = 0; i < req.body.workers.length; i++){
+              query = 'UPDATE workers SET services = array_append(services, $1) WHERE id=$2 RETURNING *'
+              values = [resultFirst.rows[0].id, req.body.workers[i]]
+              db.client.query(query, values,
+                async (errSecond, resultSecond) => {
+                  if (errSecond) {
+                    helper.queryError(res, errSecond);
+                  }
+                  // we were not able to update this worker's services
+                  if (!(resultSecond && resultSecond.rows.length == 1)) {
+                    helper.queryError(res, new Error("Could not update Worker's services!"));
+                  }
+                }
+              )
+            }
+
+            query = 'UPDATE stores SET services = array_append(services, $1) WHERE id=$2 RETURNING *'
+            values = [resultFirst.rows[0].id, req.params.store_id]
+            db.client.query(query, values,
+              async (errLast, resultLast) => {
+                if (errLast) {
+                  helper.queryError(res, errLast);
+                }
+                // we were able to successfully update the store's services and are finished update db
+                if (resultLast && resultLast.rows.length == 1){
+                  helper.querySuccess(res, resultFirst.rows[0])
+                }
+                else{
+                  helper.queryError(res, new Error("Could not update Store's services!"));
+                }
+              }
+            )
           }
           else{
             helper.queryError(res, new Error("Could not insert service!"));
@@ -480,15 +439,86 @@ async function addService(req, res, next) {
   }
 };
 
+// Reusable worker/service functions 
+// table is either workers or services
+async function getStoreItems(req, res, next, table) {
+  try{
+    await auth.verifyToken(req, res, next);
+
+    // query for stores within the given distance, and that have any of the categories checked by the client
+    let query = 'SELECT * FROM ' + table + ' WHERE store_id = $1'
+
+    let values = [req.params.store_id]
+
+    db.client.connect(function(err) {
+      // try to get all items registered to this store
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+          
+          // we were successfuly able to get the store items
+          if (result && result.rows.length > 0) {
+            helper.querySuccess(res, result.rows);
+          }
+          else{
+            helper.queryError(res, new Error("No store " + table));
+          }
+      });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.authError(res, err);
+  }
+};
+
+async function getStoreItem(req, res, next, table) {
+  try{
+    await auth.verifyToken(req, res, next);
+
+    // query for store item
+    let query = 'SELECT * FROM ' + table + ' WHERE id = $1'
+    let values = [req.params.item_id]
+
+    db.client.connect(function(err) {
+      // try to get the store item based on id
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+          
+          // we were successfuly able to get the store item
+          if (result && result.rows.length == 1) {
+            helper.querySuccess(res, result.rows[0]);
+          }
+          else{
+            helper.queryError(res, new Error("Could not find store item!"));
+          }
+      });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.authError(res, err);
+  }
+};
+
 module.exports = {
   getStore: getStore,
   editStore: editStore,
   getStores: getStores,
   addStore: addStore,
-  addWorker: addWorker,
   getUserStores: getUserStores,
-  getStoreWorkers: getStoreWorkers,
-  getStoreWorker: getStoreWorker,
-  editStoreWorker: editStoreWorker,
+  addWorker: addWorker,
+  editWorker: editWorker,
+  getStoreItems: getStoreItems,
+  getStoreItem: getStoreItem,
   addService: addService
 };

@@ -66,6 +66,12 @@ class UserStoresDashboard extends React.Component {
     })
   }
 
+  triggerShowServices(id) {
+    this.props.history.push({
+      pathname: '/stores/' + id + '/services'
+    })
+  }
+
   triggerAddService(id) {
     this.props.history.push({
       pathname: '/stores/addService/' + id,
@@ -117,6 +123,7 @@ class UserStoresDashboard extends React.Component {
               <Button onClick={() => this.triggerStoreEdit(store)}>Edit Store</Button>
               <Button onClick={() => this.triggerShowWorkers(store.id)}>Show Workers</Button>
               <Button onClick={() => this.triggerAddWorker(store.id)}>Add Worker</Button>
+              <Button onClick={() => this.triggerShowServices(store.id)}>Show Services</Button>
               <Button onClick={() => this.triggerAddService(store.id)}>Add Service</Button>
               <SearchCard store={store} 
                           carousel={true} 

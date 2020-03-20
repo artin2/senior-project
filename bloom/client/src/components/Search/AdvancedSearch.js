@@ -52,6 +52,7 @@ class AdvancedSearch extends React.Component {
     }
   }
 
+  // CITATION: https://stackoverflow.com/questions/37230555/get-with-query-string-with-fetch-in-react-native
   queryString(query) {
     // get array of key value pairs ([[k1, v1], [k2, v2]])
     const qs = Object.entries(query)
