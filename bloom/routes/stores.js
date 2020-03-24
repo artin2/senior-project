@@ -515,6 +515,40 @@ async function getStoreItem(req, res, next, table) {
   }
 };
 
+async function getWorkersSchedules(req, res, next) {
+  try{
+    await auth.verifyToken(req, res, next);
+
+    // query for store item
+    let query = 'SELECT * FROM schedules WHERE store_id = $1 and day between now() and now() + interval \'1 month\''
+    let values = [req.params.item_id]
+
+    db.client.connect(function(err) {
+      // try to get the store item based on id
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+          
+          // we were successfuly able to get the store item
+          if (result && result.rows.length == 1) {
+            helper.querySuccess(res, result.rows[0]);
+          }
+          else{
+            helper.queryError(res, new Error("Could not find store item!"));
+          }
+      });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.authError(res, err);
+  }
+};
+
 module.exports = {
   getStore: getStore,
   editStore: editStore,
@@ -525,5 +559,6 @@ module.exports = {
   editWorker: editWorker,
   getStoreItems: getStoreItems,
   getStoreItem: getStoreItem,
-  addService: addService
+  addService: addService,
+  getWorkersSchedules: getWorkersSchedules
 };

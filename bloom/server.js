@@ -204,6 +204,10 @@ app.get('/stores/:store_id/workers', withAuth, async (req, res, next) => {
   await stores.getStoreItems(req, res, next, "workers");
 });
 
+app.get('/stores/:store_id/workers/schedules', withAuth, async (req, res, next) => {
+  await stores.getWorkersSchedules(req, res, next);
+});
+
 //stores
 app.get('/stores/:store_id', withAuth, async (req, res, next) => {
   await stores.getStore(req, res, next);

@@ -15,3 +15,16 @@
 .largeMarginBottom {
   margin-bottom: 12rem;
 }
+
+.fullHeight {
+  top: 10px;
+  bottom: 20px;
+  height: 100vh;
+}
+
+.vertical-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70vh;
+}

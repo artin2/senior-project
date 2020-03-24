@@ -24,6 +24,14 @@ class StoreSignupForm extends React.Component {
     this.options = [
       { value: 'nails', label: 'Nails' },
       { value: 'hair', label: 'Hair' },
+      { value: 'makeup', label: 'Makeup' },
+      { value: 'eyelashes', label: 'Eyelashes' },
+      { value: 'eyelash extensions', label: 'Eyelash Extensions'},
+      { value: 'eyebrows', label: 'Eyebrows'},
+      { value: 'facials', label: 'Facials'},
+      { value: 'skincare', label: 'Skin Care'},
+      { value: 'waxing', label: 'Waxing'},
+      { value: 'mens', label: 'Mens Services'}
     ];
 
     // RegEx for phone number validation
