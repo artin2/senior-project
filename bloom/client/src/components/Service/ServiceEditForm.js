@@ -187,18 +187,17 @@ class ServiceEditForm extends React.Component {
                 })
                 .then(function(response){
                   if(response.status!==200){
-                    console.log("Error!", response.status)
-                    // throw new Error(response.status)
+                    store.dispatch(addAlert(response))
                   }
                   else{
-                    console.log("Successfully added service!", response.status)
                     return response.json();
                   }
                 })
                 .then(function(data){
                   // redirect to home page signed in
-                  console.log("Service data returned:", data)
-                  triggerServiceDisplay()
+                  if(data){
+                    triggerServiceDisplay()
+                  }
                 })
               }}
             >

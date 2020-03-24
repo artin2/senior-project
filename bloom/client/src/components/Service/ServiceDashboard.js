@@ -51,7 +51,6 @@ class ServiceDashboard extends React.Component {
     }
     else{
       let itemUrlParsed = window.location.href.split('/').slice(-1)[0]
-      console.log(itemUrlParsed)
       fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/" + itemUrlParsed, {
         method: "GET",
         headers: {
@@ -60,7 +59,6 @@ class ServiceDashboard extends React.Component {
         credentials: 'include'
       })
       .then(function(response){
-        console.log(response)
         if(response.status!==200){
           // throw an error alert
           store.dispatch(addAlert(response))
@@ -71,7 +69,6 @@ class ServiceDashboard extends React.Component {
       })
       .then(data => {
         if(data){
-          console.log("Retrieved item data successfully!", data)
           this.setState({
             items: data,
             itemUrl: itemUrlParsed

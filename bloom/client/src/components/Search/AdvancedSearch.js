@@ -62,8 +62,6 @@ class AdvancedSearch extends React.Component {
     let queryString = require('./helper.js').queryString;
     let query = queryString(this.state)
 
-    let self = this
-
     fetch('http://localhost:8081/stores' + query, {
       method: "GET",
       headers: {
@@ -82,8 +80,6 @@ class AdvancedSearch extends React.Component {
     })
     .then(data => {
       if(data){
-        // console.log("Store data:", data)
-
         let stateRep = this.state
         stateRep.stores = data
         stateRep.redirect = true
@@ -93,7 +89,8 @@ class AdvancedSearch extends React.Component {
         }
   
         this.props.history.push({
-          pathname: '/search' + query,
+          pathname: '/search',
+          search: query,
           state: stateRep
         })
       }

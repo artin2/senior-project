@@ -97,7 +97,6 @@ class UserStoresDashboard extends React.Component {
         credentials: 'include'
       })
       .then(function(response){
-        console.log(response)
         if(response.status!==200){
           // throw an error alert
           store.dispatch(addAlert(response))
@@ -108,7 +107,6 @@ class UserStoresDashboard extends React.Component {
       })
       .then(data => {
         if(data){
-          console.log("Retrieve store data successfully!", data)
           // let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
           this.setState({
             stores: data,

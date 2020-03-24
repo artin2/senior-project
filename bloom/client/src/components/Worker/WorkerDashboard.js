@@ -31,7 +31,6 @@ class WorkerDashboard extends React.Component {
   }
 
   componentDidMount() {
-    console.log(this.props.match.params.store_id, this.props.location.state)
     if(this.props.location.state && this.props.location.state.workers){
       this.setState({
         workers: this.props.location.state.workers
@@ -46,7 +45,6 @@ class WorkerDashboard extends React.Component {
         credentials: 'include'
       })
       .then(function(response){
-        console.log(response)
         if(response.status!==200){
           // throw an error alert
           store.dispatch(addAlert(response))

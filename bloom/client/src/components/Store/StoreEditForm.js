@@ -106,7 +106,6 @@ class StoreEditForm extends React.Component {
         credentials: 'include'
       })
       .then(function(response){
-        console.log(response)
         if(response.status!==200){
           // throw an error alert
           store.dispatch(addAlert(response))

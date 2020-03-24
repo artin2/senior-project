@@ -48,7 +48,6 @@ class ServiceDisplay extends React.Component {
       })
       .then(data => {
         if(data){
-          console.log("Retrieved service data successfully!", data)
           this.setState({
             service: data
           })
