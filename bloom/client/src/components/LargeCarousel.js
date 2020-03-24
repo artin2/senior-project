@@ -1,5 +1,6 @@
 import React from 'react';
 import Carousel from 'react-bootstrap/Carousel'
+import './LargeCarousel.css'
 
 
 class LargeCarousel extends React.Component {
@@ -12,7 +13,7 @@ class LargeCarousel extends React.Component {
       <Carousel interval="">
         {this.props.pictures.map((url, index) => (
           <Carousel.Item key={"pic-" + index}>
-            <img className="d-block w-100" src={url} alt={"Slide " + index} />
+            <img className="img-fluid w-100" src={url} alt={"Slide " + index} />
           </Carousel.Item>
         ))}
       </Carousel>

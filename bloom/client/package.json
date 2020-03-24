@@ -23,6 +23,7 @@
     "jwt-decode": "^2.2.0",
     "mdbootstrap": "^4.12.0",
     "react": "^16.12.0",
+    "react-adaptive-image": "^1.8.0",
     "react-bootstrap": "^1.0.0-beta.16",
     "react-bootstrap-multiselect": "^2.4.1",
     "react-bootstrap-sidebar": "0.0.1",

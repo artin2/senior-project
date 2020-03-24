@@ -10,6 +10,7 @@ import {
   addAlert
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
+import './StoreDisplay.css'
 
 class StoreDisplay extends React.Component {
   constructor(props) {
@@ -40,6 +41,13 @@ class StoreDisplay extends React.Component {
   triggerStoreEdit() {
     this.props.history.push({
       pathname: '/stores/edit/' + this.props.match.params.store_id,
+      state: this.state
+    })
+  }
+
+  triggerBook() {
+    this.props.history.push({
+      pathname: '/book/' + this.props.match.params.store_id,
       state: this.state
     })
   }
@@ -86,25 +94,30 @@ class StoreDisplay extends React.Component {
   render() {
     let editButton;
     if(this.state.store.owners.indexOf(JSON.parse(Cookies.get('user').substring(2)).id) > -1){
-      editButton = <Button onClick={() =>  this.triggerStoreEdit()}>Edit Store</Button>
+      editButton = <Button className="float-left" onClick={() =>  this.triggerStoreEdit()}>Edit Store</Button>
     }
 
     return (
       <Container fluid>
-        <Row className="justify-content-center">
-            <Col>
+        <Row className="justify-content-md-center" style={{ marginTop: '15px', marginBottom: '15px'}}>
+          <Col lg={3}>
+            <h1>{this.state.store.name}</h1>
+            <h5 style={{color: "gray"}}>{this.state.store.street}, {this.state.store.city}, {this.state.store.state}, {this.state.store.zipcode}</h5>
+            <hr/>
+            <p style={{fontSize: "25px"}}>{this.state.store.description}</p>
+            <ul>
+              {this.state.store.category.map((cat, index) => (
+                <li key={"cat-" + index}>{cat}</li>
+              ))}
+            </ul>
+            <div id="buttonGroup">
               {editButton}
-              <h1>{this.state.store.name}</h1>
-              <p>{this.state.store.description}</p>
-              <ul>
-                {this.state.store.category.map((cat, index) => (
-                  <li key={"cat-" + index}>{cat}</li>
-                ))}
-              </ul>
-            </Col>
-            <Col xs={8} sm={7} md={6} lg={5}>
-              <LargeCarousel pictures={this.state.store.pictures}/>
-            </Col>
+              <Button className="float-left" onClick={() =>  this.triggerBook()}>Book Now</Button>
+            </div>
+          </Col>
+          <Col xs={10} sm={9} md={8} lg={7}>
+            <LargeCarousel className="carousel" pictures={this.state.store.pictures}/>
+          </Col>
         </Row>
         <Row>
           {/* <WorkerDisplay/> */}
