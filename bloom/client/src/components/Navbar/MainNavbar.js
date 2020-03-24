@@ -3,6 +3,7 @@ import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import { Link } from "react-router-dom";
 import './MainNavbar.css'
 import Cookies from 'js-cookie';
+// import store from '../../reduxFolder/store';
 // import BasicSearch from '../Search/BasicSearch';
 
 class MainNavbar extends React.Component {
@@ -13,7 +14,32 @@ class MainNavbar extends React.Component {
       loggedIn: false,
       user: null
     }
+
+    // NOTE THIS IS NOT WORKING, NAVBAR COMPONENT DOES NOT RERENDER
+    // just for ensuring rerender when logged in, not working at the moment
+    // might as well just keep track of user using redux at this point?
+    // store.subscribe(() => {
+    //   // console.log(store.getState().user)
+    //   if(store.getState().user){
+    //     console.log("HERERERE")
+    //     this.setState({
+    //       user: store.getState().user
+    //     });
+    //   }
+    // });
   }
+
+  // componentDidUpdate(prevProps, prevState) {
+  //   // only update chart if the data has changed
+  //   if (prevState.user !== this.state.user) {
+  //     this.forceUpdate()
+  //   }
+  // }
+
+  // componentWillUnmount() {
+  //   store.unsubscribe()
+  // }
+  
 
   componentDidMount() {
     if(Cookies.get('token') != null) {

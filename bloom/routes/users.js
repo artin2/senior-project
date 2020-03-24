@@ -4,7 +4,7 @@ const auth = require('../auth.js');
 
 async function login(req, res) {
   if (req.body.email && req.body.password) {
-    let query = 'SELECT * from users WHERE email = $1;'
+    let query = 'SELECT * from users WHERE email = $1'
     let values = [req.body.email]
 
     db.client.connect(function(err) {
@@ -14,27 +14,28 @@ async function login(req, res) {
             try {
               let passwordMatch = await auth.verifyHash(result.rows[0]["password"], req.body.password);
 
-              if(passwordMatch) {
+              if(passwordMatch != false) {
                 try {
                   await auth.generateToken(res, result.rows[0]);
-                  helper.querySuccess(res, { email: req.body.email });
+                  let resultUser = result.rows[0]
+                  delete resultUser.password
+
+                  helper.querySuccess(res, { user: resultUser }, "Successfully Logged In!");
                 } 
                 catch (err) {
                   helper.queryError(res, err);
                 }
               }
               else {
-                res.send({status: "Password Provided is Incorrect"});
-                res.status(400);
+                helper.queryError(res, "Password Provided is incorrect");
               }
             }
             catch (err) {
-              console.log(err.toString())
-              res.status(400).json(err.toString());
+              helper.queryError(res, err);
             }
           }
           else{
-            helper.queryError(res, new Error("Could not find user!"));
+            helper.queryError(res, "Could not Find User!");
           }
 
           if (err) {
@@ -63,7 +64,7 @@ async function signup(req, res) {
     try {
       hash = await auth.generateHash(req.body.password);
     } catch (err) {
-      console.log("Couldn't Create Password Hash");
+      helper.queryError(res, "Could not Create Password Hash");
     }
     let query = 'INSERT INTO users(email, first_name, last_name, password, role, created_at, phone) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;'
     let values = [req.body.email, req.body.first_name, req.body.last_name, hash, req.body.role, timestamp, req.body.phone]
@@ -82,14 +83,14 @@ async function signup(req, res) {
               // for some reason the cookie is not being attatched to the response...
               // cookie is successfuly generated for sure tho..
               await auth.generateToken(res, result.rows[0]);
-              helper.querySuccess(res, result.rows[0]);
+              helper.querySuccess(res, result.rows[0], "Successfully Created User!");
             } 
             catch (err) {
               helper.queryError(res, err);
             }
           }
           else{
-            helper.queryError(res, new Error("Could not create user!"));
+            helper.queryError(res, "Could not Create User!");
           }
         }
       );
@@ -111,7 +112,7 @@ async function edit(req, res, next) {
     try {
       hash = await auth.generateHash(req.body.password);
     } catch (err) {
-      console.log("Couldn't Create Password Hash");
+      helper.queryError(res, "Could not Create Password Hash");
     }
 
     // not sure how to update email, it is a unique attribute and seems you cant update a row's unique value
@@ -141,7 +142,7 @@ async function edit(req, res, next) {
               httpOnly: false,
               domain: 'localhost'
             })
-            helper.querySuccess(res, user);
+            helper.querySuccess(res, user, "Successfully Updated User!");
           }
         }
       );

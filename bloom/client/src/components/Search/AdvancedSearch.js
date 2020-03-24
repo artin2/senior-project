@@ -3,6 +3,10 @@ import './AdvancedSearch.css'
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import { withRouter } from "react-router-dom";
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class AdvancedSearch extends React.Component {
   constructor(props) {
@@ -10,9 +14,9 @@ class AdvancedSearch extends React.Component {
     this.state = {street: '',
                   city: '',
                   state: '',
-                  zip: '',
-                  time: 0,
-                  distance: 0,
+                  zipcode: '',
+                  time: 1,
+                  distance: 1,
                   nails: false,
                   hair: false,
                   redirect: false};
@@ -22,7 +26,6 @@ class AdvancedSearch extends React.Component {
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.queryString = this.queryString.bind(this);
   }
 
   componentDidMount() {
@@ -39,7 +42,7 @@ class AdvancedSearch extends React.Component {
       street: `${address[0].long_name} ${address[1].long_name}`,
       city: address[4].long_name,
       state: address[5].short_name,
-      zip: address[7].short_name,
+      zipcode: address[7].short_name,
     })
   }
 
@@ -52,23 +55,14 @@ class AdvancedSearch extends React.Component {
     }
   }
 
-  // CITATION: https://stackoverflow.com/questions/37230555/get-with-query-string-with-fetch-in-react-native
-  queryString(query) {
-    // get array of key value pairs ([[k1, v1], [k2, v2]])
-    const qs = Object.entries(query)
-      // filter pairs with undefined value
-      .filter(pair => pair[1] !== undefined)
-      // encode keys and values, remove the value if it is null, but leave the key
-      .map(pair => pair.filter(i => i !== null).map(encodeURIComponent).join('='))
-      .join('&');
-  
-    return qs && '?' + qs;
-  }
-
   handleSubmit(event) {
     // for some reason doesn't work without this..
-    let query = this.queryString(this.state)
     event.preventDefault();
+    
+    let queryString = require('./helper.js').queryString;
+    let query = queryString(this.state)
+
+    let self = this
 
     fetch('http://localhost:8081/stores' + query, {
       method: "GET",
@@ -79,35 +73,30 @@ class AdvancedSearch extends React.Component {
     })
     .then(function(response){
       if(response.status!==200){
-        // should throw an error here
-        console.log("Error!", response.status)
-        // throw new Error(response.status)
-        window.location.href='/'
+        // throw an error alert
+        store.dispatch(addAlert(response))
       }
       else{
-        // console.log(response)
         return response.json();
       }
     })
     .then(data => {
-      console.log("Store data:", data)
-      
-      // have to pass center at the end based on the forms input
-      let searchCenter = {
-        lat: "34.277639",
-        lng: "-118.3741806"
+      if(data){
+        // console.log("Store data:", data)
+
+        let stateRep = this.state
+        stateRep.stores = data
+        stateRep.redirect = true
+        stateRep.center = {
+          lat: "34.277639",
+          lng: "-118.3741806"
+        }
+  
+        this.props.history.push({
+          pathname: '/search' + query,
+          state: stateRep
+        })
       }
-
-      this.setState({
-        stores: data,
-        redirect: true,
-        center: searchCenter
-      })
-
-      this.props.history.push({
-        pathname: '/search',
-        state: this.state
-      })
     });
   }
 

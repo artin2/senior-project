@@ -10,6 +10,10 @@ import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPho
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class StoreEditForm extends React.Component {
   constructor(props) {
@@ -104,22 +108,21 @@ class StoreEditForm extends React.Component {
       .then(function(response){
         console.log(response)
         if(response.status!==200){
-          // should throw an error here
-          console.log("Error!", response.status)
-          // throw new Error(response.status)
-          // window.location.href='/'
+          // throw an error alert
+          store.dispatch(addAlert(response))
         }
         else{
           return response.json();
         }
       })
       .then(data => {
-        console.log("Store data on mount:", data)
-        let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
-        this.setState({
-          store: data,
-          selectedOption: convertedCategory
-        })
+        if(data){
+          let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+          this.setState({
+            store: data,
+            selectedOption: convertedCategory
+          })
+        }
       });
     }
   }
@@ -167,18 +170,17 @@ class StoreEditForm extends React.Component {
                 })
                 .then(function(response){
                   if(response.status!==200){
-                    console.log("Error!", response.status)
-                    // throw new Error(response.status)
+                    store.dispatch(addAlert(response))
                   }
                   else{
                     // redirect to home page signed in
-                    console.log("Successful edit!", response.status)
                     return response.json()
                   }
                 })
                 .then(data => {
-                  console.log("Store data updated:", data)
-                  triggerStoreDisplay(data)
+                  if(data){
+                    triggerStoreDisplay(data)
+                  }
                 });
               }}
             >

@@ -10,6 +10,10 @@ import { FaEnvelope } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class AddWorkerForm extends React.Component {
   constructor(props) {
@@ -71,18 +75,17 @@ class AddWorkerForm extends React.Component {
                 })
                 .then(function(response){
                   if(response.status!==200){
-                    console.log("Error!", response.status)
-                    // throw new Error(response.status)
+                    store.dispatch(addAlert(response))
                   }
                   else{
-                    console.log("Successfully added worker!", response.status)
                     return response.json();
                   }
                 })
                 .then(function(data){
                   // redirect to home page signed in
-                  console.log("Worker data returned:", data)
-                  triggerWorkerDisplay(data)
+                  if(data){
+                    triggerWorkerDisplay(data)
+                  }
                 })
               }}
             >

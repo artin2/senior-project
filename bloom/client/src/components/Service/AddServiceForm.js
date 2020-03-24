@@ -10,6 +10,10 @@ import { FaDollarSign, FaHandshake, FaHourglassHalf, FaPen } from 'react-icons/f
 import { Formik } from 'formik';
 import Select from 'react-select';
 import * as Yup from 'yup';
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class AddServiceForm extends React.Component {
   constructor(props) {
@@ -69,23 +73,21 @@ class AddServiceForm extends React.Component {
       credentials: 'include'
     })
     .then(function(response){
-      console.log(response)
       if(response.status!==200){
-        // should throw an error here
-        console.log("Error!", response.status)
-        // throw new Error(response.status)
-        // window.location.href='/'
+        // throw an error alert
+        store.dispatch(addAlert(response))
       }
       else{
         return response.json();
       }
     })
     .then(data => {
-      console.log("Limited store data from server:", data)
-      let convertedWorkers = data.map((worker) => ({ value: worker.id, label: worker.first_name + " " + worker.last_name }));
-      this.setState({
-        workerOptions: convertedWorkers
-      })
+      if(data){
+        let convertedWorkers = data.map((worker) => ({ value: worker.id, label: worker.first_name + " " + worker.last_name }));
+        this.setState({
+          workerOptions: convertedWorkers
+        })
+      }
     });
   }
 
@@ -136,18 +138,17 @@ class AddServiceForm extends React.Component {
                 })
                 .then(function(response){
                   if(response.status!==200){
-                    console.log("Error!", response.status)
-                    // throw new Error(response.status)
+                    store.dispatch(addAlert(response))
                   }
                   else{
-                    console.log("Successfully added service!", response.status)
                     return response.json();
                   }
                 })
                 .then(function(data){
                   // redirect to home page signed in
-                  console.log("Service data returned:", data)
-                  triggerStoreDisplay()
+                  if(data){
+                    triggerStoreDisplay()
+                  }
                 })
               }}
             >

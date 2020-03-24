@@ -25,10 +25,10 @@ async function getStore(req, res, next) {
 
           // were able to find the store
           if (result && result.rows.length > 0) {
-            helper.querySuccess(res, result.rows[0]);
+            helper.querySuccess(res, result.rows[0], "Successfully got Store!");
           }
           else{
-            helper.queryError(res, new Error("Could not find store!"));
+            helper.queryError(res, "Could not Find Store!");
           }
       });
       if (err) {
@@ -42,73 +42,78 @@ async function getStore(req, res, next) {
 };
 
 async function getStores(req, res, next) {
-  try{
-    await auth.verifyToken(req, res, next);
-    let geocodeResult = await geocoder.geocode({address: req.query.street, city: req.query.city, state: req.query.state, zipcode: req.query.zipcode})
-    let lat = geocodeResult[0].latitude
-    let lng = geocodeResult[0].longitude
-    let distance = req.query.distance
-    let categories = ['Nails', 'Hair']
-    let categoryQueryArray = []
+  if(req.query.street && req.query.city && req.query.state && req.query.zipcode){
+    try{
+      await auth.verifyToken(req, res, next);
+      let geocodeResult = await geocoder.geocode({address: req.query.street, city: req.query.city, state: req.query.state, zipcode: req.query.zipcode})
+      let lat = geocodeResult[0].latitude
+      let lng = geocodeResult[0].longitude
+      let distance = req.query.distance
+      let categories = ['Nails', 'Hair']
+      let categoryQueryArray = []
 
-    // check to see which categories where marked as true
-    let j = categories.length
-    while (j--) {
-      cat = categories[j].toLowerCase()
-      if (req.query[cat] == "true") { 
-        categoryQueryArray.push(categories[j])
+      // check to see which categories where marked as true
+      let j = categories.length
+      while (j--) {
+        cat = categories[j].toLowerCase()
+        if (req.query[cat] == "true") { 
+          categoryQueryArray.push(categories[j])
+        }
       }
-    }
 
-    // if client didn't mark any categories then they want all of them
-    if(categoryQueryArray.length == 0){
-      categoryQueryArray = categories
-    }
-
-    // convert the category array to a string literal array that postgres can understand
-    var categoryQuery = '\'{';
-    for(var i = 0; i < categoryQueryArray.length; i++) {
-      if(i == categoryQueryArray.length - 1){
-        categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'";
+      // if client didn't mark any categories then they want all of them
+      if(categoryQueryArray.length == 0){
+        categoryQueryArray = categories
       }
-      else if(categoryQueryArray.length == 1){
-        categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'"
+
+      // convert the category array to a string literal array that postgres can understand
+      var categoryQuery = '\'{';
+      for(var i = 0; i < categoryQueryArray.length; i++) {
+        if(i == categoryQueryArray.length - 1){
+          categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'";
+        }
+        else if(categoryQueryArray.length == 1){
+          categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'"
+        }
+        else{
+          categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\", "
+        }
       }
-      else{
-        categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\", "
-      }
-    }
 
-    // query for stores within the given distance, and that have any of the categories checked by the client
-    let query = `SELECT *, ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) ) AS distance
-                FROM stores
-                WHERE ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) )
-                  < ` + distance + ` AND category && ` + categoryQuery + `
-                ORDER BY distance;`
+      // query for stores within the given distance, and that have any of the categories checked by the client
+      let query = `SELECT *, ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) ) AS distance
+                  FROM stores
+                  WHERE ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) )
+                    < ` + distance + ` AND category && ` + categoryQuery + `
+                  ORDER BY distance;`
 
-    db.client.connect(function(err) {
-      // try to get search results
-      db.client.query(query,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
+      db.client.connect(function(err) {
+        // try to get search results
+        db.client.query(query,
+          async (err, result) => {
+            if (err) {
+              helper.queryError(res, err);
+            }
 
-          // we were able to get search results
-          if (result && result.rows.length > 0) {
-              helper.querySuccess(res, result.rows);
-          }
-          else{
-            helper.queryError(res, new Error("No search results!"));
-          }
+            // we were able to get search results
+            if (result && result.rows.length > 0) {
+                helper.querySuccess(res, result.rows, "Successfully got Search Results!");
+            }
+            else{
+              helper.queryError(res, "No Search Results!");
+            }
+        });
+        if (err) {
+          helper.dbConnError(res, err);
+        }
       });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
+    }
+    catch(err){
+      helper.authError(res, err);
+    }
   }
-  catch(err){
-    helper.authError(res, err);
+  else{
+    helper.queryError(res, "Missing Search Params!");
   }
 };
 
@@ -131,10 +136,10 @@ async function getUserStores(req, res, next) {
           
           // we were successfuly able to get the users stores
           if (result && result.rows.length > 0) {
-            helper.querySuccess(res, result.rows);
+            helper.querySuccess(res, result.rows, "Successfully got User's Stores!");
           }
           else{
-            helper.queryError(res, new Error("No store results!"));
+            helper.queryError(res, "No Store Results!");
           }
       });
       if (err) {
@@ -169,11 +174,11 @@ async function editStore(req, res, next) {
 
             // we were successful in updating the store
             if (result && result.rows.length == 1) {
-              helper.querySuccess(res, result.rows[0]);
+              helper.querySuccess(res, result.rows[0], "Successfully Updated Store!");
             }
             else{
               // there were no results from trying to update the stores table
-              helper.queryError(res, new Error("Unable to update store!"));
+              helper.queryError(res, "Unable to Update Store!");
             }
         });
         if (err) {
@@ -214,11 +219,11 @@ async function addStore(req, res, next) {
 
             // we were successful in creating the store
             if (result && result.rows.length == 1) {
-              helper.querySuccess(res, result.rows[0]);
+              helper.querySuccess(res, result.rows[0], "Successfully Created Store!");
             }
             else{
               // there were no results from trying to insert into the stores table
-              helper.queryError(res, new Error("Unable to insert store!"));
+              helper.queryError(res, "Unable to Insert Store!");
             }
           }
         );
@@ -296,32 +301,32 @@ async function addWorker(req, res, next) {
                             }
                             // we were able to successfully update the workers in the stores table, return worker entry
                             if (resultLast && resultLast.rows.length == 1) {
-                              helper.querySuccess(res, resultFirst.rows[0]);
+                              helper.querySuccess(res, resultFirst.rows[0], "Successfully Added Worker!");
                             }
                             else{
                               // there was a problem updating the stores table 
-                              helper.queryError(res, new Error("Could not update Stores table!"));
+                              helper.queryError(res, "Could not Update Stores Table!");
                             }
                           }
                         )
                       }
                       else{
                         // there was a problem updating the users table 
-                        helper.queryError(res, new Error("Could not update Users table!"));
+                        helper.queryError(res, "Could not Update Users Table!");
                       }
                     }
                   )
                 }
                 else {
                   // there was an error in inserting into the worker table
-                  helper.queryError(res, new Error("Could not enter into Workers table!"));
+                  helper.queryError(res, "Could not Add Woker into the Workers Table!");
                 }
               }
             );
           }
           else{
             // error, there were no results from trying to get the user to become worker from the db
-            helper.queryError(res, new Error("User does not exist!"));
+            helper.queryError(res, "User does not Exist!");
           }
         }
       );
@@ -352,10 +357,10 @@ async function editWorker(req, res, next) {
           
           // we were successfuly able to update the worker
           if (result && result.rows.length == 1) {
-            helper.querySuccess(res, result.rows[0]);
+            helper.querySuccess(res, result.rows[0], "Successfully Updated Worker!");
           }
           else{
-            helper.queryError(res, new Error("Could not edit store worker!"));
+            helper.queryError(res, "Could not Edit Store Worker!");
           }
       });
       if (err) {
@@ -401,7 +406,7 @@ async function addService(req, res, next) {
                   }
                   // we were not able to update this worker's services
                   if (!(resultSecond && resultSecond.rows.length == 1)) {
-                    helper.queryError(res, new Error("Could not update Worker's services!"));
+                    helper.queryError(res, "Could not Update Worker's Services!");
                   }
                 }
               )
@@ -416,16 +421,16 @@ async function addService(req, res, next) {
                 }
                 // we were able to successfully update the store's services and are finished update db
                 if (resultLast && resultLast.rows.length == 1){
-                  helper.querySuccess(res, resultFirst.rows[0])
+                  helper.querySuccess(res, resultFirst.rows[0], "Successfully Added Service!")
                 }
                 else{
-                  helper.queryError(res, new Error("Could not update Store's services!"));
+                  helper.queryError(res, "Could not Update Store's Services!");
                 }
               }
             )
           }
           else{
-            helper.queryError(res, new Error("Could not insert service!"));
+            helper.queryError(res, "Could not Insert Service!");
           }
         }
       );
@@ -460,10 +465,10 @@ async function getStoreItems(req, res, next, table) {
           
           // we were successfuly able to get the store items
           if (result && result.rows.length > 0) {
-            helper.querySuccess(res, result.rows);
+            helper.querySuccess(res, result.rows, "Successfully got Store Items!");
           }
           else{
-            helper.queryError(res, new Error("No store " + table));
+            helper.queryError(res, "No Store Items");
           }
       });
       if (err) {
@@ -497,7 +502,7 @@ async function getStoreItem(req, res, next, table) {
             helper.querySuccess(res, result.rows[0]);
           }
           else{
-            helper.queryError(res, new Error("Could not find store item!"));
+            helper.queryError(res, "Could not find Store Item!");
           }
       });
       if (err) {

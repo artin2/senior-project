@@ -13,7 +13,10 @@ import {TiSocialFacebookCircular, TiSocialGooglePlus} from 'react-icons/ti';
 // import ReactDOM from 'react-dom';
 // import { useGoogleLogin } from 'react-google-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-// import { useHistory } from 'react-router'
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 
 const successGoogle = (response) => {
@@ -37,19 +40,40 @@ const failureFacebook = (response) => {
 class LoginForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {email: '',
-                  password: ''};
+    this.state = {
+      email: '',
+      password: '',
+      message: {}
+    };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.triggerHome = this.triggerHome.bind(this);
   }
 
   handleChange(event) {
     this.setState({[event.target.id]: event.target.value});
   }
 
+  // redirect to the home page with the success response
+  triggerHome(returnedUser) {
+    let resp = {
+      status: this.state.returnedResponse.status,
+      statusText: this.state.returnedResponse.statusText
+    }
+
+    this.props.history.push({
+      pathname: '/',
+      state: {
+        response: resp,
+        user: returnedUser
+      }
+    })
+  }
+
   handleSubmit(event) {
     //there might be a CORS issue with the backend, this doesn't work without preventDefault..
+    let self = this
     event.preventDefault();
     fetch('http://localhost:8081/login' , {
       headers: {
@@ -62,26 +86,30 @@ class LoginForm extends React.Component {
       body: JSON.stringify(this.state)
     })
     .then(function(response){
-
       if(response.status!==200){
-        console.log("Error!", response.status)
-        const error = new Error(response.error);
-        throw error;
+        // console.log("Error!", response)
+        store.dispatch(addAlert(response))
       }
       else{
         // redirect to home page signed in
-        console.log("Successful login!")
-        window.location.href='/'
+        // console.log("Successful login!", response)
+        self.setState({
+          returnedResponse: response
+        })
+        return response.json()
       }
-    }).catch(err => {
-      console.error(err);
-      alert('Error logging in please try again');
+    })
+    .then(data => {
+      if(data){
+        self.triggerHome(data)
+      }
     });
   }
 
   render() {
     return (
       <Container fluid>
+        {alert}
         <Row className="justify-content-center">
           <Col xs={8} sm={7} md={6} lg={5}>
             <Form className="formBody rounded">
@@ -108,6 +136,7 @@ class LoginForm extends React.Component {
                 </InputGroup>
               </Form.Group>
               <Col xs={8} sm={10} md={11} lg={12}>
+                <Button  className="" type="submit" variant="primary" onClick={this.handleSubmit}>Login</Button>
                 <Row className="justify-content-center">
                   <GoogleLogin
                     clientId={process.env.REACT_APP_GOOGLE_ID}
@@ -131,7 +160,6 @@ class LoginForm extends React.Component {
                     callback={successFacebook}
                     />
                 </Row>
-                <Button  className="" type="submit" variant="primary" onClick={this.handleSubmit}>Login</Button>
               </Col>
             </Form>
           </Col>

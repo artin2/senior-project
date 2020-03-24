@@ -2,6 +2,11 @@ import React from 'react';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
+
 
 class WorkerDisplay extends React.Component {
   constructor(props) {
@@ -39,20 +44,19 @@ class WorkerDisplay extends React.Component {
       })
       .then(function(response){
         if(response.status!==200){
-          // should throw an error here
-          console.log("Error!", response.status)
-          // throw new Error(response.status)
-          // window.location.href='/'
+          // throw an error alert
+          store.dispatch(addAlert(response))
         }
         else{
           return response.json();
         }
       })
       .then(data => {
-        console.log("Retrieved worker data successfully!", data)
-        this.setState({
-          worker: data
-        })
+        if(data){
+          this.setState({
+            worker: data
+          })
+        }
       });
     }
   }

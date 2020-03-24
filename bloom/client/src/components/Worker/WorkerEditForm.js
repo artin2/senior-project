@@ -8,6 +8,11 @@ import Button from 'react-bootstrap/Button'
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
+
 
 class WorkerEditForm extends React.Component {
   constructor(props) {
@@ -55,7 +60,6 @@ class WorkerEditForm extends React.Component {
   componentDidMount() {
     if(this.props.location.state && this.props.location.state.worker){
       let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
-      console.log("HERERERE", convertedServices)
       this.setState({
         worker: this.props.location.state.worker,
         selectedOption: convertedServices
@@ -70,25 +74,22 @@ class WorkerEditForm extends React.Component {
         credentials: 'include'
       })
       .then(function(response){
-        console.log(response)
         if(response.status!==200){
-          // should throw an error here
-          console.log("Error!", response.status)
-          // throw new Error(response.status)
-          // window.location.href='/'
+          // throw an error alert
+          store.dispatch(addAlert(response))
         }
         else{
           return response.json();
         }
       })
       .then(data => {
-        console.log("Retrieve worker data successfully!", data.services)
-        let convertedServices = data.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
-        console.log("THERERER", convertedServices)
-        this.setState({
-          worker: data,
-          selectedOption: convertedServices
-        })
+        if(data){
+          let convertedServices = data.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
+          this.setState({
+            worker: data,
+            selectedOption: convertedServices
+          })
+        }
       });
     }
   }
@@ -129,18 +130,17 @@ class WorkerEditForm extends React.Component {
                 })
                 .then(function(response){
                   if(response.status!==200){
-                    console.log("Error!", response.status)
-                    // throw new Error(response.status)
+                    store.dispatch(addAlert(response))
                   }
                   else{
                     // redirect to worker page
-                    console.log("Successful update of worker!", response.status)
                     return response.json()
                   }
                 })
                 .then(data => {
-                  console.log("Worker data on return:", data)
-                  triggerWorkerDisplay()
+                  if(data){
+                    triggerWorkerDisplay()
+                  }
                 });
               }}
             >

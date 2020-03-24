@@ -5,6 +5,10 @@ import Col from 'react-bootstrap/Col'
 import { Button } from 'react-bootstrap';
 import SearchCard from '../Search/SearchCard';
 import { withRouter } from "react-router-dom";
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class UserStoresDashboard extends React.Component {
   constructor(props) {
@@ -95,21 +99,22 @@ class UserStoresDashboard extends React.Component {
       .then(function(response){
         console.log(response)
         if(response.status!==200){
-          // should throw an error here
-          console.log("Error!", response.status)
-          // throw new Error(response.status)
-          window.location.href='/'
+          // throw an error alert
+          store.dispatch(addAlert(response))
         }
         else{
           return response.json();
         }
       })
       .then(data => {
-        console.log("Retrieve store data successfully!", data)
-        // let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
-        this.setState({
-          stores: data,
-        })
+        if(data){
+          console.log("Retrieve store data successfully!", data)
+          // let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+          this.setState({
+            stores: data,
+          })
+        }
+        
       });
     }
   }

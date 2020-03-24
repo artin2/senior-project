@@ -24,16 +24,48 @@ class SearchDisplay extends React.Component {
   }
 
   componentDidMount(){
-    if(this.props.location.state && this.props.location.state.stores){
+    if(this.props.location.state && this.props.location.state.stores && this.props.location.state.center){
       this.setState({
-        stores: this.props.location.state.stores
-      })
-    }
-
-    if(this.props.location.state && this.props.location.state.center){
-      this.setState({
+        stores: this.props.location.state.stores,
         center: this.props.location.state.center
       })
+    }
+    else{
+      let self = this
+      let link = window.location.href.split("search")
+      let query = ""
+      
+      if(link.length > 1){
+        query = link[1]
+      }
+
+      fetch('http://localhost:8081/stores' + query, {
+        method: "GET",
+        headers: {
+            'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(function(response){
+        if(response.status!==200){
+          // should throw an error here
+          console.log("ERROR!")
+        }
+        else{
+          return response.json();
+        }
+      })
+      .then(data => {
+        if(data){
+          this.setState({
+            stores: data,
+            center: {
+              lat: "34.277639",
+              lng: "-118.3741806"
+            }
+          })
+        }
+      });
     }
   }
 
@@ -41,7 +73,6 @@ class SearchDisplay extends React.Component {
     let storeCards = null
     let map = null
     if(this.state.stores.length > 0){
-      console.log(this.state.stores)
       storeCards = this.state.stores.map(store => (
         <Row key={"store-" + store.id} className="justify-content-center">
           <Col>

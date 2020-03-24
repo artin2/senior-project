@@ -10,6 +10,11 @@ import { FaDollarSign, FaHandshake, FaHourglassHalf, FaPen } from 'react-icons/f
 import { Formik } from 'formik';
 import Select from 'react-select';
 import * as Yup from 'yup';
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
+
 class ServiceEditForm extends React.Component {
   constructor(props) {
     super(props);
@@ -88,24 +93,22 @@ class ServiceEditForm extends React.Component {
         credentials: 'include'
       })
       .then(function(response){
-        console.log(response)
         if(response.status!==200){
-          // should throw an error here
-          console.log("Error!", response.status)
-          // throw new Error(response.status)
-          // window.location.href='/'
+          // throw an error alert
+          store.dispatch(addAlert(response))
         }
         else{
           return response.json();
         }
       })
       .then(data => {
-        console.log("Retrieve service data successfully!", data)
-        let convertedCategoryData = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
-        this.setState({
-          service: data,
-          convertedCategory: convertedCategoryData
-        })
+        if(data){
+          let convertedCategoryData = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+          this.setState({
+            service: data,
+            convertedCategory: convertedCategoryData
+          })
+        }
       });
 
       // // then we get the worker data to display for user

@@ -6,6 +6,10 @@ import LargeCarousel from '../LargeCarousel';
 import { Button } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import { withRouter } from "react-router-dom";
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class StoreDisplay extends React.Component {
   constructor(props) {
@@ -59,24 +63,22 @@ class StoreDisplay extends React.Component {
         credentials: 'include'
       })
       .then(function(response){
-        console.log(response)
         if(response.status!==200){
-          // should throw an error here
-          console.log("Error!", response.status)
-          // throw new Error(response.status)
-          window.location.href='/'
+          // throw an error alert
+          store.dispatch(addAlert(response))
         }
         else{
           return response.json();
         }
       })
       .then(data => {
-        console.log("Retrieve store data successfully!", data)
-        let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
-        this.setState({
-          store: data,
-          selectedOption: convertedCategory
-        })
+        if(data){
+          let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+          this.setState({
+            store: data,
+            selectedOption: convertedCategory
+          })
+        }
       });
     }
   }

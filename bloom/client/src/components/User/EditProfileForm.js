@@ -10,6 +10,10 @@ import { FaLockOpen, FaLock, FaUser, FaPhone } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Cookies from 'js-cookie';
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class EditProfileForm extends React.Component {
   constructor(props) {
@@ -102,18 +106,17 @@ class EditProfileForm extends React.Component {
                 })
                 .then(function(response){
                   if(response.status!==200){
-                    console.log("Error!", response.status)
-                    // throw new Error(response.status)
+                    store.dispatch(addAlert(response))
                   }
                   else{
                     // redirect to home page signed in
-                    console.log("Successful patch!", response.status)
                     return response.json()
                   }
                 })
                 .then(data => {
-                  console.log("User data updated:", data)
-                  triggerUserDisplay(data)
+                  if(data){
+                    triggerUserDisplay(data)
+                  }
                 });
               }}
             >

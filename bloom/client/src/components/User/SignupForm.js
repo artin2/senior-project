@@ -9,6 +9,10 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import { FaEnvelope, FaLockOpen, FaLock, FaUser, FaPhone } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class SignupForm extends React.Component {
   constructor(props) {
@@ -68,12 +72,10 @@ class SignupForm extends React.Component {
                 })
                 .then(function(response){
                   if(response.status!==200){
-                    console.log("Error!", response.status)
-                    // throw new Error(response.status)
+                    store.dispatch(addAlert(response))
                   }
                   else{
                     // redirect to home page signed in
-                    console.log("Successful signup!", response.status)
                     window.location.href='/'
                   }
                 })

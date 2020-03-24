@@ -6,6 +6,10 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import { Button } from 'react-bootstrap';
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class ServiceDashboard extends React.Component {
   constructor(props) {
@@ -58,21 +62,21 @@ class ServiceDashboard extends React.Component {
       .then(function(response){
         console.log(response)
         if(response.status!==200){
-          // should throw an error here
-          console.log("Error!", response.status)
-          // throw new Error(response.status)
-          // window.location.href='/'
+          // throw an error alert
+          store.dispatch(addAlert(response))
         }
         else{
           return response.json();
         }
       })
       .then(data => {
-        console.log("Retrieved item data successfully!", data)
-        this.setState({
-          items: data,
-          itemUrl: itemUrlParsed
-        })
+        if(data){
+          console.log("Retrieved item data successfully!", data)
+          this.setState({
+            items: data,
+            itemUrl: itemUrlParsed
+          })
+        }
       });
     }
   }

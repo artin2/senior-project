@@ -11,6 +11,10 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
 import Cookies from 'js-cookie';
+import {
+  addAlert
+} from '../../reduxFolder/actions'
+import store from '../../reduxFolder/store';
 
 class StoreSignupForm extends React.Component {
   constructor(props) {
@@ -112,19 +116,17 @@ class StoreSignupForm extends React.Component {
                 })
                 .then(function(response){
                   if(response.status!==200){
-                    // should throw an error here
-                    console.log("Error!", response.status)
-                    // throw new Error(response.status)
-                    // window.location.href='/'
+                    // throw an error alert
+                    store.dispatch(addAlert(response))
                   }
                   else{
-                    // console.log(response)
                     return response.json();
                   }
                 })
                 .then(data => {
-                  console.log("Returned store data:", data)
-                  triggerStoreDisplay(data)
+                  if(data){
+                    triggerStoreDisplay(data)
+                  }
                 });
               }}
             >

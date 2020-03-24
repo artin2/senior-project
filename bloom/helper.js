@@ -11,8 +11,11 @@ function dbConnError(res, err) {
 
 function queryError(res, err) {
   console.log('Query error', err);
-  res.status(400);
-  res.send(err);
+  res.statusMessage = err;
+  res.status(400).end();
+  // res.status(400).send(err)
+  // res.status(400);
+  // res.json(err);
 }
 
 function authError(res, err) {
@@ -21,10 +24,11 @@ function authError(res, err) {
   res.send(err);
 }
 
-function querySuccess(res, msg) {
-  console.log(msg)
+function querySuccess(res, content, msg) {
+  console.log("Success", msg)
+  res.statusMessage = msg
   res.status(200);
-  res.json(msg);
+  res.json(content);
   // res.send(msg);
 }
 

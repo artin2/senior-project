@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-export default function redirectWithAuth(ComponentToProtect) {
+export default function redirectWithAuth(ComponentToProtect, addAlert) {
   return class extends Component {
     constructor(props) {
       super(props);
@@ -33,7 +33,7 @@ export default function redirectWithAuth(ComponentToProtect) {
         return <Redirect to="/"/>;
       }
       else {
-        return <ComponentToProtect {...this.props}/>;
+        return <ComponentToProtect addAlertPassed={addAlert} {...this.props}/>;
       }
     }
   }
