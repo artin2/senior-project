@@ -153,6 +153,7 @@ async function getUserStores(req, res, next) {
 };
 
 async function editStore(req, res, next) {
+  let failed = false
   if(req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.services && req.body.owners && req.body.description && req.body.pictures && req.body.id){
     try{
       await auth.verifyToken(req, res, next);
@@ -174,11 +175,36 @@ async function editStore(req, res, next) {
 
             // we were successful in updating the store
             if (result && result.rows.length == 1) {
-              helper.querySuccess(res, result.rows[0], "Successfully Updated Store!");
+              let weeklyHours = req.body.weeklyHours
+              // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7. 
+              for(let i = 0; i < weeklyHours.length; i++) {
+                letStoreHoursQuery = 'UPDATE store_hours SET open_time=$1, close_time=$2 WHERE store_id=$3 and day_of_the_week=$4'
+                let storeHoursValues = [weeklyHours[i].open_time, weeklyHours[i].close_time, req.body.id, i]
+                db.client.connect(function(err) {
+                  // try to update the store
+                  db.client.query(letStoreHoursQuery, storeHoursValues,
+                    async (err, result) => {
+                      if (err) {
+                        helper.queryError(res, err);
+                      }
+          
+                      // we were successful in updating the store hours for day i
+                      if (!result || result.rows.length != 1) {
+                        failed = true
+                      }
+                  });
+                  if (err) {
+                    helper.dbConnError(res, err);
+                  }
+                });
+              }
             }
             else{
               // there were no results from trying to update the stores table
               helper.queryError(res, "Unable to Update Store!");
+            }
+            if(failed) {
+              helper.queryError(res, new Error("Store hour update failed!"));
             }
         });
         if (err) {
@@ -549,6 +575,40 @@ async function getWorkersSchedules(req, res, next) {
   }
 };
 
+async function getStoreHours(req, res, next) {
+  try{
+    await auth.verifyToken(req, res, next);
+
+    // query for store item
+    let query = 'SELECT day_of_the_week, open_time, close_time FROM store_hours WHERE store_id = $1'
+    let values = [req.params.item_id]
+
+    db.client.connect(function(err) {
+      // try to get the store item based on id
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+          
+          // we were successfuly able to get the store item
+          if (result && result.rows.length == 1) {
+            helper.querySuccess(res, result.rows[0]);
+          }
+          else{
+            helper.queryError(res, new Error("Could not find store item!"));
+          }
+      });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.authError(res, err);
+  }
+};
+
 module.exports = {
   getStore: getStore,
   editStore: editStore,
@@ -560,5 +620,6 @@ module.exports = {
   getStoreItems: getStoreItems,
   getStoreItem: getStoreItem,
   addService: addService,
-  getWorkersSchedules: getWorkersSchedules
+  getWorkersSchedules: getWorkersSchedules,
+  getStoreHours: getStoreHours
 };

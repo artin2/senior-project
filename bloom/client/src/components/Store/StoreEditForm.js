@@ -29,7 +29,8 @@ class StoreEditForm extends React.Component {
         city: "",
         state: "",
         zipcode: "",
-        category: []
+        category: [],
+        weeklyHours: []
       },
       selectedOption: null
     };
