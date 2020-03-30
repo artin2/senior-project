@@ -6,4 +6,15 @@
 .searchBar {
   padding-right: 1rem;
   padding-left: 1rem;
+
+}
+
+.nav {
+
+  background-color: white;
+}
+
+.left{
+  position: absolute;
+  right: 10px;
 }

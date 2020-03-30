@@ -1,1 +1,166 @@
 
+.container {
+
+
+
+    /* Control the height of the image */
+
+    /* background-size: cover;
+    height: 100%;
+    width: 2000px; */
+    /* border: 1px black solid; */
+    /* position: absolute; */
+
+    /* Center and scale the image nicely */
+
+
+}
+
+.search {
+
+  /* position: absolute; */
+  align-items: center;
+
+
+}
+
+.type_container {
+
+  /* will-change: transform; */
+  /* overflow-y: scroll;
+  scroll-behavior: smooth; */
+  margin-top:180px;
+  /* margin-left: 20px; */
+  margin-bottom: -30px;
+
+}
+
+.typist {
+
+  color: black;
+  font-size: 40px;
+  font-family: 'Coming Soon, cursive';
+
+}
+
+.bloom {
+
+
+  margin-top: 140px;
+  margin-left: 20px;
+  font-size: 70px;
+  color: white;
+  font-family: 'Megrim', cursive;
+  font-weight: bold;
+}
+
+.welcome {
+
+  margin-top: 160px;
+  margin-left: 700px;
+  font-size: 40px;
+  color: white;
+  font-family: 'Aref Ruqaa', serif;
+  font-weight: bold;
+}
+
+.subtitle {
+
+  margin-top: 20px;
+  margin-left: 700px;
+  font-size: 30px;
+  color: white;
+  font-family: 'Comic Neue', cursive;
+
+
+}
+
+.cards {
+
+  /* position: absolute; */
+  margin-top: 100px;
+
+}
+
+.images {
+  box-shadow: 10px 10px 10px #8888;
+  /* border-radius: 20px; */
+  margin-top: 10px;
+  margin-left: 10px;
+  /* margin-right:  */
+  height: 400px;
+  width:430px;
+  filter: grayscale(1);
+}
+
+.image_container:hover .images{
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.image_container {
+  height: 400px;
+  width: 430px;
+  margin-top: 15px;
+  margin-right:15px;
+
+}
+
+.text {
+transition: .5s ease;
+opacity: 0;
+
+
+font-size: 40px;
+position: relative;
+top: -250px;
+left: 20px;
+/* transform: translate(-50%, -50%);
+-ms-transform: translate(-50%, -50%); */
+text-align: center;
+}
+
+.image_container:hover .text{
+  opacity: 1;
+}
+
+.header {
+
+  font-size: 35px;
+  margin-bottom: 50px;
+  font-family: 'Aref Ruqaa', serif;
+  font-weight: bold;
+}
+
+.salon{
+
+  margin-left: -50px;
+  width: 700px;
+  height: 700px;
+  margin-top: 50px;
+  box-shadow: 10px 10px 15px 15px #888888;
+  /* border-radius: 450px; */
+}
+
+.salon_text {
+
+  margin: 80px;
+  margin-left: 180px;
+
+
+}
+
+.paint_line {
+  margin-top: 350px;
+  margin-left: -300px;
+  width: 800px;
+ height: 100px;
+ transform: rotate(270deg);
+
+ position: absolute;
+
+}
+/*
+.salon_container {
+  background-image: #8CAFCA;
+} */

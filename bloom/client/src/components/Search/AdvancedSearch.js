@@ -1,6 +1,6 @@
 import React from 'react';
 import './AdvancedSearch.css'
-import { Form } from 'react-bootstrap';
+import { Form, Row} from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import { withRouter } from "react-router-dom";
 import {
@@ -58,7 +58,7 @@ class AdvancedSearch extends React.Component {
   handleSubmit(event) {
     // for some reason doesn't work without this..
     event.preventDefault();
-    
+
     let queryString = require('./helper.js').queryString;
     let query = queryString(this.state)
 
@@ -87,7 +87,7 @@ class AdvancedSearch extends React.Component {
           lat: "34.277639",
           lng: "-118.3741806"
         }
-  
+
         this.props.history.push({
           pathname: '/search',
           search: query,
@@ -99,18 +99,22 @@ class AdvancedSearch extends React.Component {
 
   render() {
     return (
+      <div className="book_window">
       <Form className="formBody rounded" onSubmit={this.handleSubmit}>
         <h3>Book Now</h3>
         <Form.Group controlId="autocomplete">
+        <Row>
           <Form.Label>Address</Form.Label>
           <Form.Control
             type="text"
             placeholder="Try 'New Haven, CT'"
             autoComplete="new-password"
           />
+        </Row>
         </Form.Group>
-    
+
         <Form.Group>
+          <Row>
           <Form.Label>Time</Form.Label>
           <Form.Control as="select" id="time" onChange={this.handleChange}>
             <option>1</option>
@@ -119,9 +123,11 @@ class AdvancedSearch extends React.Component {
             <option>4</option>
             <option>5</option>
           </Form.Control>
+          </Row>
         </Form.Group>
 
         <Form.Group>
+          <Row>
           <Form.Label>Distance</Form.Label>
           <Form.Control as="select" id="distance" onChange={this.handleChange}>
             <option>1 mile</option>
@@ -130,23 +136,29 @@ class AdvancedSearch extends React.Component {
             <option>25 miles</option>
             <option>50 miles</option>
           </Form.Control>
+          </Row>
         </Form.Group>
 
         <Form.Group controlId="service">
+          <Row>
           <Form.Label>Service</Form.Label>
-          <Form.Check 
+          <Form.Check
+            style={{marginLeft: 30}}
             id="nails"
             label="Nails"
             onChange={this.handleChange}
           />
-          <Form.Check 
+          <Form.Check
+            style={{marginLeft: 10}}
             id="hair"
             label="Hair"
             onChange={this.handleChange}
           />
+          </Row>
         </Form.Group>
-          <Button type="submit">Submit</Button>
+          <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} type="submit">Submit</Button>
       </Form>
+      </div>
     );
   }
 }

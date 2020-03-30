@@ -1,9 +1,16 @@
 .formBody {
   margin-top: 20px;
-  padding-top: 10px;
+
   background-color: #fff;
-  padding-bottom: 10px;
-  border-style: groove;
+  /* border-style: groove; */
+  padding: 20px;
+  padding-top: 50px;
+  padding-bottom: 40px;
+  box-shadow: 10px 10px 5px #8888;
+  border-radius: 20px;
+
+
+
 }
 
 .form-control:focus{
@@ -15,4 +22,10 @@
 .form-group {
     margin-right: 10px;
     margin-left: 10px;
+}
+
+.book_window {
+  width: 450px;
+  margin-top: 120px;
+  position: absolute;
 }

@@ -39,13 +39,13 @@ class MainNavbar extends React.Component {
   // componentWillUnmount() {
   //   store.unsubscribe()
   // }
-  
+
 
   componentDidMount() {
     if(Cookies.get('token') != null) {
       let s = JSON.parse(Cookies.get('user').substring(2))
-  
-      this.setState({ 
+
+      this.setState({
         loggedIn: true,
         user: s
       });
@@ -55,7 +55,7 @@ class MainNavbar extends React.Component {
   render() {
     let userComponents = null
     if(!this.state.loggedIn) {
-      userComponents = <Nav>
+      userComponents = <Nav className="left">
                           <Link to="/login" className="nav-link">Login</Link>
                           <Link to="/signup" className="nav-link">Signup</Link>
                        </Nav>
@@ -76,11 +76,11 @@ class MainNavbar extends React.Component {
                        </Nav>
     }
     return (
-      <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark" sticky="top">
-        <Link to="/" className="navbar-brand">Bloom</Link>
+      <Navbar collapseOnSelect expand="sm" bg="light" variant="light" sticky="top">
+        <Link to="/" className="navbar-brand" style={{fontFamily: 'Megrim, cursive', fontSize: '35px'}}>Bloom</Link>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
-          <Nav className="mr-auto">
+          <Nav className="left" style={{marginRight: '120px'}}>
             <Link to="/help" className="nav-link">Help</Link>
             <Link to="/about" className="nav-link">About</Link>
           </Nav>
