@@ -3,11 +3,11 @@
 
 .react-calendar {
 
-  width: 1000px !important;
+  width: 1400px !important;
   max-width: 1500px !important;
   background-color: purple;
   margin-top: 20px;
-  margin-left: 200px;
+  /* margin-left: 200px; */
   height: 620px;
   /* height: 600px !important; */
 
@@ -20,8 +20,22 @@
 }
 
 .title {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: bold;
   margin-top: 20px;
+  font-family: 'Aref Ruqaa', serif;
 
+}
+
+.dx-recurrence-interval-field {
+    display: none;
+}
+.dx-recurrence-freq-field {
+    display: none;
+}
+ .dx-recurrence-repeat-end-container {
+    display: none;
+}
+ .dx-recurrence-repeat-end-container-label {
+    display: none;
 }
