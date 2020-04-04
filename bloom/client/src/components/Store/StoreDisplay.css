@@ -3,6 +3,68 @@
   height: 75%;
 }
 
+.dashboard_carousel {
+  height: 600px;
+  width: 600px;
+  position: absolute;
+  left: 100px;
+  top: 50px;
+  box-shadow: 3px 3px 5px 3px #888888;
+}
+
+.item {
+  height: 600px;
+  width: 600px;
+
+}
+
+.style_column {
+  position: absolute;
+  background-color: #bdcddb;
+  height: 750px;
+  width: 400px;
+  top: 0;
+  left: 0;
+}
+
+.name {
+  font-size: 50px;
+  font-weight: bold;
+  margin-left: 150px;
+  font-family: 'Aref Ruqaa', serif;
+}
+
+.category {
+  display: inline-block;
+  padding: 10px;
+  padding-bottom: 0px;
+  background-color: #597096;
+  border-radius: 10px;
+  margin-left: 10px;
+}
+
+.address {
+  margin-top: 30px;
+  font-size: 22px;
+  margin-left: 200px;
+  margin-bottom: 20px;
+  font-family: 'Coming Soon, cursive';
+
+}
+
+.description {
+  font-family: 'Coming Soon, cursive';
+  font-size: 20px;
+  margin-top: 40px;
+  text-align: center;
+}
+
+.edit {
+  top: 80px;
+  right: 200px;
+  position: absolute;
+}
+
 /* .no-right-padding {
   padding-right: 0 !important;
 } */
