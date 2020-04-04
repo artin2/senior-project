@@ -1,6 +1,6 @@
 .facebookButton {
   margin-top: 10px;
-  width: 220px;
+  width: 330px;
   background-color: #3b5998;
   color: white;
   padding-right: 30px;
@@ -8,4 +8,21 @@
   padding-left: 15px;
   height: 48px;
   font-size: 14px;
+
+}
+
+.login {
+  background-color: #8CAFCB;
+  border: 0px;
+  width: 330px;
+  height: 45px;
+  margin-top: 20px;
+  border-radius: 0px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.form {
+  width: 430px;
+  padding-left: 80px;
 }

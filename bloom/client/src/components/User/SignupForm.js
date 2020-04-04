@@ -1,5 +1,6 @@
 import React from 'react';
 import '../../App.css';
+import './LoginForm.css'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -8,6 +9,8 @@ import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
 import { FaEnvelope, FaLockOpen, FaLock, FaUser, FaPhone } from 'react-icons/fa';
 import { Formik } from 'formik';
+import paint from '../../assets/abstract-painting.jpg';
+import { Link } from "react-router-dom";
 import * as Yup from 'yup';
 import {
   addAlert
@@ -45,13 +48,14 @@ class SignupForm extends React.Component {
       .required("Password Confirmation required")
     });
   }
-    
+
   render() {
     return (
       <Container fluid>
+      <img src={paint} alt="paint" style={{top: 0, left: 0, position: 'absolute', height: '100%', width:'100%', filter: 'grayscale(0.4)'}}/>
         <Row className="justify-content-center">
           <Col xs={8} sm={7} md={6} lg={5}>
-            <Formik 
+            <Formik
               initialValues={{
                 first_name: '',
                 last_name: '',
@@ -88,21 +92,21 @@ class SignupForm extends React.Component {
                 handleBlur,
                 handleSubmit}) => (
               <Form className="formBody rounded">
-                <h3>Sign Up</h3>
+                <h3 style={{marginBottom: 40}}>Sign Up</h3>
 
-                <Form.Group controlId="formFirstName">
+                <Form.Group controlId="formFirstName" className="form">
                   <InputGroup>
                     <InputGroup.Prepend>
                         <InputGroup.Text>
                             <FaUser/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control 
-                      type="text" 
+                    <Form.Control
+                      type="text"
                       name="first_name"
-                      value={values.first_name} 
-                      placeholder="First Name" 
-                      onChange={handleChange} 
+                      value={values.first_name}
+                      placeholder="First Name"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       className={touched.first_name && errors.first_name ? "error" : null}/>
                   </InputGroup>
@@ -112,17 +116,17 @@ class SignupForm extends React.Component {
                 </Form.Group>
 
 
-                <Form.Group controlId="formLastName">
+                <Form.Group controlId="formLastName" className="form">
                   <InputGroup>
                     <InputGroup.Prepend>
                         <InputGroup.Text>
                             <FaUser/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control type="text" 
+                    <Form.Control type="text"
                     value={values.last_name}
-                    placeholder="Last Name" 
-                    name="last_name" 
+                    placeholder="Last Name"
+                    name="last_name"
                     onChange={handleChange}
                     onBlur={handleBlur}
                     className={touched.last_name && errors.last_name ? "error" : null}/>
@@ -132,18 +136,18 @@ class SignupForm extends React.Component {
                   ): null}
                 </Form.Group>
 
-                <Form.Group controlId="formPhone">
+                <Form.Group controlId="formPhone" className="form">
                   <InputGroup>
                     <InputGroup.Prepend>
                         <InputGroup.Text>
                             <FaPhone/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control type="text" 
-                      value={values.phone} 
-                      placeholder="Phone Number" 
-                      name="phone" 
-                      onChange={handleChange} 
+                    <Form.Control type="text"
+                      value={values.phone}
+                      placeholder="Phone Number"
+                      name="phone"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       className={touched.phone && errors.phone ? "error" : null}/>
                   </InputGroup>
@@ -152,19 +156,19 @@ class SignupForm extends React.Component {
                   ): null}
                 </Form.Group>
 
-                <Form.Group controlId="formEmail">
+                <Form.Group controlId="formEmail" className="form">
                   <InputGroup>
                     <InputGroup.Prepend>
                         <InputGroup.Text>
                             <FaEnvelope/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control 
+                    <Form.Control
                       type="email"
                       value={values.email}
-                      placeholder="Email" 
-                      name="email" 
-                      onChange={handleChange} 
+                      placeholder="Email"
+                      name="email"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       className={touched.email && errors.email ? "error" : null}/>
                   </InputGroup>
@@ -173,19 +177,19 @@ class SignupForm extends React.Component {
                   ): null}
                 </Form.Group>
 
-                <Form.Group controlId="formPassword">
+                <Form.Group controlId="formPassword" className="form">
                   <InputGroup>
                     <InputGroup.Prepend>
                         <InputGroup.Text>
                             <FaLockOpen/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control 
-                      type="password" 
-                      value={values.password} 
-                      placeholder="Password" 
-                      name="password" 
-                      onChange={handleChange} 
+                    <Form.Control
+                      type="password"
+                      value={values.password}
+                      placeholder="Password"
+                      name="password"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       className={touched.password && errors.password ? "error" : null}/>
                   </InputGroup>
@@ -194,19 +198,19 @@ class SignupForm extends React.Component {
                   ): null}
                 </Form.Group>
 
-                <Form.Group controlId="formPasswordConfirmation">
+                <Form.Group controlId="formPasswordConfirmation" className="form">
                   <InputGroup>
                     <InputGroup.Prepend>
                         <InputGroup.Text>
                             <FaLock/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control 
-                      type="password" 
+                    <Form.Control
+                      type="password"
                       value={values.password_confirmation}
-                      placeholder="Confirm Password" 
-                      name="password_confirmation" 
-                      onChange={handleChange} 
+                      placeholder="Confirm Password"
+                      name="password_confirmation"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       className={touched.password_confirmation && errors.password_confirmation ? "error" : null}/>
                   </InputGroup>
@@ -214,7 +218,8 @@ class SignupForm extends React.Component {
                     <div className="error-message">{errors.password_confirmation}</div>
                   ): null}
                 </Form.Group>
-                <Button onClick={handleSubmit}>Submit</Button>
+                <Button className="login" onClick={handleSubmit}>Sign Up</Button>
+                <p> Already have a Bloom account? <Link to="/login" style={{color: 'black'}}><b> Login. </b></Link></p>
               </Form>
             )}
             </Formik>

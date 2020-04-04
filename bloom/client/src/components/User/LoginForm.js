@@ -10,6 +10,8 @@ import { FaEnvelope, FaLock } from 'react-icons/fa';
 import GoogleLogin from 'react-google-login';
 import FacebookLogin from 'react-facebook-login';
 import {TiSocialFacebookCircular, TiSocialGooglePlus} from 'react-icons/ti';
+import paint from '../../assets/abstract-painting.jpg';
+import { Link } from "react-router-dom";
 // import ReactDOM from 'react-dom';
 // import { useGoogleLogin } from 'react-google-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
@@ -109,14 +111,15 @@ class LoginForm extends React.Component {
   render() {
     return (
       <Container fluid>
+      <img src={paint} alt="paint" style={{top: 0, left: 0, position: 'absolute', height: '100%', width:'100%', filter: 'grayscale(0.4)'}}/>
         {alert}
         <Row className="justify-content-center">
           <Col xs={8} sm={7} md={6} lg={5}>
-            <Form className="formBody rounded">
+            <Form className="formBody rounded container">
               <h3>Login</h3>
-              <Form.Group>
+              <Form.Group style={{marginTop: 40, width: 350, marginLeft: 90}}>
                 <InputGroup>
-                  <InputGroup.Prepend>
+                  <InputGroup.Prepend >
                       <InputGroup.Text>
                           <FaEnvelope/>
                       </InputGroup.Text>
@@ -125,7 +128,7 @@ class LoginForm extends React.Component {
                 </InputGroup>
               </Form.Group>
 
-              <Form.Group>
+              <Form.Group style={{width: 350, marginLeft: 90}}>
                 <InputGroup>
                   <InputGroup.Prepend>
                       <InputGroup.Text>
@@ -135,9 +138,9 @@ class LoginForm extends React.Component {
                   <Form.Control id="password" type="password" placeholder="Password" onChange={this.handleChange}/>
                 </InputGroup>
               </Form.Group>
-              <Col xs={8} sm={10} md={11} lg={12}>
-                <Button  className="" type="submit" variant="primary" onClick={this.handleSubmit}>Login</Button>
-                <Row className="justify-content-center">
+              <Col xs={8} sm={8} md={8} lg={8} style={{marginLeft: 90}}>
+                <Button  className="login" type="submit" variant="primary" onClick={this.handleSubmit}>Login</Button>
+                  <p><b> OR </b></p>
                   <GoogleLogin
                     clientId={process.env.REACT_APP_GOOGLE_ID}
                     buttonText="Login with Google"
@@ -145,8 +148,8 @@ class LoginForm extends React.Component {
                     onFailure={failureGoogle}
                     cookiePolicy={'single_host_origin'}
                     render={renderProps => (
-                      <button onClick={renderProps.onClick} style={{margin: '10px', marginLeft: '20px', width: '220px', backgroundColor:"#db4a39", color: 'white', paddingRight: '30px',
-                    marginBottom: '50px', height: '48px', fontSize: '14px'}}> <TiSocialGooglePlus  size={45} style={{paddingRight:"15px"}}/>Login with Google</button>
+                      <button onClick={renderProps.onClick} style={{ width: '330px', backgroundColor:"#db4a39", color: 'white', paddingRight: '30px',
+                    marginBottom: '10px', height: '48px', fontSize: '14px'}}> <TiSocialGooglePlus  size={45} style={{paddingRight:"15px"}}/>Login with Google</button>
                     )}
                   />
 
@@ -159,7 +162,7 @@ class LoginForm extends React.Component {
                     icon={<TiSocialFacebookCircular size={45} style={{paddingRight:"15px"}}/>}
                     callback={successFacebook}
                     />
-                </Row>
+                  <p> Don't have a Bloom account yet? <Link to="/signup" style={{color: 'black'}}><b> Sign Up. </b></Link></p>
               </Col>
             </Form>
           </Col>
