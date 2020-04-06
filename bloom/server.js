@@ -221,12 +221,14 @@ app.post('/addStore', withAuth, async (req, res, next) => {
   await stores.addStore(req, res, next);
 });
 
+app.get('/stores/:store_id/storeHours', withAuth, async (req, res, next) => {
+  await stores.getStoreHours(req, res, next);
+});
+
 //s3
 app.post('/getPresignedUrl', withAuth, async (req, res) => {
   await s3.getPresignedUploadUrl(req, res);
 });
-
-
 
 let port = process.env.PORT || 8081;
 

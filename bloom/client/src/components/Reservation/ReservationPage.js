@@ -79,7 +79,7 @@ class ReservationPage extends React.Component {
     return rhours + " " + this.pluralize(rhours, 'hour') + " and " + rminutes + " " + this.pluralize(rminutes, 'minute');
   }
 
-  prefetchWorkers = () => {
+  prefetchSchedules = () => {
     fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/workers/schedules" , {
       method: "GET",
       headers: {
