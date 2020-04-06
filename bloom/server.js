@@ -12,6 +12,7 @@ const helper = require('./helper.js')
 const stores = require('./routes/stores.js');
 const users = require('./routes/users.js');
 const jwt = require('jsonwebtoken');
+const s3 = require('./routes/s3');
 
 require('dotenv').config();
 
@@ -147,8 +148,8 @@ app.post('/login', async (req, res) => {
   await users.login(req, res);
 });
 
-app.post('/users/:id', async (req, res) => {
-  await users.edit(req, res);
+app.post('/users/:id', async (req, res, next) => {
+  await users.edit(req, res, next);
 });
 
 
@@ -215,6 +216,12 @@ app.get('/stores', withAuth, async (req, res, next) => {
 app.post('/addStore', withAuth, async (req, res, next) => {
   await stores.addStore(req, res, next);
 });
+
+//s3
+app.post('/getPresignedUrl', withAuth, async (req, res) => {
+  await s3.getPresignedUploadUrl(req, res);
+});
+
 
 
 let port = process.env.PORT || 8081;

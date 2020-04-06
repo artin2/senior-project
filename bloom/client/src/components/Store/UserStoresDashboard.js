@@ -15,12 +15,7 @@ import {
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
 
-// ***** NOTE: Change those with this.state.category, this.state.street etc
-
-const categories = ['Nail Salon', 'Hair Salon', 'Spa & Wellness Center'];
-const street = "237 Clybourne Avenue";
-const city = "Los Angeles";
-const state = "CA";
+// ***** NOTE: fix to properly display all the stores
 
 class UserStoresDashboard extends React.Component {
   constructor(props) {
@@ -147,36 +142,36 @@ class UserStoresDashboard extends React.Component {
   render() {
     return (
       <Container fluid>
-        <div className="style_column"> </div>
-        <FaEdit className="edit" size={25} />
-        <Row className="justify-content-center">
-
-          <Carousel className="dashboard_carousel" interval="">
-
-              <Carousel.Item className="item">
-                <img className="item" src={salon2} />
-              </Carousel.Item>
-              <Carousel.Item className="item">
-                <img className="item" src={hair} />
-              </Carousel.Item>
-
-          </Carousel>
-          <Col style={{marginLeft: 450, marginTop: 100}}>
-            <p className="name"> Salon Name </p>
-              <p className="address">{street}, {city}, {state} </p>
-            <div style={{marginLeft:200}}>
-            {categories.map(category => (
-            <div className="category"> <p style={{color: 'white'}}> {category} </p> </div>
-            ))}
-            </div>
-
-            <div style={{width: 500, marginLeft: 330}}>
-            <p className="description"> Description: Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-             Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
-            </div>
-          </Col>
-        </Row>
-
+        {this.state.stores.map((store, index) => (
+          <div key={"store" + index}>
+            <div className="style_column"> </div>
+            <FaEdit className="edit" size={25} onClick={() => this.triggerStoreEdit(store)}/>
+            <Row className="justify-content-center">
+              <Carousel className="dashboard_carousel" interval="">
+                  <Carousel.Item className="item">
+                    <img className="item" src={salon2} />
+                  </Carousel.Item>
+                  <Carousel.Item className="item">
+                    <img className="item" src={hair} />
+                  </Carousel.Item>
+              </Carousel>
+              <Col style={{marginLeft: 450, marginTop: 100}}>
+                  <p className="name" onClick={() => this.triggerAddService(store.id)}> {store.name} </p>
+                  <p className="address">{store.street}, {store.city}, {store.state} </p>
+                <div style={{marginLeft:200}}>
+                  {store.category.map(category => (
+                    <div className="category"> <p style={{color: 'white'}}> {category} </p> </div>
+                  ))}
+                </div>
+                <div style={{width: 500, marginLeft: 330}}>
+                <p className="description"> 
+                  {store.description}
+                </p>
+                </div>
+              </Col>
+            </Row>
+          </div>
+        ))}
       </Container>
     );
   }

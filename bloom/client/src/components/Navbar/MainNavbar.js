@@ -54,6 +54,8 @@ class MainNavbar extends React.Component {
 
   render() {
     let userComponents = null
+    let storeDisplay = null
+
     if(!this.state.loggedIn) {
       userComponents = <Nav className="left">
                           <Link to="/login" className="nav-link">Login</Link>
@@ -61,13 +63,20 @@ class MainNavbar extends React.Component {
                        </Nav>
     }
     else {
+      if(this.state.user.role != '0'){
+        console.log(this.state.user)
+        storeDisplay = <NavDropdown title="Manage Stores" id="basic-nav-dropdown">
+                          <NavDropdown.Item href={"/users/" + this.state.user.id + "/stores"}>Dashboard</NavDropdown.Item>
+                          <NavDropdown.Item href="/storeCalendar">Calendar</NavDropdown.Item>
+                          <NavDropdown.Divider />
+                          <NavDropdown.Item href="/store/signup">Create Store</NavDropdown.Item>
+                        </NavDropdown>
+      }
+      else{
+        storeDisplay = <Link to="/store/signup" className="nav-link">Create Store</Link>
+      }
       userComponents = <Nav>
-                          <NavDropdown title="Manage Stores" id="basic-nav-dropdown">
-                            <NavDropdown.Item href={"/users/" + this.state.user.id + "/stores"}>Dashboard</NavDropdown.Item>
-                            <NavDropdown.Item href="/storeCalendar">Calendar</NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item href="/store/signup">Create Store</NavDropdown.Item>
-                          </NavDropdown>
+                          {storeDisplay}
                           <NavDropdown title="Profile" id="basic-nav-dropdown">
                           <NavDropdown.Item href={"/users/" + this.state.user.id}>View</NavDropdown.Item>
                             <NavDropdown.Item href={"/users/edit/" + this.state.user.id}>Edit</NavDropdown.Item>

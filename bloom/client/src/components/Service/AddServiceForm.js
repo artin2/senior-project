@@ -32,7 +32,8 @@ class AddServiceForm extends React.Component {
         { value: 'hair', label: 'Hair' }
       ],
       workerOptions: [],
-      selectedOption: null
+      selectedOption: null,
+      selectedFiles: null
     };
 
     // Schema for yup
@@ -58,9 +59,13 @@ class AddServiceForm extends React.Component {
       category: Yup.array()
       .required("Category is required")
       .nullable()
+      // pictures: Yup.array()
+      // .required("Picture is required")
+      // .nullable()
     });
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
+    this.uploadHandler = this.uploadHandler.bind(this);
   }
 
   componentDidMount() {
@@ -97,6 +102,50 @@ class AddServiceForm extends React.Component {
       pathname: '/stores/' + this.props.match.params.store_id
     })
   }
+
+  async uploadHandler() {
+    // upload each image to s3
+    // have to get presigned url from server before uploading directly
+    let pictures = []
+    for(let i = 0; i < this.state.selectedFiles.length; i++){
+      let values = {
+        fileName: this.state.selectedFiles[i].name, // should add the current time so its unique key?
+        fileType: this.state.selectedFiles[i].type
+      }
+
+      const response = await fetch('http://localhost:8081/getPresignedUrl/', {
+        method: "POST",
+        headers: {
+            'Content-type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(values)
+      })
+      const url = await response.json()
+
+      const responseS3 = await fetch(url, {
+          method: "PUT",
+          headers: {
+              'Content-type': this.state.selectedFiles[i].type
+          },
+          body: this.state.selectedFiles[i]
+        })
+      
+      if(responseS3.status!==200){
+        // throw an error alert
+        store.dispatch(addAlert(response))
+      }
+      else{
+        pictures.push(values.fileName)
+      }
+    }
+
+    return pictures
+  }
+
+  fileChangedHandler = event => {
+    this.setState({ selectedFiles: event.target.files })
+  }
     
   render() {
     return (
@@ -127,6 +176,10 @@ class AddServiceForm extends React.Component {
                 values.workers = values.workers.map(function(val){ 
                   return val.value; 
                 })
+
+                // upload to s3 from client to avoid burdening back end
+                // NOTE: returns the name of the files, not the url
+                values.pictures = this.uploadHandler()
 
                 fetch('http://localhost:8081/stores/addService/' + store_id, {
                   method: "POST",
@@ -272,6 +325,18 @@ class AddServiceForm extends React.Component {
                   />
                   {touched.category && errors.category ? (
                     <div className="error-message">{errors.category}</div>
+                  ): null}
+                </Form.Group>
+
+                <Form.Group controlId="formPictures">
+                  <input 
+                    onChange={this.fileChangedHandler}
+                    type="file"
+                    multiple
+                    className={touched.pictures && errors.pictures ? "error" : null}
+                  />
+                  {touched.pictures && errors.pictures ? (
+                    <div className="error-message">{errors.pictures}</div>
                   ): null}
                 </Form.Group>
 
