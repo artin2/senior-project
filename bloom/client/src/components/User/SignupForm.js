@@ -218,7 +218,7 @@ class SignupForm extends React.Component {
                     <div className="error-message">{errors.password_confirmation}</div>
                   ): null}
                 </Form.Group>
-                <Button className="login" onClick={handleSubmit}>Sign Up</Button>
+                <Button className="signup" onClick={handleSubmit}>Sign Up</Button>
                 <p> Already have a Bloom account? <Link to="/login" style={{color: 'black'}}><b> Login. </b></Link></p>
               </Form>
             )}
