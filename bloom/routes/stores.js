@@ -430,8 +430,8 @@ async function addService(req, res, next) {
 
     db.client.connect(function (err) {
       // check to see if the user exists
-      let query = 'INSERT INTO services(name, cost, workers, store_id, category, description, pictures, duration) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;'
-      let values = [req.body.name, req.body.cost, req.body.workers, req.params.store_id, req.body.category, req.body.description, req.body.pictures, req.body.duration]
+      let query = 'INSERT INTO services(name, cost, workers, store_id, category, description, duration) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;'
+      let values = [req.body.name, req.body.cost, req.body.workers, req.params.store_id, req.body.category, req.body.description, req.body.duration]
       db.client.query(query, values,
         async (errFirst, resultFirst) => {
           if (errFirst) {

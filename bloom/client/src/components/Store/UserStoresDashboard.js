@@ -156,11 +156,11 @@ class UserStoresDashboard extends React.Component {
                   </Carousel.Item>
               </Carousel>
               <Col style={{marginLeft: 450, marginTop: 100}}>
-                  <p className="name" onClick={() => this.triggerAddService(store.id)}> {store.name} </p>
+                  <p className="name" onClick={() => this.triggerShowServices(store.id)}> {store.name} </p>
                   <p className="address">{store.street}, {store.city}, {store.state} </p>
                 <div style={{marginLeft:200}}>
-                  {store.category.map(category => (
-                    <div className="category"> <p style={{color: 'white'}}> {category} </p> </div>
+                  {store.category.map((category, index) => (
+                    <div className="category" key={store.id + "-category-" + index}> <p style={{color: 'white'}}> {category} </p> </div>
                   ))}
                 </div>
                 <div style={{width: 500, marginLeft: 330}}>

@@ -230,6 +230,12 @@ app.post('/getPresignedUrl', withAuth, async (req, res) => {
   await s3.getPresignedUploadUrl(req, res);
 });
 
+app.post('/getImages', withAuth, async (req, res) => {
+  await s3.getImages(req, res);
+});
+
+
+
 let port = process.env.PORT || 8081;
 
 app.listen(port, function () {
