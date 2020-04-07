@@ -4,17 +4,26 @@ import ServiceSelection from './ServiceSelection'
 import './ReservationPage.css'
 import { Row, Col, Card, ListGroup } from 'react-bootstrap'
 import { FaArrowLeft } from 'react-icons/fa'
-import DateSelection from './DateSelection';
+import DateSelection from './DateSelection'
+import { css } from '@emotion/core'
+import GridLoader from 'react-spinners/GridLoader'
+
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
 
 class ReservationPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      storeName: 'Nails R Us',
+      storeName: null,
       total: 0,
       time: 0,
       currentStep: 1,
-      selectedServices: []
+      selectedServices: [],
+      services: [],
+      isLoading: true
     };
   }
 
@@ -70,15 +79,89 @@ class ReservationPage extends React.Component {
     return rhours + " " + this.pluralize(rhours, 'hour') + " and " + rminutes + " " + this.pluralize(rminutes, 'minute');
   }
 
+  prefetchSchedules = () => {
+    fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/workers/schedules" , {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    .then(function(response){
+      console.log(response)
+      if(response.status!==200){
+        // should throw an error here
+        console.log("Error!", response.status)
+        // throw new Error(response.status)
+        // window.location.href='/'
+      }
+      else{
+        return response.json();
+      }
+    })
+    .then(data => {
+      // form data here
+      console.log("Limited store data from server:", data)
+      let convertedWorkers = data.map((worker) => ({ value: worker.id, label: worker.first_name + " " + worker.last_name }));
+      this.setState({
+        workerOptions: convertedWorkers
+      })
+    });
+  }
+
+  componentDidMount() {
+    // need to get store category, fetch?
+    Promise.all([
+      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/services", {
+      method: "GET",
+      headers: {
+        'Content-type': 'application/json'
+      },
+      credentials: 'include'
+    }).then(value => value.json()),
+    fetch('http://localhost:8081/stores/' + this.props.match.params.store_id, {
+      method: "GET",
+      headers: {
+        'Content-type': 'application/json'
+      },
+      credentials: 'include'
+    }).then(value => value.json())
+    ]).then(allResponses => {
+      console.log(allResponses)
+      const response1 = allResponses[0]
+      const response2 = allResponses[1]
+      this.setState({
+        services: response1,
+        storeName: response2.name,
+        isLoading: false
+      })
+    })
+  }
+
 
 
   render() {
     let that = this;
     const DisplayByStep = (props) => {
-      if (this.state.currentStep == 1) {
-        return <ServiceSelection updateReservation={this.updateReservation} selectedServices={this.state.selectedServices} time={this.state.time} total={this.state.total} handleSubmit={this.handleSubmit} timeConvert={this.timeConvert} pluralize={this.pluralize} />
+      if (this.state.isLoading) {
+        return <Card className="fullHeight">
+          <Row className="vertical-center">
+            <Col>
+              <GridLoader
+                css={override}
+                size={20}
+                color={"#2196f3"}
+                loading={this.state.isLoading}
+              />
+            </Col>
+          </Row>
+        </Card>
       } else {
-        return <DateSelection time={this.state.time} selectedServices={this.state.selectedServices}/>
+        if (this.state.currentStep == 1) {
+          return <ServiceSelection services={this.state.services} updateReservation={this.updateReservation} selectedServices={this.state.selectedServices} time={this.state.time} total={this.state.total} handleSubmit={this.handleSubmit} timeConvert={this.timeConvert} pluralize={this.pluralize} />
+        } else {
+          return <DateSelection time={this.state.time} selectedServices={this.state.selectedServices} />
+        }
       }
     }
 

@@ -10,16 +10,17 @@ const options = {
 const geocoder = NodeGeocoder(options);
 
 async function getStore(req, res, next) {
-  try{
+  try {
     await auth.verifyToken(req, res, next);
     let storeId = req.params.store_id
     let query = 'SELECT * FROM stores WHERE id=' + storeId
 
-    db.client.connect(function(err) {
+      db.client.connect(function (err) {
       // try to get the store
       db.client.query(query,
         async (err, result) => {
           if (err) {
+            // check err if it's a string
             helper.queryError(res, err);
           }
 
@@ -30,13 +31,13 @@ async function getStore(req, res, next) {
           else{
             helper.queryError(res, "Could not Find Store!");
           }
-      });
+        });
       if (err) {
         helper.dbConnError(res, err);
       }
     });
   }
-  catch(err){
+  catch (err) {
     helper.authError(res, err);
   }
 };
@@ -118,7 +119,7 @@ async function getStores(req, res, next) {
 };
 
 async function getUserStores(req, res, next) {
-  try{
+  try {
     await auth.verifyToken(req, res, next);
 
     // query for stores within the given distance, and that have any of the categories checked by the client
@@ -126,14 +127,14 @@ async function getUserStores(req, res, next) {
                 FROM stores
                 WHERE ` + req.params.store_id + ` = ANY(owners)`
 
-    db.client.connect(function(err) {
+    db.client.connect(function (err) {
       // try to get all stores registered to this user
       db.client.query(query,
         async (err, result) => {
           if (err) {
             helper.queryError(res, err);
           }
-          
+
           // we were successfuly able to get the users stores
           if (result && result.rows.length > 0) {
             helper.querySuccess(res, result.rows, "Successfully got User's Stores!");
@@ -141,30 +142,32 @@ async function getUserStores(req, res, next) {
           else{
             helper.queryError(res, "No Store Results!");
           }
-      });
+        });
       if (err) {
         helper.dbConnError(res, err);
       }
     });
   }
-  catch(err){
+  catch (err) {
     helper.authError(res, err);
   }
 };
 
 async function editStore(req, res, next) {
-  if(req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.services && req.body.owners && req.body.description && req.body.pictures && req.body.id){
-    try{
+  let failed = false
+  let store = null
+  if (req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.services && req.body.owners && req.body.description && req.body.pictures && req.body.id) {
+    try {
       await auth.verifyToken(req, res, next);
       // should fix this later so it only does it when the address has changed
-      let geocodeResult = await geocoder.geocode({address: req.body.street, city: req.body.city, state: req.body.state, zipcode: req.body.zipcode})
+      let geocodeResult = await geocoder.geocode({ address: req.body.street, city: req.body.city, state: req.body.state, zipcode: req.body.zipcode })
       let lat = geocodeResult[0].latitude
       let lng = geocodeResult[0].longitude
       let query = 'UPDATE stores SET name=$1, street=$2, city=$3, state=$4, zipcode=$5, category=$6, phone=$7, services=$8, owners=$9, description=$10, pictures=$11, lat=$12, lng=$13 WHERE id=$14 RETURNING *'
       let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, req.body.category, req.body.phone, req.body.services, req.body.owners, req.body.description, req.body.pictures, lat, lng, req.body.id]
-
+      
       // connect to the db
-      db.client.connect(function(err) {
+      db.client.connect(function (err) {
         // try to update the store
         db.client.query(query, values,
           async (err, result) => {
@@ -174,20 +177,62 @@ async function editStore(req, res, next) {
 
             // we were successful in updating the store
             if (result && result.rows.length == 1) {
-              helper.querySuccess(res, result.rows[0], "Successfully Updated Store!");
+              console.log('Updated store, now moving to update hours if necessary')
+              store = result.rows[0];
             }
-            else{
+            else {
               // there were no results from trying to update the stores table
               helper.queryError(res, "Unable to Update Store!");
             }
-        });
+          });
         if (err) {
           helper.dbConnError(res, err);
         }
       });
     }
-    catch(err){
+    catch (err) {
       helper.authError(res, err);
+    }
+    // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7. 
+    let newHours = req.body.storeHours
+    // Below is for scoping issues. Res is undefined below
+    let resp = res
+    if (newHours.length > 0) {
+      let storeId = req.body.id
+        ; (async (req, res) => {
+          const hourDb = await db.client.connect();
+          try {
+            await hourDb.query("BEGIN");
+            const query = 'UPDATE store_hours SET open_time=$1, close_time=$2 WHERE store_id=$3 and day_of_the_week=$4 RETURNING store_id';
+            for (let i = 0; i < newHours.length; i++) {
+              if (newHours[i] != null) {
+                let storeHoursValues = [newHours[i].open_time, newHours[i].close_time, storeId, i]
+                await hourDb.query(query, storeHoursValues);
+              }
+            }
+            await hourDb.query("COMMIT");
+          } catch (e) {
+            await hourDb.query("ROLLBACK");
+            console.log('##########Rolling Back#############')
+            failed = true
+            throw e;
+          } finally {
+            if (!failed) {
+              helper.querySuccess(resp, store, 'Successfully updated store!');
+            } else {
+              resp.send("Something went wrong.")
+              resp.send(400)
+            }
+            hourDb.release();
+          }
+        })().catch(e => helper.queryError(resp, e));
+    } else {
+      if (!failed) {
+        helper.querySuccess(res, store, 'Successfully updated store!');
+      } else {
+        res.send("Something went wrong.")
+        res.send(400)
+      }
     }
   }
   else {
@@ -198,10 +243,10 @@ async function editStore(req, res, next) {
 };
 
 async function addStore(req, res, next) {
-  if(req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.description && req.body.pictures && req.body.owner_id){
-    try{
+  if (req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.description && req.body.pictures && req.body.owner_id) {
+    try {
       await auth.verifyToken(req, res, next);
-      let geocodeResult = await geocoder.geocode({address: req.body.street, city: req.body.city, state: req.body.state, zipcode: req.body.zipcode})
+      let geocodeResult = await geocoder.geocode({ address: req.body.street, city: req.body.city, state: req.body.state, zipcode: req.body.zipcode })
       let timestamp = helper.getFormattedDate();
       let lat = geocodeResult[0].latitude
       let lng = geocodeResult[0].longitude
@@ -209,7 +254,7 @@ async function addStore(req, res, next) {
       let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, timestamp, req.body.category, req.body.phone, req.body.description, req.body.pictures, lat, lng, [0], [req.body.owner_id]]
 
       // connect to the db
-      db.client.connect(function(err) {
+      db.client.connect(function (err) {
         // try to add the store into the db
         db.client.query(query, values,
           async (err, result) => {
@@ -221,23 +266,23 @@ async function addStore(req, res, next) {
             if (result && result.rows.length == 1) {
               helper.querySuccess(res, result.rows[0], "Successfully Created Store!");
             }
-            else{
+            else {
               // there were no results from trying to insert into the stores table
               helper.queryError(res, "Unable to Insert Store!");
             }
           }
         );
-        
+
         if (err) {
           helper.dbConnError(res, err);
         }
       });
     }
-    catch(err){
+    catch (err) {
       helper.authError(res, err);
     }
   }
-  else{
+  else {
     // not sure if this is correct
     res.send("Missing parameter(s).")
     res.send(400)
@@ -254,7 +299,7 @@ async function addWorker(req, res, next) {
     // should add verification to check they are the store owner, maybe can do this in the front end though...
     await auth.verifyToken(req, res, next);
 
-    db.client.connect(function(err) {
+    db.client.connect(function (err) {
       // check to see if the user exists
       let query = 'SELECT * from users WHERE email = $1'
       let values = [req.body.email]
@@ -268,7 +313,7 @@ async function addWorker(req, res, next) {
             let timestamp = helper.getFormattedDate();
             query = 'INSERT INTO workers(first_name, last_name, services, store_id, user_id, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;'
             let values = [result.rows[0].first_name, result.rows[0].last_name, [0], req.params.store_id, result.rows[0].id, timestamp]
-            
+
             // try to insert the worker in the workers table
             db.client.query(query, values,
               async (errFirst, resultFirst) => {
@@ -277,7 +322,7 @@ async function addWorker(req, res, next) {
                 }
 
                 // we were successful in inserting the worker
-                if(resultFirst && resultFirst.rows.length == 1){
+                if (resultFirst && resultFirst.rows.length == 1) {
                   // now we have to update the user row to make their role worker
                   // note, may want to update query to this...
                   // query = 'UPDATE users SET role = array_append(role, 1) WHERE id=$2 RETURNING *'
@@ -303,14 +348,14 @@ async function addWorker(req, res, next) {
                             if (resultLast && resultLast.rows.length == 1) {
                               helper.querySuccess(res, resultFirst.rows[0], "Successfully Added Worker!");
                             }
-                            else{
+                            else {
                               // there was a problem updating the stores table 
                               helper.queryError(res, "Could not Update Stores Table!");
                             }
                           }
                         )
                       }
-                      else{
+                      else {
                         // there was a problem updating the users table 
                         helper.queryError(res, "Could not Update Users Table!");
                       }
@@ -324,7 +369,7 @@ async function addWorker(req, res, next) {
               }
             );
           }
-          else{
+          else {
             // error, there were no results from trying to get the user to become worker from the db
             helper.queryError(res, "User does not Exist!");
           }
@@ -341,20 +386,20 @@ async function addWorker(req, res, next) {
 };
 
 async function editWorker(req, res, next) {
-  try{
+  try {
     await auth.verifyToken(req, res, next);
 
     let query = 'UPDATE workers SET first_name=$1, last_name=$2, services=$3 WHERE id=$4 RETURNING *'
     let values = [req.body.first_name, req.body.last_name, req.body.services, req.params.item_id]
 
-    db.client.connect(function(err) {
+    db.client.connect(function (err) {
       // update the store worker
       db.client.query(query, values,
         async (err, result) => {
           if (err) {
             helper.queryError(res, err);
           }
-          
+
           // we were successfuly able to update the worker
           if (result && result.rows.length == 1) {
             helper.querySuccess(res, result.rows[0], "Successfully Updated Worker!");
@@ -362,13 +407,13 @@ async function editWorker(req, res, next) {
           else{
             helper.queryError(res, "Could not Edit Store Worker!");
           }
-      });
+        });
       if (err) {
         helper.dbConnError(res, err);
       }
     });
   }
-  catch(err){
+  catch (err) {
     helper.authError(res, err);
   }
 };
@@ -383,10 +428,10 @@ async function addService(req, res, next) {
     // should add verification to check they are the store owner, maybe can do this in the front end though...
     await auth.verifyToken(req, res, next);
 
-    db.client.connect(function(err) {
+    db.client.connect(function (err) {
       // check to see if the user exists
-      let query = 'INSERT INTO services(name, cost, workers, store_id, category, description, pictures, duration) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;'
-      let values = [req.body.name, req.body.cost, req.body.workers, req.params.store_id, req.body.category, req.body.description, req.body.pictures, req.body.duration]
+      let query = 'INSERT INTO services(name, cost, workers, store_id, category, description, duration) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;'
+      let values = [req.body.name, req.body.cost, req.body.workers, req.params.store_id, req.body.category, req.body.description, req.body.duration]
       db.client.query(query, values,
         async (errFirst, resultFirst) => {
           if (errFirst) {
@@ -396,7 +441,7 @@ async function addService(req, res, next) {
           // we were able to insert the service
           if (resultFirst && resultFirst.rows.length == 1) {
             // add the service to each workers services array
-            for(var i = 0; i < req.body.workers.length; i++){
+            for (var i = 0; i < req.body.workers.length; i++) {
               query = 'UPDATE workers SET services = array_append(services, $1) WHERE id=$2 RETURNING *'
               values = [resultFirst.rows[0].id, req.body.workers[i]]
               db.client.query(query, values,
@@ -447,7 +492,7 @@ async function addService(req, res, next) {
 // Reusable worker/service functions 
 // table is either workers or services
 async function getStoreItems(req, res, next, table) {
-  try{
+  try {
     await auth.verifyToken(req, res, next);
 
     // query for stores within the given distance, and that have any of the categories checked by the client
@@ -455,14 +500,14 @@ async function getStoreItems(req, res, next, table) {
 
     let values = [req.params.store_id]
 
-    db.client.connect(function(err) {
+    db.client.connect(function (err) {
       // try to get all items registered to this store
       db.client.query(query, values,
         async (err, result) => {
           if (err) {
             helper.queryError(res, err);
           }
-          
+
           // we were successfuly able to get the store items
           if (result && result.rows.length > 0) {
             helper.querySuccess(res, result.rows, "Successfully got Store Items!");
@@ -470,47 +515,114 @@ async function getStoreItems(req, res, next, table) {
           else{
             helper.queryError(res, "No Store Items");
           }
-      });
+        });
       if (err) {
         helper.dbConnError(res, err);
       }
     });
   }
-  catch(err){
+  catch (err) {
     helper.authError(res, err);
   }
 };
 
 async function getStoreItem(req, res, next, table) {
-  try{
+  try {
     await auth.verifyToken(req, res, next);
 
     // query for store item
     let query = 'SELECT * FROM ' + table + ' WHERE id = $1'
     let values = [req.params.item_id]
 
-    db.client.connect(function(err) {
+    db.client.connect(function (err) {
       // try to get the store item based on id
       db.client.query(query, values,
         async (err, result) => {
           if (err) {
             helper.queryError(res, err);
           }
-          
+
           // we were successfuly able to get the store item
           if (result && result.rows.length == 1) {
-            helper.querySuccess(res, result.rows[0]);
+            helper.querySuccess(res, result.rows[0], 'Sucessfully found store item!');
           }
           else{
             helper.queryError(res, "Could not find Store Item!");
           }
-      });
+        });
       if (err) {
         helper.dbConnError(res, err);
       }
     });
   }
-  catch(err){
+  catch (err) {
+    helper.authError(res, err);
+  }
+};
+
+async function getWorkersSchedules(req, res, next) {
+  try {
+    await auth.verifyToken(req, res, next);
+
+    // query for store item
+    let query = 'SELECT * FROM schedules WHERE store_id = $1 and day between now() and now() + interval \'1 month\''
+    let values = [req.params.item_id]
+
+    db.client.connect(function (err) {
+      // try to get the store item based on id
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+
+          // we were successfuly able to get the store item
+          if (result && result.rows.length == 1) {
+            helper.querySuccess(res, result.rows[0], 'Successfully got worker schedules!');
+          }
+          else {
+            helper.queryError(res, new Error("Could not find worker schedules!"));
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch (err) {
+    helper.authError(res, err);
+  }
+};
+
+async function getStoreHours(req, res, next) {
+  try {
+    await auth.verifyToken(req, res, next);
+
+    // query for store item
+    let query = 'SELECT open_time, close_time FROM store_hours WHERE store_id = $1 ORDER BY day_of_the_week'
+    let values = [req.params.store_id]
+
+    db.client.connect(function (err) {
+      // try to get the store item based on id
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+          // we were successfuly able to get the store item
+          if (result && result.rows.length > 0) {
+            helper.querySuccess(res, result.rows, 'Successfully got store hours!');
+          }
+          else {
+            helper.queryError(res, new Error("Could not find store hours!"));
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch (err) {
     helper.authError(res, err);
   }
 };
@@ -525,5 +637,7 @@ module.exports = {
   editWorker: editWorker,
   getStoreItems: getStoreItems,
   getStoreItem: getStoreItem,
-  addService: addService
+  addService: addService,
+  getWorkersSchedules: getWorkersSchedules,
+  getStoreHours: getStoreHours
 };

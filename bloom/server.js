@@ -204,6 +204,10 @@ app.get('/stores/:store_id/workers', withAuth, async (req, res, next) => {
   await stores.getStoreItems(req, res, next, "workers");
 });
 
+app.get('/stores/:store_id/workers/schedules', withAuth, async (req, res, next) => {
+  await stores.getWorkersSchedules(req, res, next);
+});
+
 //stores
 app.get('/stores/:store_id', withAuth, async (req, res, next) => {
   await stores.getStore(req, res, next);
@@ -217,9 +221,17 @@ app.post('/addStore', withAuth, async (req, res, next) => {
   await stores.addStore(req, res, next);
 });
 
+app.get('/stores/:store_id/storeHours', withAuth, async (req, res, next) => {
+  await stores.getStoreHours(req, res, next);
+});
+
 //s3
 app.post('/getPresignedUrl', withAuth, async (req, res) => {
   await s3.getPresignedUploadUrl(req, res);
+});
+
+app.post('/getImages', withAuth, async (req, res) => {
+  await s3.getImages(req, res);
 });
 
 

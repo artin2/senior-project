@@ -106,10 +106,9 @@ class AddServiceForm extends React.Component {
   async uploadHandler() {
     // upload each image to s3
     // have to get presigned url from server before uploading directly
-    let pictures = []
     for(let i = 0; i < this.state.selectedFiles.length; i++){
       let values = {
-        fileName: this.state.selectedFiles[i].name, // should add the current time so its unique key?
+        fileName: 'stores/' + this.props.match.params.store_id + '/services/' + this.state.selectedFiles[i].name, // should add the current time so its unique key?
         fileType: this.state.selectedFiles[i].type
       }
 
@@ -135,12 +134,7 @@ class AddServiceForm extends React.Component {
         // throw an error alert
         store.dispatch(addAlert(response))
       }
-      else{
-        pictures.push(values.fileName)
-      }
     }
-
-    return pictures
   }
 
   fileChangedHandler = event => {
@@ -165,7 +159,7 @@ class AddServiceForm extends React.Component {
                 store_id: this.props.match.params.store_id
               }}
               validationSchema={this.yupValidationSchema}
-              onSubmit={(values) => {
+              onSubmit={async (values, {setSubmitting }) => {
                 let store_id = this.props.match.params.store_id
                 let triggerStoreDisplay = this.triggerStoreDisplay
 
@@ -179,7 +173,7 @@ class AddServiceForm extends React.Component {
 
                 // upload to s3 from client to avoid burdening back end
                 // NOTE: returns the name of the files, not the url
-                values.pictures = this.uploadHandler()
+                values.pictures = await this.uploadHandler()
 
                 fetch('http://localhost:8081/stores/addService/' + store_id, {
                   method: "POST",
@@ -203,6 +197,8 @@ class AddServiceForm extends React.Component {
                     triggerStoreDisplay()
                   }
                 })
+
+                setSubmitting(false)
               }}
             >
             {( {values,
