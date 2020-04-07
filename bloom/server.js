@@ -26,7 +26,7 @@ app.use(bodyParser.json());
 //   credentials: true,
 //   //CITATION: https://medium.com/@alexishevia/using-cors-in-express-cac7e29b005b
 //   origin: function(origin, callback){
-//     // allow requests with no origin 
+//     // allow requests with no origin
 //     // (like mobile apps or curl requests)
 //     if(!origin) return callback(null, true);
 //     if(allowedOrigins.indexOf(origin) === -1){
@@ -170,7 +170,7 @@ app.post('/stores/edit/:store_id', withAuth, async (req, res, next) => {
   await stores.editStore(req, res, next);
 });
 
-// store services 
+// store services
 app.post('/stores/addService/:store_id', withAuth, async (req, res, next) => {
   await stores.addService(req, res, next);
 });
@@ -234,6 +234,11 @@ app.post('/getImages', withAuth, async (req, res) => {
   await s3.getImages(req, res);
 });
 
+//Need to fix this: not sure what name of cookie is
+app.get('/clearCookie', (req, res) => {
+  res.clearCookie('jwt_token').end();
+  res.send('User Logged Out Successfully');
+});
 
 
 let port = process.env.PORT || 8081;
