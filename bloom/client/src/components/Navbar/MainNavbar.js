@@ -68,6 +68,7 @@ class MainNavbar extends React.Component {
         storeDisplay = <NavDropdown title="Manage Stores" id="basic-nav-dropdown">
                           <NavDropdown.Item href={"/users/" + this.state.user.id + "/stores"}>Dashboard</NavDropdown.Item>
                           <NavDropdown.Item href="/storeCalendar">Calendar</NavDropdown.Item>
+                          <NavDropdown.Item href="/stores/:store_id/services">Services</NavDropdown.Item>
                           <NavDropdown.Divider />
                           <NavDropdown.Item href="/store/signup">Create Store</NavDropdown.Item>
                         </NavDropdown>
