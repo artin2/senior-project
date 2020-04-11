@@ -27,7 +27,7 @@ class StoreEditForm extends React.Component {
     super(props);
     this.state = {
       store: {
-        pictures: [],
+        // pictures: [],
         name: "",
         description: "",
         phone: "",
@@ -260,7 +260,6 @@ class StoreEditForm extends React.Component {
 
                 values.services = this.state.store.services
                 values.owners = this.state.store.owners
-                values.pictures = this.state.store.pictures
                 values.id = store_id
                 values.storeHours = this.state.newHours
                 fetch('http://localhost:8081/stores/edit/' + store_id , {

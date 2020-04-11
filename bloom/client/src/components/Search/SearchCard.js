@@ -7,10 +7,10 @@ class SearchCard extends React.Component {
   render() {
     let image;
     if(this.props.carousel){
-      image = <LargeCarousel pictures={this.props.store.pictures}/>
+      image = <LargeCarousel pictures={this.props.pictures}/>
     }
     else{
-      image = <img className="d-block w-100" src={this.props.store.pictures[0]} alt={"1"} />
+      image = <img className="d-block w-100" src={this.props.pictures[0]} alt={"1"} />
     }
 
     let button

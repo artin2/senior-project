@@ -66,6 +66,7 @@
 .service_title {
   font-size: 30px;
   font-family: 'Aref Ruqaa', serif;
+  cursor: pointer;
 }
 
 .service_subtitle {

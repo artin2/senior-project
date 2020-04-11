@@ -25,15 +25,12 @@ class SearchDisplay extends React.Component {
 
   componentDidMount(){
     if(this.props.location.state && this.props.location.state.stores && this.props.location.state.center){
-      console.log("here")
       this.setState({
         stores: this.props.location.state.stores,
         center: this.props.location.state.center
       })
     }
     else{
-      console.log("there")
-      let self = this
       let link = window.location.href.split("search")
       let query = ""
       

@@ -11,6 +11,7 @@ import {
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
 import './StoreDisplay.css'
+import { getPictures } from '../s3'
 
 class StoreDisplay extends React.Component {
   constructor(props) {
@@ -27,14 +28,14 @@ class StoreDisplay extends React.Component {
         category: [],
         services: [],
         workers: [],
-        pictures: [],
         owners: [],
         phone: "",
         clients: [],
         description: "",
         lat: "",
         lng: ""
-      }
+      },
+      pictures: []
     }
   }
 
@@ -91,6 +92,23 @@ class StoreDisplay extends React.Component {
     }
   }
 
+  async componentDidUpdate(prevProps, prevState) {
+    if (prevState.store !== this.state.store) {
+      let picturesFetched = await getPictures('stores/' + this.state.store.id + '/images/')
+      this.setState({
+        pictures: picturesFetched
+      })
+      // can put this for now so we don't have to upload to s3
+      // this.setState({
+      //   pictures: [
+      //       "/hair.jpg",
+      //       "/nails.jpg",
+      //       "/salon.jpg"
+      //     ]
+      // })
+    }
+  }
+
   render() {
     let editButton;
     if(this.state.store.owners.indexOf(JSON.parse(Cookies.get('user').substring(2)).id) > -1){
@@ -116,7 +134,7 @@ class StoreDisplay extends React.Component {
             </div>
           </Col>
           <Col xs={10} sm={9} md={8} lg={7}>
-            <LargeCarousel className="carousel" pictures={this.state.store.pictures}/>
+            <LargeCarousel className="carousel" pictures={this.state.pictures}/>
           </Col>
         </Row>
         <Row>

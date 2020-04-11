@@ -15,10 +15,15 @@ import {
   addAlert
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
+import { uploadHandler } from '../s3';
 
 class StoreSignupForm extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      selectedFiles: null
+    }
     
     // options for store categories
     this.options = [
@@ -82,6 +87,10 @@ class StoreSignupForm extends React.Component {
     })
   }
 
+  fileChangedHandler = event => {
+    this.setState({ selectedFiles: event.target.files })
+  }
+
   render() {
     return (
       <Container fluid>
@@ -104,20 +113,17 @@ class StoreSignupForm extends React.Component {
                 values.category = values.category.map(function(val){ 
                   return val.label; 
                 })
-                // temporary
-                values.pictures = [
-                  "/hair.jpg",
-                  "/nails.jpg",
-                  "/salon.jpg"
-                ]
+
                 values.owner_id = JSON.parse(Cookies.get('user').substring(2)).id
+                
 
                 let triggerStoreDisplay = this.triggerStoreDisplay
 
                 fetch('http://localhost:8081/addStore' , {
                   method: "POST",
                   headers: {
-                    'Content-type': 'application/json'
+                    'Content-type': 'application/json',
+                    'Accept': 'application/json'
                   },
                   credentials: 'include',
                   body: JSON.stringify(values)
@@ -131,8 +137,11 @@ class StoreSignupForm extends React.Component {
                     return response.json();
                   }
                 })
-                .then(data => {
+                .then(async data => {
                   if(data){
+                    console.log(data)
+                    let prefix = 'stores/' + data.id + '/images/'
+                    await uploadHandler(prefix, this.state.selectedFiles)
                     triggerStoreDisplay(data)
                   }
                 });
@@ -304,6 +313,18 @@ class StoreSignupForm extends React.Component {
                       />
                       {touched.category && errors.category ? (
                         <div className="error-message">{errors.category}</div>
+                      ): null}
+                    </Form.Group>
+
+                    <Form.Group controlId="formPictures">
+                      <input 
+                        onChange={this.fileChangedHandler}
+                        type="file"
+                        multiple
+                        className={touched.pictures && errors.pictures ? "error" : null}
+                      />
+                      {touched.pictures && errors.pictures ? (
+                        <div className="error-message">{errors.pictures}</div>
                       ): null}
                     </Form.Group>
 

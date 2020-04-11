@@ -3,9 +3,9 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import { Button } from 'react-bootstrap';
-import SearchCard from '../Search/SearchCard';
+// import SearchCard from '../Search/SearchCard';
 import Carousel from 'react-bootstrap/Carousel'
-import salon from '../../assets/salon.jpg';
+// import salon from '../../assets/salon.jpg';
 import salon2 from '../../assets/salon2.jpeg';
 import hair from '../../assets/hair_salon.jpg';
 import { FaEdit } from 'react-icons/fa';
@@ -33,7 +33,6 @@ class UserStoresDashboard extends React.Component {
           category: [],
           services: [],
           workers: [],
-          pictures: [],
           owners: [],
           phone: "",
           clients: [],
@@ -141,33 +140,41 @@ class UserStoresDashboard extends React.Component {
 
   render() {
     return (
-      <Container fluid>
+      <Container fluid style={{backgroundColor: '#bdcddb'}}>
         {this.state.stores.map((store, index) => (
           <div key={"store" + index}>
-            <div className="style_column"> </div>
-            <FaEdit className="edit" size={25} onClick={() => this.triggerStoreEdit(store)}/>
-            <Row className="justify-content-center">
-              <Carousel className="dashboard_carousel" interval="">
-                  <Carousel.Item className="item">
-                    <img className="item" src={salon2} />
-                  </Carousel.Item>
-                  <Carousel.Item className="item">
-                    <img className="item" src={hair} />
-                  </Carousel.Item>
-              </Carousel>
-              <Col style={{marginLeft: 450, marginTop: 100}}>
-                  <p className="name" onClick={() => this.triggerShowServices(store.id)}> {store.name} </p>
-                  <p className="address">{store.street}, {store.city}, {store.state} </p>
-                <div style={{marginLeft:200}}>
+            <Row className="justify-content-center" style={{height: 700}}>
+              {/* <div className="style_column"> </div> */}
+              <Col xs={6} sm={6} md={6} lg={6}>
+                <Carousel className="dashboard_carousel" interval="">
+                    <Carousel.Item className="item">
+                      <img className="item" src={salon2} alt="test"/>
+                    </Carousel.Item>
+                    <Carousel.Item className="item">
+                      <img className="item" src={hair} alt="test2"/>
+                    </Carousel.Item>
+                </Carousel>
+              </Col>
+              <Col xs={6} sm={6} md={6} lg={6} style={{top: 125}}>
+                <span className="name" onClick={() => this.triggerStoreShow(store)} style={{cursor: 'pointer'}}> {store.name} </span>
+                <FaEdit className="edit" size={25} onClick={() => this.triggerStoreEdit(store)}/>
+                <p className="address">{store.street}, {store.city}, {store.state} </p>
+                <div>
                   {store.category.map((category, index) => (
                     <div className="category" key={store.id + "-category-" + index}> <p style={{color: 'white'}}> {category} </p> </div>
                   ))}
                 </div>
-                <div style={{width: 500, marginLeft: 330}}>
-                <p className="description"> 
-                  {store.description}
-                </p>
+                <div>
+                  <p className="description"> 
+                    {store.description}
+                  </p>
                 </div>
+
+                <Button onClick={() =>  this.triggerShowWorkers(store.id)}>View Workers</Button> &nbsp;
+                <Button onClick={() =>  this.triggerAddWorker(store.id)}>Add Worker</Button> &nbsp;
+                <Button onClick={() =>  this.triggerShowServices(store.id)}>View Services</Button> &nbsp;
+                <Button onClick={() =>  this.triggerAddService(store.id)}>Add Service</Button>
+
               </Col>
             </Row>
           </div>

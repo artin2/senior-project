@@ -156,15 +156,15 @@ async function getUserStores(req, res, next) {
 async function editStore(req, res, next) {
   let failed = false
   let store = null
-  if (req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.services && req.body.owners && req.body.description && req.body.pictures && req.body.id) {
+  if (req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.services && req.body.owners && req.body.description && req.body.id) {
     try {
       await auth.verifyToken(req, res, next);
       // should fix this later so it only does it when the address has changed
       let geocodeResult = await geocoder.geocode({ address: req.body.street, city: req.body.city, state: req.body.state, zipcode: req.body.zipcode })
       let lat = geocodeResult[0].latitude
       let lng = geocodeResult[0].longitude
-      let query = 'UPDATE stores SET name=$1, street=$2, city=$3, state=$4, zipcode=$5, category=$6, phone=$7, services=$8, owners=$9, description=$10, pictures=$11, lat=$12, lng=$13 WHERE id=$14 RETURNING *'
-      let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, req.body.category, req.body.phone, req.body.services, req.body.owners, req.body.description, req.body.pictures, lat, lng, req.body.id]
+      let query = 'UPDATE stores SET name=$1, street=$2, city=$3, state=$4, zipcode=$5, category=$6, phone=$7, services=$8, owners=$9, description=$10, lat=$11, lng=$12 WHERE id=$13 RETURNING *'
+      let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, req.body.category, req.body.phone, req.body.services, req.body.owners, req.body.description, lat, lng, req.body.id]
       
       // connect to the db
       db.client.connect(function (err) {
@@ -193,6 +193,8 @@ async function editStore(req, res, next) {
     catch (err) {
       helper.authError(res, err);
     }
+
+
     // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7. 
     let newHours = req.body.storeHours
     // Below is for scoping issues. Res is undefined below
@@ -220,38 +222,35 @@ async function editStore(req, res, next) {
             if (!failed) {
               helper.querySuccess(resp, store, 'Successfully updated store!');
             } else {
-              resp.send("Something went wrong.")
-              resp.send(400)
+              helper.queryError(res, "Unable to Update Store!");
             }
             hourDb.release();
           }
         })().catch(e => helper.queryError(resp, e));
     } else {
       if (!failed) {
+        // ******this is not working at the moment, need to wait for both queries to finish before sending this message....
         helper.querySuccess(res, store, 'Successfully updated store!');
       } else {
-        res.send("Something went wrong.")
-        res.send(400)
+        helper.queryError(res, "Unable to Update Store!");
       }
     }
   }
   else {
-    // not sure if this is correct
-    res.send("Missing parameter(s).")
-    res.send(400)
+    helper.queryError(res, "Missing Parameters!");
   }
 };
 
 async function addStore(req, res, next) {
-  if (req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.description && req.body.pictures && req.body.owner_id) {
+  if (req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.description && req.body.owner_id) {
     try {
       await auth.verifyToken(req, res, next);
       let geocodeResult = await geocoder.geocode({ address: req.body.street, city: req.body.city, state: req.body.state, zipcode: req.body.zipcode })
       let timestamp = helper.getFormattedDate();
       let lat = geocodeResult[0].latitude
       let lng = geocodeResult[0].longitude
-      let query = 'INSERT INTO stores(name, street, city, state, zipcode, created_at, category, phone, description, pictures, lat, lng, services, owners) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *;'
-      let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, timestamp, req.body.category, req.body.phone, req.body.description, req.body.pictures, lat, lng, [0], [req.body.owner_id]]
+      let query = 'INSERT INTO stores(name, street, city, state, zipcode, created_at, category, phone, description, lat, lng, services, owners) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *;'
+      let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, timestamp, req.body.category, req.body.phone, req.body.description, lat, lng, [0], [req.body.owner_id]]
 
       // connect to the db
       db.client.connect(function (err) {
@@ -264,6 +263,7 @@ async function addStore(req, res, next) {
 
             // we were successful in creating the store
             if (result && result.rows.length == 1) {
+              // at this point, we need to add the store hours as well******
               helper.querySuccess(res, result.rows[0], "Successfully Created Store!");
             }
             else {
@@ -283,9 +283,7 @@ async function addStore(req, res, next) {
     }
   }
   else {
-    // not sure if this is correct
-    res.send("Missing parameter(s).")
-    res.send(400)
+    helper.queryError(res, "Missing Parameters!");
   }
 };
 

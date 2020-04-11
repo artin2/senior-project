@@ -2,12 +2,12 @@ import React from 'react';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-import {
-  addAlert
-} from '../../reduxFolder/actions'
-import store from '../../reduxFolder/store';
+// import {
+//   addAlert
+// } from '../../reduxFolder/actions'
+// import store from '../../reduxFolder/store';
 import LargeCarousel from '../LargeCarousel';
-// import getPictures from '../s3'
+import { getPictures } from '../s3'
 
 class ServiceDisplay extends React.Component {
   constructor(props) {
@@ -24,52 +24,33 @@ class ServiceDisplay extends React.Component {
       },
       pictures: []
     }
-
-    // this.getPicturesAsync = this.getPicturesAsync.bind(this);
   }
 
-  // async getPicturesAsync(){
-  //   let data = await getPictures('stores/' + this.state.service.store_id + '/services/')
-  //   console.log(data)
-  //   this.setState({
-  //     pictures: data
-  //   })
-  // }
+  async componentDidUpdate(prevProps, prevState) {
+    if (prevState.service !== this.state.service) {
+      let picturesFetched = await getPictures('stores/' + this.state.service.store_id + '/services/' + this.state.service.name + '/')
+      this.setState({
+        pictures: picturesFetched
+      })
+    }
 
-  getPictures(){
-    fetch('http://localhost:8081/getImages', {
-      method: "POST",
-      headers: {
-          'Content-type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({prefix: 'stores/' + this.state.service.store_id + '/services/'})
-    })
-    .then(function(response){
-      if(response.status!==200){
-        // throw an error alert
-        store.dispatch(addAlert(response))
-      }
-      else{
-        return response.json();
-      }
-    })
-    .then(data => {
-      if(data){
-        this.setState({
-          pictures: data
-        })
-      }
-    });
+    // can put this for now so we don't have to upload to s3
+    // this.setState({
+    //   pictures: [
+    //       "/hair.jpg",
+    //       "/nails.jpg",
+    //       "/salon.jpg"
+    //     ]
+    // })
   }
 
   async componentDidMount(): Promise<void> {
     if(this.props.location.state && this.props.location.state.service){
+      
       this.setState({
         service: this.props.location.state.service
-      },
-      this.getPictures)
-      // this.getPicturesAsync)
+      })
+      // this.getPictures)
     }
     else{
       const response = await fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id, {
@@ -83,9 +64,8 @@ class ServiceDisplay extends React.Component {
       const data = await response.json()
       this.setState({
         service: data
-      },
-      this.getPictures)
-      // this.getPicturesAsync)
+      })
+      // this.getPictures)
     }
 
     return Promise.resolve()

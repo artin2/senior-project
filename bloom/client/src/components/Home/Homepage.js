@@ -1,12 +1,12 @@
 import React from 'react';
-import Container from 'react-bootstrap/Container'
+// import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import AdvancedSearch from '../Search/AdvancedSearch';
 import './Homepage.css';
 import paint from '../../assets/abstract-painting.jpg';
 import barber from '../../assets/barber.jpg';
-import bride_hair from '../../assets/bride_hair.jpg';
+// import bride_hair from '../../assets/bride_hair.jpg';
 import facials from '../../assets/facials.jpg';
 import hair from '../../assets/hair.jpg';
 import lipstics from '../../assets/lipstics2.jpg';
@@ -16,14 +16,14 @@ import salon from '../../assets/salon.jpg';
 import paint_line from '../../assets/paint_line.png';
 import Typist from 'react-typist';
 import { useState, useEffect } from 'react'
-import { useSpring, animated as a } from 'react-spring'
-import TrackVisibility from 'react-on-screen';
+// import { useSpring, animated as a } from 'react-spring'
+// import TrackVisibility from 'react-on-screen';
 import VizSensor from 'react-visibility-sensor';
-import Typing from 'react-typing-animation';
+// import Typing from 'react-typing-animation';
 import Category from './Category.js';
 
 import {
-  addAlert, addUser
+  addAlert, //addUser
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
 

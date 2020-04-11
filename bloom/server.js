@@ -176,6 +176,7 @@ app.post('/stores/addService/:store_id', withAuth, async (req, res, next) => {
 });
 
 app.post('/stores/:store_id/services/:item_id', withAuth, async (req, res, next) => {
+  // **still need to implement
   await stores.editStoreService(req, res, next);
 });
 

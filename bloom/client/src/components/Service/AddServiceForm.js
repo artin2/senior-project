@@ -14,16 +14,16 @@ import {
   addAlert
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
+import { uploadHandler } from '../s3';
 
 class AddServiceForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
+      name: '', // assuming this is a unique value for file upload
       cost: '',
       duration: '',
       description: '',
-      pictures: [],
       workers: [],
       category: [],
       store_id: '',
@@ -65,7 +65,6 @@ class AddServiceForm extends React.Component {
     });
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
-    this.uploadHandler = this.uploadHandler.bind(this);
   }
 
   componentDidMount() {
@@ -103,40 +102,6 @@ class AddServiceForm extends React.Component {
     })
   }
 
-  async uploadHandler() {
-    // upload each image to s3
-    // have to get presigned url from server before uploading directly
-    for(let i = 0; i < this.state.selectedFiles.length; i++){
-      let values = {
-        fileName: 'stores/' + this.props.match.params.store_id + '/services/' + this.state.selectedFiles[i].name, // should add the current time so its unique key?
-        fileType: this.state.selectedFiles[i].type
-      }
-
-      const response = await fetch('http://localhost:8081/getPresignedUrl/', {
-        method: "POST",
-        headers: {
-            'Content-type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(values)
-      })
-      const url = await response.json()
-
-      const responseS3 = await fetch(url, {
-          method: "PUT",
-          headers: {
-              'Content-type': this.state.selectedFiles[i].type
-          },
-          body: this.state.selectedFiles[i]
-        })
-      
-      if(responseS3.status!==200){
-        // throw an error alert
-        store.dispatch(addAlert(response))
-      }
-    }
-  }
-
   fileChangedHandler = event => {
     this.setState({ selectedFiles: event.target.files })
   }
@@ -172,8 +137,8 @@ class AddServiceForm extends React.Component {
                 })
 
                 // upload to s3 from client to avoid burdening back end
-                // NOTE: returns the name of the files, not the url
-                values.pictures = await this.uploadHandler()
+                let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                await uploadHandler(prefix, this.state.selectedFiles)
 
                 fetch('http://localhost:8081/stores/addService/' + store_id, {
                   method: "POST",

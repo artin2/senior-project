@@ -77,7 +77,9 @@ class ServiceEditForm extends React.Component {
 
   componentDidMount() {
     if(this.props.location.state && this.props.location.state.service){
+      // console.log(this.props.location.state.service)
       let convertedCategoryData = this.props.location.state.service.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+      // console.log(convertedCategoryData)
       this.setState({
         service: this.props.location.state.service,
         convertedCategory: convertedCategoryData
@@ -157,9 +159,9 @@ class ServiceEditForm extends React.Component {
                 cost: this.state.service.cost,
                 duration: this.state.service.duration,
                 description: this.state.service.description,
-                pictures: this.state.service.pictures,
+                // pictures: this.state.service.pictures,
                 workers: this.state.service.workers,
-                category: this.state.service.category,
+                category: this.state.convertedCategory,
                 store_id: this.props.match.params.store_id
               }}
               validationSchema={this.yupValidationSchema}
