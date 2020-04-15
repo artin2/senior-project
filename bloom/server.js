@@ -210,11 +210,11 @@ app.get('/stores/:store_id/workers/schedules', withAuth, async (req, res, next) 
 });
 
 //stores
-app.get('/stores/:store_id', withAuth, async (req, res, next) => {
+app.get('/stores/:store_id', async (req, res, next) => {
   await stores.getStore(req, res, next);
 });
 
-app.get('/stores', withAuth, async (req, res, next) => {
+app.get('/stores', async (req, res, next) => {
   await stores.getStores(req, res, next);
 });
 

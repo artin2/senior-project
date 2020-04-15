@@ -112,7 +112,7 @@ class StoreDisplay extends React.Component {
 
   render() {
     let editButton;
-    if(this.state.store.owners.indexOf(JSON.parse(Cookies.get('user').substring(2)).id) > -1){
+    if(Cookies.get('user') && this.state.store.owners.indexOf(JSON.parse(Cookies.get('user').substring(2)).id) > -1){
       editButton = <Button className="float-left" onClick={() =>  this.triggerStoreEdit()}>Edit Store</Button>
     }
 

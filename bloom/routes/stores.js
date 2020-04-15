@@ -11,7 +11,7 @@ const geocoder = NodeGeocoder(options);
 
 async function getStore(req, res, next) {
   try {
-    await auth.verifyToken(req, res, next);
+    // await auth.verifyToken(req, res, next);
     let storeId = req.params.store_id
     let query = 'SELECT * FROM stores WHERE id=' + storeId
 
@@ -44,7 +44,7 @@ async function getStore(req, res, next) {
 
 async function getStores(req, res, next) {
   try{
-    await auth.verifyToken(req, res, next);
+    // await auth.verifyToken(req, res, next);
     let geocodeResult = await geocoder.geocode(req.query.address)
     let lat = geocodeResult[0].latitude
     let lng = geocodeResult[0].longitude

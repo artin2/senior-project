@@ -64,8 +64,7 @@ class AdvancedSearch extends React.Component {
       method: "GET",
       headers: {
           'Content-type': 'application/json'
-      },
-      credentials: 'include'
+      }
     })
     .then(function(response){
       if(response.status!==200){
