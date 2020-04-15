@@ -15,7 +15,7 @@ import {
   addAlert
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
-import { uploadHandler } from '../s3';
+// import { uploadHandler } from '../s3';
 
 class StoreSignupForm extends React.Component {
   constructor(props) {
@@ -139,9 +139,9 @@ class StoreSignupForm extends React.Component {
                 })
                 .then(async data => {
                   if(data){
-                    console.log(data)
-                    let prefix = 'stores/' + data.id + '/images/'
-                    await uploadHandler(prefix, this.state.selectedFiles)
+                    // console.log(data)
+                    // let prefix = 'stores/' + data.id + '/images/'
+                    // await uploadHandler(prefix, this.state.selectedFiles)
                     triggerStoreDisplay(data)
                   }
                 });

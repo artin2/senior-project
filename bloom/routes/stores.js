@@ -43,78 +43,73 @@ async function getStore(req, res, next) {
 };
 
 async function getStores(req, res, next) {
-  if(req.query.street && req.query.city && req.query.state && req.query.zipcode){
-    try{
-      await auth.verifyToken(req, res, next);
-      let geocodeResult = await geocoder.geocode({address: req.query.street, city: req.query.city, state: req.query.state, zipcode: req.query.zipcode})
-      let lat = geocodeResult[0].latitude
-      let lng = geocodeResult[0].longitude
-      let distance = req.query.distance
-      let categories = ['Nails', 'Hair']
-      let categoryQueryArray = []
+  try{
+    await auth.verifyToken(req, res, next);
+    let geocodeResult = await geocoder.geocode(req.query.address)
+    let lat = geocodeResult[0].latitude
+    let lng = geocodeResult[0].longitude
+    let distance = req.query.distance
+    let categories = ['Nails', 'Hair']
+    let categoryQueryArray = []
 
-      // check to see which categories where marked as true
-      let j = categories.length
-      while (j--) {
-        cat = categories[j].toLowerCase()
-        if (req.query[cat] == "true") { 
-          categoryQueryArray.push(categories[j])
-        }
+    // check to see which categories where marked as true
+    let j = categories.length
+    while (j--) {
+      cat = categories[j].toLowerCase()
+      if (req.query[cat] == "true") { 
+        categoryQueryArray.push(categories[j])
       }
+    }
 
-      // if client didn't mark any categories then they want all of them
-      if(categoryQueryArray.length == 0){
-        categoryQueryArray = categories
+    // if client didn't mark any categories then they want all of them
+    if(categoryQueryArray.length == 0){
+      categoryQueryArray = categories
+    }
+
+    // convert the category array to a string literal array that postgres can understand
+    var categoryQuery = '\'{';
+    for(var i = 0; i < categoryQueryArray.length; i++) {
+      if(i == categoryQueryArray.length - 1){
+        categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'";
       }
-
-      // convert the category array to a string literal array that postgres can understand
-      var categoryQuery = '\'{';
-      for(var i = 0; i < categoryQueryArray.length; i++) {
-        if(i == categoryQueryArray.length - 1){
-          categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'";
-        }
-        else if(categoryQueryArray.length == 1){
-          categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'"
-        }
-        else{
-          categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\", "
-        }
+      else if(categoryQueryArray.length == 1){
+        categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'"
       }
+      else{
+        categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\", "
+      }
+    }
 
-      // query for stores within the given distance, and that have any of the categories checked by the client
-      let query = `SELECT *, ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) ) AS distance
-                  FROM stores
-                  WHERE ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) )
-                    < ` + distance + ` AND category && ` + categoryQuery + `
-                  ORDER BY distance;`
+    // query for stores within the given distance, and that have any of the categories checked by the client
+    let query = `SELECT *, ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) ) AS distance
+                FROM stores
+                WHERE ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) )
+                  < ` + distance + ` AND category && ` + categoryQuery + `
+                ORDER BY distance;`
 
-      db.client.connect(function(err) {
-        // try to get search results
-        db.client.query(query,
-          async (err, result) => {
-            if (err) {
-              helper.queryError(res, err);
-            }
+    db.client.connect(function(err) {
+      // try to get search results
+      db.client.query(query,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
 
-            // we were able to get search results
-            if (result && result.rows.length > 0) {
-                helper.querySuccess(res, result.rows, "Successfully got Search Results!");
-            }
-            else{
-              helper.queryError(res, "No Search Results!");
-            }
-        });
-        if (err) {
-          helper.dbConnError(res, err);
-        }
+          // we were able to get search results
+          if (result && result.rows.length > 0) {
+              helper.querySuccess(res, result.rows, "Successfully got Search Results!");
+          }
+          else{
+            helper.queryError(res, "No Search Results!");
+          }
       });
-    }
-    catch(err){
-      helper.authError(res, err);
-    }
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
   }
-  else{
-    helper.queryError(res, "Missing Search Params!");
+  catch(err){
+    helper.authError(res, err);
   }
 };
 

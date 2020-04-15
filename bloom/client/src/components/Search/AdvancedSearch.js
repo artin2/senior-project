@@ -11,15 +11,13 @@ import store from '../../reduxFolder/store';
 class AdvancedSearch extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {street: '',
-                  city: '',
-                  state: '',
-                  zipcode: '',
-                  time: 1,
-                  distance: 1,
-                  nails: false,
-                  hair: false,
-                  redirect: false};
+    this.state = {
+      address: '',
+      time: 1,
+      distance: 1,
+      nails: false,
+      hair: false,
+      redirect: false};
     this.autocomplete = null
     this.redirect = false
 
@@ -30,19 +28,19 @@ class AdvancedSearch extends React.Component {
 
   componentDidMount() {
     const google = window.google;
-    this.autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'), {})
+    this.autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'), { })
 
     this.autocomplete.addListener("place_changed", this.handlePlaceSelect)
   }
 
   handlePlaceSelect() {
     let addressObject = this.autocomplete.getPlace()
-    let address = addressObject.address_components
+    let address = addressObject.address_components.map(function(elem){
+                      return elem.long_name;
+                  }).join(", ");
+
     this.setState({
-      street: `${address[0].long_name} ${address[1].long_name}`,
-      city: address[4].long_name,
-      state: address[5].short_name,
-      zipcode: address[7].short_name,
+      address: address
     })
   }
 

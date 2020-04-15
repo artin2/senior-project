@@ -76,7 +76,7 @@ class SearchDisplay extends React.Component {
         <Row key={"store-" + store.id} className="justify-content-center">
           <Col>
             <SearchCard store={store} 
-                        carousel={true} 
+                        carousel={true}
                         styleVal={{ width: '18rem' }} 
                         onClickFunctionBook={() =>  window.location.href='/book/' + store.id} 
                         onClickFunctionStore={() =>  window.location.href='/stores/' + store.id}/>

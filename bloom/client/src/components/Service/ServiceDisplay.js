@@ -7,7 +7,7 @@ import Col from 'react-bootstrap/Col'
 // } from '../../reduxFolder/actions'
 // import store from '../../reduxFolder/store';
 import LargeCarousel from '../LargeCarousel';
-import { getPictures } from '../s3'
+// import { getPictures } from '../s3'
 
 class ServiceDisplay extends React.Component {
   constructor(props) {
@@ -27,21 +27,21 @@ class ServiceDisplay extends React.Component {
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    if (prevState.service !== this.state.service) {
-      let picturesFetched = await getPictures('stores/' + this.state.service.store_id + '/services/' + this.state.service.name + '/')
-      this.setState({
-        pictures: picturesFetched
-      })
-    }
+    // if (prevState.service !== this.state.service) {
+    //   let picturesFetched = await getPictures('stores/' + this.state.service.store_id + '/services/' + this.state.service.name + '/')
+    //   this.setState({
+    //     pictures: picturesFetched
+    //   })
+    // }
 
     // can put this for now so we don't have to upload to s3
-    // this.setState({
-    //   pictures: [
-    //       "/hair.jpg",
-    //       "/nails.jpg",
-    //       "/salon.jpg"
-    //     ]
-    // })
+    this.setState({
+      pictures: [
+          "/hair.jpg",
+          "/nails.jpg",
+          "/salon.jpg"
+        ]
+    })
   }
 
   async componentDidMount(): Promise<void> {

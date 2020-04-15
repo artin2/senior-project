@@ -14,7 +14,7 @@ import {
   addAlert
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
-import { uploadHandler } from '../s3';
+// import { uploadHandler } from '../s3';
 
 class AddServiceForm extends React.Component {
   constructor(props) {
@@ -137,8 +137,8 @@ class AddServiceForm extends React.Component {
                 })
 
                 // upload to s3 from client to avoid burdening back end
-                let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
-                await uploadHandler(prefix, this.state.selectedFiles)
+                // let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                // await uploadHandler(prefix, this.state.selectedFiles)
 
                 fetch('http://localhost:8081/stores/addService/' + store_id, {
                   method: "POST",

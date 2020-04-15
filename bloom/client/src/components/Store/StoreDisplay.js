@@ -11,7 +11,7 @@ import {
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
 import './StoreDisplay.css'
-import { getPictures } from '../s3'
+// import { getPictures } from '../s3'
 
 class StoreDisplay extends React.Component {
   constructor(props) {
@@ -94,18 +94,19 @@ class StoreDisplay extends React.Component {
 
   async componentDidUpdate(prevProps, prevState) {
     if (prevState.store !== this.state.store) {
-      let picturesFetched = await getPictures('stores/' + this.state.store.id + '/images/')
-      this.setState({
-        pictures: picturesFetched
-      })
-      // can put this for now so we don't have to upload to s3
+      // let picturesFetched = await getPictures('stores/' + this.state.store.id + '/images/')
       // this.setState({
-      //   pictures: [
-      //       "/hair.jpg",
-      //       "/nails.jpg",
-      //       "/salon.jpg"
-      //     ]
+      //   pictures: picturesFetched
       // })
+      
+      // can put this for now so we don't have to upload to s3
+      this.setState({
+        pictures: [
+            "/hair.jpg",
+            "/nails.jpg",
+            "/salon.jpg"
+          ]
+      })
     }
   }
 
