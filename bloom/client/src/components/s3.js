@@ -58,4 +58,17 @@ async function uploadHandler(prefix, selectedFiles) {
   }
 }
 
-export { getPictures, uploadHandler}
+// function for uploading all selected files to s3
+async function deleteHandler(keysPassed) {
+  // remove each image from s3
+  const response = await fetch('http://localhost:8081/deleteImages/', {
+    method: "POST",
+    headers: {
+        'Content-type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({keys: keysPassed})
+  })
+}
+
+export { getPictures, uploadHandler, deleteHandler}

@@ -37,10 +37,19 @@ class ServiceDisplay extends React.Component {
     // can put this for now so we don't have to upload to s3
     this.setState({
       pictures: [
-          "/hair.jpg",
-          "/nails.jpg",
-          "/salon.jpg"
-        ]
+        { 
+          url: "/hair.jpg",
+          key: "/hair.jpg"
+        },
+        {
+          url: "/nails.jpg",
+          key: "/nails.jpg"
+        },
+        {
+          url: "/salon.jpg",
+          key: "/salon.jpg"
+        }
+      ]
     })
   }
 
@@ -50,7 +59,6 @@ class ServiceDisplay extends React.Component {
       this.setState({
         service: this.props.location.state.service
       })
-      // this.getPictures)
     }
     else{
       const response = await fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id, {
@@ -65,7 +73,6 @@ class ServiceDisplay extends React.Component {
       this.setState({
         service: data
       })
-      // this.getPictures)
     }
 
     return Promise.resolve()

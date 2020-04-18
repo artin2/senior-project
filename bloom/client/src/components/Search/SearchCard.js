@@ -21,10 +21,19 @@ class SearchCard extends React.Component {
     // can put this for now so we don't have to upload to s3
     this.setState({
       pictures: [
-          "/hair.jpg",
-          "/nails.jpg",
-          "/salon.jpg"
-        ]
+        { 
+          url: "/hair.jpg",
+          key: "/hair.jpg"
+        },
+        {
+          url: "/nails.jpg",
+          key: "/nails.jpg"
+        },
+        {
+          url: "/salon.jpg",
+          key: "/salon.jpg"
+        }
+      ]
     })
   }
   
@@ -34,7 +43,7 @@ class SearchCard extends React.Component {
       image = <LargeCarousel pictures={this.state.pictures}/>
     }
     else{
-      image = <img className="d-block w-100" src={this.state.pictures[0]} alt={"1"} />
+      image = <img className="d-block w-100" src={this.state.pictures[0].url} alt={"1"} />
     }
 
     let button
