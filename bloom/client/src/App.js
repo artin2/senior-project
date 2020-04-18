@@ -56,10 +56,15 @@ function App() {
     window.location.href='/'
   }
 
+  // let user = null;
+  // if(Cookies.get('token') != null) {  //should be user?
+  //   user = JSON.parse(Cookies.get('user').substring(2))
+  // }
+
   return (
     <div className="App">
       <Router>
-        <MainNavbar/>
+        <MainNavbar user={Cookies.get('token') ? JSON.parse(Cookies.get('user').substring(2)) : null}/>
         <Alert/>
         <div className="App-body">
           <Switch>

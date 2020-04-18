@@ -16,7 +16,8 @@ import { Link } from "react-router-dom";
 // import { useGoogleLogin } from 'react-google-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import {
-  addAlert
+  addAlert,
+  addUser
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
 
@@ -64,10 +65,13 @@ class LoginForm extends React.Component {
       statusText: this.state.returnedResponse.statusText
     }
 
+    store.dispatch(addAlert(resp))
+    store.dispatch(addUser(returnedUser))
+
     this.props.history.push({
       pathname: '/',
       state: {
-        response: resp,
+        // response: resp,
         user: returnedUser
       }
     })
