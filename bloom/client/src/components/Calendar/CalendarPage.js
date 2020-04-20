@@ -9,10 +9,12 @@ import 'react-calendar/dist/Calendar.css';
 import Paper from '@material-ui/core/Paper';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import { Multiselect } from 'multiselect-react-dropdown';
+import { FiSearch} from 'react-icons/fi';
 
 const today = new Date();
 
-
+//new Date(2018, 6, 1, 10, 0) start and end dates
 
 const isWeekEnd = (date: Date): boolean => date.getDay() === 0 || date.getDay() === 6;
 
@@ -60,15 +62,37 @@ const TimeTableCell = (
 );
 const recurringIcon = () => <div />
 
-const BasicLayout = ({ appointmentData,
+const BasicLayout = ({ appointmentData, onFieldChange,
    ...restProps }) => {
+
+   const onCustomFieldChange = (nextValue) => {
+     onFieldChange({ price: nextValue });
+   };
 
   return (
     <AppointmentForm.BasicLayout
+      onFieldChange={onFieldChange}
       appointmentData={appointmentData}
       {...restProps}
     >
 
+    <AppointmentForm.Label
+       text="Price"
+       type="title"
+     />
+     <Row className="justify-content-center">
+     <AppointmentForm.TextEditor
+      style={{width: '50%'}}
+       value={appointmentData.price}
+       onValueChange={onCustomFieldChange}
+       placeholder="Price"
+     />
+     <AppointmentForm.Label
+        style={{marginTop: 15, marginLeft: 10, fontSize: 20}}
+        text="$"
+        type="text"
+      />
+      </Row>
     </AppointmentForm.BasicLayout>
   );
 };
@@ -158,32 +182,42 @@ class Calendar extends React.Component {
   constructor(props) {
     super(props);
        this.state = {
+         selectedWorkers: [],
+         selectedServices: [],
+         selectedAppointments: [
+           { id: '0', startDate: '2020-04-19 15:00', endDate: '2020-04-19 16:00', title: 'Manicure', workers: [2],
+           services: [2], price: 50},
+           { id: '1', startDate: '2020-04-21 09:00', endDate: '2020-04-21 11:00', title: 'Hair Blowout', workers: [0, 1],
+           services: [1], price: 20},
+         ],
          appointments: [
-           { id: '0', startDate: '2020-04-13 10:00', endDate: '2020-04-13 11:00', title: 'Manicure', members: [2],
-           service: 'Manicure'},
-           { id: '1', startDate: '2020-04-3 09:00', endDate: '2020-04-3 11:00', title: 'Hair Blowout', members: [0, 1],
-           service: 'Haircut' },
+           { id: '0', startDate: '2020-04-19 15:00', endDate: '2020-04-19 16:00', title: 'Manicure', workers: [2],
+           services: [2], price: 50},
+           { id: '1', startDate: '2020-04-21 09:00', endDate: '2020-04-21 11:00', title: 'Hair Blowout', workers: [0, 1],
+            services: [1], price: 20},
          ],
          mainResourceName: 'workers',
           resources: [
             {
-              fieldName: 'service',
+              fieldName: 'services',
               title: 'Services',
               allowMultiple: true,
               instances: [
-                { id: '1', text: 'Haircut' },
-                { id: '2', text: 'Manicure' },
+                { id: 1, text: 'Haircut' },
+                { id: 2, text: 'Manicure' },
 
               ],
             },
             {
-              fieldName: 'members',
-              title: 'Members',
-              // allowMultiple: true,
+              fieldName: 'workers',
+              title: 'Workers',
+              allowMultiple: true,
               instances: [
                 { id: 0, text: 'Artin Kasumyan' },
                 { id: 1, text: 'Arthur Kasumyan' },
                 { id: 2, text: 'Roula Sharqawe' },
+                { id: 3, text: 'George Clooney' },
+                { id: 4, text: 'Johnny Depp' },
               ],
             },
           ],
@@ -191,10 +225,63 @@ class Calendar extends React.Component {
        }
        this.commitChanges = this.commitChanges.bind(this);
        this.changeMainResource = this.changeMainResource.bind(this);
+       this.onSelectWorker = this.onSelectWorker.bind(this);
+       this.onRemoveWorker = this.onRemoveWorker.bind(this);
+       this.onSelectService = this.onSelectService.bind(this);
+       this.onRemoveService = this.onRemoveService.bind(this);
+       this.onSearch = this.onSearch.bind(this);
   }
 
   changeMainResource(mainResourceName) {
     this.setState({ mainResourceName });
+  }
+
+  onSelectWorker(selectedList, selectedItem) {
+    // console.log(selectedList, selectedItem)
+    this.setState({ selectedWorkers: selectedList });
+  }
+
+  onRemoveWorker(selectedList, removedItem) {
+    // console.log("remove", selectedList, removedItem);
+    this.setState({ selectedWorkers: selectedList });
+  }
+
+  onSelectService(selectedList, selectedItem) {
+    this.setState({ selectedServices: selectedList });
+  }
+
+  onRemoveService(selectedList, removedItem) {
+    this.setState({ selectedServices: selectedList });
+  }
+
+  onSearch() {
+
+    let includeWorker;
+    let includeService;
+    let newSelected = [];
+
+    this.state.appointments.map(appointment => {
+      includeWorker = (this.state.selectedWorkers.length==0) ? true : false;
+      includeService= (this.state.selectedServices.length==0) ? true : false;
+
+      this.state.selectedWorkers.map(worker => {
+
+        if(appointment.workers.includes(worker.id)) {
+          includeWorker = true;
+        }
+      })
+      this.state.selectedServices.map(service => {
+
+        if(appointment.services.includes(service.id)) {
+          includeService = true;
+        }
+      })
+
+      if(includeService && includeWorker) {
+        newSelected.push(appointment);
+      }
+    })
+    this.setState({ selectedAppointments: newSelected });
   }
 
 
@@ -219,20 +306,42 @@ class Calendar extends React.Component {
 
 
   render() {
-    console.log(this.state.currentDate);
+
+    console.log(this.state.selectedAppointments);
     return (
       <Container fluid>
         <Row className="justify-content-center">
           <Col>
             <p className="title"> Manage Your Appointments </p>
-            <ResourceSwitcher
-             resources={this.state.resources}
-             mainResourceName={this.state.mainResourceName}
-             onChange={this.changeMainResource}
-           />
+            <Row style={{marginBottom: 50, marginLeft: '22%', position: 'relative'}}>
+            <Multiselect
+              // isObject={false}
+              options={this.state.resources[0]["instances"]}
+              // selectedValues={this.state.selected}
+              onSelect={this.onSelectService}
+              onRemove={this.onRemoveService}
+              placeholder="Service"
+              closeIcon="cancel"
+              displayValue="text"
+              style={{multiselectContainer: {marginLeft: '2%', width: '35%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: 250, width: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
+              />
+            <Multiselect
+                // isObject={false}
+                options={this.state.resources[1]["instances"]}
+                // selectedValues={this.state.selected}
+                onSelect={this.onSelectWorker}
+                onRemove={this.onRemoveWorker}
+                placeholder="Workers"
+                closeIcon="cancel"
+                displayValue="text"
+                style={{multiselectContainer: {marginLeft: '2%', width: '35%'},  optionContainer:{ zIndex: 10000000}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: 250, width: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
+              />
+              <FiSearch onClick={this.onSearch} size={35} style={{cursor: "pointer", marginLeft: 10, paddingRight:"10px"}}/>
+            </Row>
+
            <Paper className="react-calendar">
           <Scheduler
-            data={this.state.appointments}
+            data={this.state.selectedAppointments}
 
           >
           <ViewState
@@ -279,7 +388,7 @@ class Calendar extends React.Component {
             />
             <Resources
               data={this.state.resources}
-              mainResourceName={this.state.mainResourceName}
+              // mainResourceName={this.state.mainResourceName}
               />
             <DragDropProvider/>
           </Scheduler>
@@ -292,3 +401,9 @@ class Calendar extends React.Component {
 }
 
 export default Calendar;
+
+// <ResourceSwitcher
+//  resources={this.state.resources}
+//  mainResourceName={this.state.mainResourceName}
+//  onChange={this.changeMainResource}
+// />

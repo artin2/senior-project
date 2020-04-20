@@ -8,11 +8,19 @@
   background-color: purple;
   margin-top: 20px;
   /* margin-left: 200px; */
+  z-index: 2 !important;
   height: 620px;
   /* height: 600px !important; */
 
 }
 
+.MuiGrid-root {
+  z-index: 1 !important;
+}
+
+.makeStyles-mainTable-190 .makeStyles-mainTable-204 {
+  z-index: 3 !important;
+}
 .weekend {
 
   background-color: #cbd1d6;
@@ -22,7 +30,7 @@
 .title {
   font-size: 30px;
   font-weight: bold;
-  margin-top: 20px;
+  margin-top: 100px;
   font-family: 'Aref Ruqaa', serif;
 
 }

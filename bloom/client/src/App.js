@@ -34,11 +34,11 @@ import Alert from './components/Flash/Alert';
 
 function App() {
   // general note: anyplace where we can pass information and avoid an extra call to get that information, we should
-  // example of how to pass information: 
+  // example of how to pass information:
   // Say we want to call stores/1/workers/1
   // this says lets get worker 1 from store 1, so we need the workers info
   // odds are we are calling this from the store dashboard where we have the worker entry, so we can pass
-  // it to the worker display component by calling the following function on click 
+  // it to the worker display component by calling the following function on click
 
   // triggerWorkerDisplay(id) {
   //   this.props.history.push({
@@ -56,11 +56,13 @@ function App() {
     window.location.href='/'
   }
 
+  //</Alert> removed alert for now
+
   return (
     <div className="App">
       <Router>
         <MainNavbar/>
-        <Alert/>
+
         <div className="App-body">
           <Switch>
             <Route exact path="/" component={Homepage} />
@@ -79,7 +81,7 @@ function App() {
             <Route path="/book/:store_id" component={ReservationPage} />
             <Route exact path="/store/signup" component={redirectWithoutAuth(StoreSignupForm)} />
             <Route path="/stores/edit/:store_id" component={redirectWithoutAuth(StoreEditForm)}/>
-           
+
             <Route path="/stores/addService/:store_id" component={redirectWithoutAuth(AddServiceForm)}/>
             <Route path="/stores/:store_id/services/:service_id/edit" component={redirectWithoutAuth(ServiceEditForm)}/>
             <Route path="/stores/:store_id/services/:service_id" component={redirectWithoutAuth(ServiceDisplay)}/>
@@ -90,7 +92,7 @@ function App() {
             <Route path="/stores/:store_id/workers/:worker_id" component={redirectWithoutAuth(WorkerDisplay)}/>
             <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
             <Route path="/stores/:store_id" component={StoreDisplay}/>
-            
+
           </Switch>
         </div>
       </Router>
@@ -109,7 +111,7 @@ export default App;
 //     };
 //     this.addAlert = this.addAlert.bind(this)
 //   }
-  
+
 //   addAlert(messagePassed) {
 //     this.setState({
 //       message: messagePassed
@@ -118,11 +120,11 @@ export default App;
 
 //   render() {
 //     // general note: anyplace where we can pass information and avoid an extra call to get that information, we should
-//     // example of how to pass information: 
+//     // example of how to pass information:
 //     // Say we want to call stores/1/workers/1
 //     // this says lets get worker 1 from store 1, so we need the workers info
 //     // odds are we are calling this from the store dashboard where we have the worker entry, so we can pass
-//     // it to the worker display component by calling the following function on click 
+//     // it to the worker display component by calling the following function on click
 
 //     // triggerWorkerDisplay(id) {
 //     //   this.props.history.push({
@@ -163,7 +165,7 @@ export default App;
 //               <Route path="/book/:store_id" component={ReservationPage} />
 //               <Route exact path="/store/signup" component={redirectWithoutAuth(StoreSignupForm)} />
 //               <Route path="/stores/edit/:store_id" component={redirectWithoutAuth(StoreEditForm)}/>
-            
+
 //               <Route path="/stores/addService/:store_id" component={redirectWithoutAuth(AddServiceForm)}/>
 //               <Route path="/stores/:store_id/services/:service_id/edit" component={redirectWithoutAuth(ServiceEditForm)}/>
 //               <Route path="/stores/:store_id/services/:service_id" component={redirectWithoutAuth(ServiceDisplay)}/>
@@ -174,7 +176,7 @@ export default App;
 //               <Route path="/stores/:store_id/workers/:worker_id" component={redirectWithoutAuth(WorkerDisplay)}/>
 //               <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
 //               <Route path="/stores/:store_id" component={StoreDisplay}/>
-              
+
 //             </Switch>
 //           </div>
 //         </Router>

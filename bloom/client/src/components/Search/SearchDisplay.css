@@ -5,3 +5,25 @@
   padding-top: 10px;
   padding-bottom: 10px;
 }
+
+
+.search_title {
+
+  font-size: 28px;
+  font-family: 'Aref Ruqaa', serif;
+  font-weight: bold;
+}
+/* 
+.form {
+  border-radius: 0px !important;
+  width: 20%;
+  margin-right: 20px;
+} */
+
+.chips {
+   display: flex;
+   flex-wrap: wrap;
+ }
+ .chip {
+   margin: 2;
+ }

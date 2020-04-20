@@ -12,6 +12,9 @@ import FacebookLogin from 'react-facebook-login';
 import {TiSocialFacebookCircular, TiSocialGooglePlus} from 'react-icons/ti';
 import paint from '../../assets/abstract-painting.jpg';
 import { Link } from "react-router-dom";
+import { connect,  } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import login from '../../reduxFolder/redux.js'
 // import ReactDOM from 'react-dom';
 // import { useGoogleLogin } from 'react-google-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
@@ -59,63 +62,88 @@ class LoginForm extends React.Component {
 
   // redirect to the home page with the success response
   triggerHome(returnedUser) {
-    let resp = {
-      status: this.state.returnedResponse.status,
-      statusText: this.state.returnedResponse.statusText
-    }
+
+    console.log("whatttt");
+
+    // let resp = {
+    //   status: this.state.returnedResponse.status,
+    //   statusText: this.state.returnedResponse.statusText
+    // }
 
     this.props.history.push({
       pathname: '/',
       state: {
-        response: resp,
+        // response: resp,
         user: returnedUser
       }
     })
   }
 
+  componentDidUpdate(prevProps, prevState)  {
+    // console.log(this.props.user);
+
+    if (prevProps.user !== this.props.user) {
+      // console.log(this.props.user);
+
+      this.triggerHome(this.props.user);
+
+    }
+
+    if (prevProps.error !== this.props.error) {
+
+      console.log("Error logging in -- should show alert with error", this.props.error);
+
+    }
+  }
+
   handleSubmit(event) {
+
     //there might be a CORS issue with the backend, this doesn't work without preventDefault..
-    let self = this
+    // let self = this
     event.preventDefault();
-    fetch('http://localhost:8081/login' , {
-      headers: {
-        // 'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        // 'Cache': 'no-cache'
-      },
-      credentials: 'include',
-      method: "POST",
-      body: JSON.stringify(this.state)
-    })
-    .then(function(response){
-      if(response.status!==200){
-        // console.log("Error!", response)
-        store.dispatch(addAlert(response))
-      }
-      else{
-        // redirect to home page signed in
-        // console.log("Successful login!", response)
-        self.setState({
-          returnedResponse: response
-        })
-        return response.json()
-      }
-    })
-    .then(data => {
-      if(data){
-        self.triggerHome(data)
-      }
-    });
+    this.props.loginUser(this.state.email, this.state.password, "")
+
+    // self.triggerHome(res)
+
+    // fetch('http://localhost:8081/login' , {
+    //   headers: {
+    //     // 'Accept': 'application/json',
+    //     'Content-Type': 'application/json',
+    //     // 'Cache': 'no-cache'
+    //   },
+    //   credentials: 'include',
+    //   method: "POST",
+    //   body: JSON.stringify(this.state)
+    // })
+    // .then(function(response){
+    //   if(response.status!==200){
+    //     // console.log("Error!", response)
+    //     store.dispatch(addAlert(response))
+    //   }
+    //   else{
+    //     // redirect to home page signed in
+    //     // console.log("Successful login!", response)
+    //     self.setState({
+    //       returnedResponse: response
+    //     })
+    //     return response.json()
+    //   }
+    // })
+    // .then(data => {
+    //   if(data){
+    //     self.triggerHome(data)
+    //   }
+    // });
   }
 
   render() {
     return (
       <Container fluid>
       <img src={paint} alt="paint" style={{top: 0, left: 0, position: 'absolute', height: '100%', width:'100%', filter: 'grayscale(0.4)'}}/>
-        {alert}
+
         <Row className="justify-content-center">
           <Col xs={8} sm={7} md={6} lg={5}>
-            <Form className="formBody rounded container">
+            <Form className="formBody rounded container" style={{marginTop: 120}}>
               <h3>Login</h3>
               <Form.Group style={{marginTop: 40, width: '65%', marginLeft: '17%'}}>
                 <InputGroup>
@@ -172,4 +200,15 @@ class LoginForm extends React.Component {
   }
 }
 
-export default LoginForm;
+const mapStateToProps = state => ({
+  user: state.userReducer.user,
+  // response: state.response,
+  error: state.userReducer.error,
+})
+
+const mapDispatchToProps = dispatch => bindActionCreators({
+  loginUser: (email, password, auth_token) => login(email, password, auth_token)
+}, dispatch)
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);

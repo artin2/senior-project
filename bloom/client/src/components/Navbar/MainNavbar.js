@@ -85,7 +85,7 @@ class MainNavbar extends React.Component {
                        </Nav>
     }
     return (
-      <Navbar collapseOnSelect expand="sm" bg="light" variant="light" sticky="top">
+      <Navbar collapseOnSelect expand="sm" bg="light" variant="light" fixed="top">
         <Link to="/" className="navbar-brand" style={{fontFamily: 'Megrim, cursive', fontSize: '35px'}}>Bloom</Link>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">

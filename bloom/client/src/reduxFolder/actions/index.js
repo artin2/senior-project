@@ -35,15 +35,15 @@ export const ADD_USER = 'ADD_USER'
  */
 
 export function addAlert(messagePassed) {
-  return { 
-    type: ADD_ALERT, 
+  return {
+    type: ADD_ALERT,
     message: messagePassed
   }
 }
 
 export function addUser(userPassed) {
-  return { 
-    type: ADD_USER, 
-    user: userPassed 
+  return {
+    type: ADD_USER,
+    user: userPassed
   }
 }

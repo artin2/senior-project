@@ -91,7 +91,7 @@ class SignupForm extends React.Component {
                 handleChange,
                 handleBlur,
                 handleSubmit}) => (
-              <Form className="formBody rounded">
+              <Form className="formBody rounded" style={{marginTop: 120}}>
                 <h3 style={{marginBottom: 40}}>Sign Up</h3>
 
                 <Form.Group controlId="formFirstName" className="form">

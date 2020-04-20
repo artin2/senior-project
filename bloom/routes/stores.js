@@ -56,7 +56,7 @@ async function getStores(req, res, next) {
     let j = categories.length
     while (j--) {
       cat = categories[j].toLowerCase()
-      if (req.query[cat] == "true") { 
+      if (req.query[cat] == "true") {
         categoryQueryArray.push(categories[j])
       }
     }
@@ -160,7 +160,7 @@ async function editStore(req, res, next) {
       let lng = geocodeResult[0].longitude
       let query = 'UPDATE stores SET name=$1, street=$2, city=$3, state=$4, zipcode=$5, category=$6, phone=$7, services=$8, owners=$9, description=$10, lat=$11, lng=$12 WHERE id=$13 RETURNING *'
       let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, req.body.category, req.body.phone, req.body.services, req.body.owners, req.body.description, lat, lng, req.body.id]
-      
+
       // connect to the db
       db.client.connect(function (err) {
         // try to update the store
@@ -190,7 +190,7 @@ async function editStore(req, res, next) {
     }
 
 
-    // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7. 
+    // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7.
     let newHours = req.body.storeHours
     // Below is for scoping issues. Res is undefined below
     let resp = res
@@ -282,7 +282,7 @@ async function addStore(req, res, next) {
   }
 };
 
-// Store worker functions 
+// Store worker functions
 
 // NOTE: with nested queries like this, we need to revert successful queries that were made if the inner most one
 // fails...
@@ -342,14 +342,14 @@ async function addWorker(req, res, next) {
                               helper.querySuccess(res, resultFirst.rows[0], "Successfully Added Worker!");
                             }
                             else {
-                              // there was a problem updating the stores table 
+                              // there was a problem updating the stores table
                               helper.queryError(res, "Could not Update Stores Table!");
                             }
                           }
                         )
                       }
                       else {
-                        // there was a problem updating the users table 
+                        // there was a problem updating the users table
                         helper.queryError(res, "Could not Update Users Table!");
                       }
                     }
@@ -482,7 +482,7 @@ async function addService(req, res, next) {
   }
 };
 
-// Reusable worker/service functions 
+// Reusable worker/service functions
 // table is either workers or services
 async function getStoreItems(req, res, next, table) {
   try {
@@ -619,6 +619,52 @@ async function getStoreHours(req, res, next) {
     helper.authError(res, err);
   }
 };
+
+//Appointments
+async function addAppointment(req, res, next) {
+  if (req.body.user_id && req.body.store_id && req.body.date && req.body.start_time && req.body.end_time && req.body.price && req.body.services && req.body.workers) {
+    try {
+      await auth.verifyToken(req, res, next);
+      let timestamp = helper.getFormattedDate();
+      let query = 'INSERT INTO appointments(user_id, store_id, date, start_time, end_time, price, services, workers, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;'
+      let values = [req.body.user_id, req.body.store_id, req.body.date, req.body.start_time, req.body.end_time, req.body.price, req.body.services, req.body.workers, timestamp]
+
+      // connect to the db
+      db.client.connect(function (err) {
+        // try to add the store into the db
+        db.client.query(query, values,
+          async (err, result) => {
+            if (err) {
+              helper.queryError(res, err);
+            }
+
+            // we were successful in creating the store
+            if (result && result.rows.length == 1) {
+              // at this point, we need to add the store hours as well******
+              helper.querySuccess(res, result.rows[0], "Successfully Added Appointment!");
+            }
+            else {
+              // there were no results from trying to insert into the stores table
+              helper.queryError(res, "Unable to add appointment!");
+            }
+          }
+        );
+
+        if (err) {
+          helper.dbConnError(res, err);
+        }
+      });
+    }
+    catch (err) {
+      helper.authError(res, err);
+    }
+  }
+  else {
+    helper.queryError(res, "Missing Parameters!");
+  }
+};
+
+
 
 module.exports = {
   getStore: getStore,
