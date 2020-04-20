@@ -28,6 +28,7 @@
  */
 
 export const ADD_ALERT = 'ADD_ALERT'
+export const REMOVE_ALERT = 'REMOVE_ALERT'
 export const ADD_USER = 'ADD_USER'
 
 /*
@@ -38,6 +39,13 @@ export function addAlert(messagePassed) {
   return {
     type: ADD_ALERT,
     message: messagePassed
+  }
+}
+
+export function removeAlert(test) {
+  return { 
+    type: REMOVE_ALERT,
+    test: test
   }
 }
 

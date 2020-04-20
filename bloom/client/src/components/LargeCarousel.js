@@ -10,10 +10,11 @@ class LargeCarousel extends React.Component {
 
   render() {
     return (
+
       <Carousel style={this.props.style} interval="">
-        {this.props.pictures.map((url, index) => (
+        {this.props.pictures.map((picture, index) => (
           <Carousel.Item key={"pic-" + index}>
-            <img style={this.props.img} src={url} alt={"Slide " + index} />
+            <img style={this.props.img} src={picture.url} alt={"Slide " + index} />
           </Carousel.Item>
         ))}
       </Carousel>

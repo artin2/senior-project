@@ -235,6 +235,11 @@ app.post('/getImages', withAuth, async (req, res) => {
   await s3.getImages(req, res);
 });
 
+app.post('/deleteImages', withAuth, async (req, res) => {
+  await s3.deleteImages(req, res);
+});
+
+
 //Need to fix this: not sure what name of cookie is
 app.get('/clearCookie', (req, res) => {
   res.clearCookie('jwt_token').end();

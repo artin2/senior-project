@@ -47,7 +47,10 @@ async function getImages(req, res) {
       Key: pictures.Contents[i].Key
     };
     var signedUrl = await getSignedUrl(s3, params)
-    signedUrls.push(signedUrl)
+    signedUrls.push({
+      key: pictures.Contents[i].Key,
+      url: signedUrl
+    })
   }
 
   // async.eachLimit(pictures, 10, function(picture, next) { 
@@ -79,6 +82,26 @@ async function getImages(req, res) {
   helper.querySuccess(res, signedUrls, "Successfuly got pictures")
 }
 
+async function deleteImages(req, res) {
+  const s3 = new aws.S3({
+    region: process.env.AWSRegion,
+    accessKeyId: process.env.AWSAccessKey,
+    secretAccessKey: process.env.AWSSecretKey
+  });  // Create a new instance of S3
+
+  for (let i = 0; i < req.body.keys.length; i++) {
+    var params = { Bucket: process.env.AWSBucket, Key: req.body.keys[i] };
+
+    await s3.deleteObject(params, function(err, data) {
+      if (err) console.log(err);  // error
+      else     console.log("deleted"); // deleted
+    });
+  }
+
+  // should fix this
+  helper.querySuccess(res, {}, "Successfuly deleted from s3!")
+}
+
 async function getSignedUrl(s3, params){
   return new Promise((resolve,reject) => {
     s3.getSignedUrl('getObject', params, (err, url) => {
@@ -108,5 +131,6 @@ async function getSignedUrl(s3, params){
 
 module.exports = {
   getPresignedUploadUrl: getPresignedUploadUrl,
-  getImages: getImages
+  getImages: getImages,
+  deleteImages: deleteImages
 };

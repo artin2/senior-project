@@ -22,11 +22,6 @@ import VizSensor from 'react-visibility-sensor';
 // import Typing from 'react-typing-animation';
 import Category from './Category.js';
 
-import {
-  addAlert, //addUser
-} from '../../reduxFolder/actions'
-import store from '../../reduxFolder/store';
-
 const calc = (x, y) => [-(y - window.innerHeight / 2) / 20, (x - window.innerWidth / 2) / 80, 1.04]
 const trans = (x, y, s) => `perspective(600px) scale(${s})`
 
@@ -163,16 +158,16 @@ class Homepage extends React.Component {
 
   componentDidMount() {
     // if the calling component wants us to update the navbar component
-    if(this.props.location.state){
-      // NOTE THIS IS NOT WORKING, NAVBAR COMPONENT DOES NOT RERENDER
-      // // if the calling component set an alert, display it
-      // if(this.props.location.state.user){
-      //   store.dispatch(addUser(this.props.location.state.user))
-      // }
-      if(this.props.location.state.response){
-        store.dispatch(addAlert(this.props.location.state.response))
-      }
-    }
+    // if(this.props.location.state){
+    //   // NOTE THIS IS NOT WORKING, NAVBAR COMPONENT DOES NOT RERENDER
+    //   // // if the calling component set an alert, display it
+    //   // if(this.props.location.state.user){
+    //   //   store.dispatch(addUser(this.props.location.state.user))
+    //   // }
+    //   if(this.props.location.state.response){
+    //     store.dispatch(addAlert(this.props.location.state.response))
+    //   }
+    // }
 
   }
 
@@ -217,7 +212,6 @@ class Homepage extends React.Component {
           <div className="type_container">
             <VizSensor
              onChange={(isVisible) => {
-               console.log("booom");
                this.setState({Visible: isVisible})
              }}
              active={!this.state.Visible}>

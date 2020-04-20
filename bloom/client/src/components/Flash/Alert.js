@@ -1,5 +1,8 @@
 import React from 'react';
 import store from '../../reduxFolder/store';
+import {
+  removeAlert
+} from '../../reduxFolder/actions'
 
 class Alert extends React.Component {
   constructor(props) {
@@ -21,9 +24,9 @@ class Alert extends React.Component {
     this.alertClass = this.alertClass.bind(this);
   }
   
-  componentWillUnmount() {
-    store.unsubscribe()
-  }
+  // componentWillUnmount() {
+  //   store.unsubscribe()
+  // }
   
   alertClass (status) {
     let classes = {
@@ -39,7 +42,8 @@ class Alert extends React.Component {
     // return <div></div>
     // const index = this.state.messages.indexOf(statusText);
     // const statusText = React.addons.update(this.state.statusText, { $splice: [[index, 1]] });
-    this.setState({ message: { status: "", statusText: ""} });
+    // this.setState({ message: { status: "", statusText: ""} });
+    store.dispatch(removeAlert("test"))
   }
 
   render() {

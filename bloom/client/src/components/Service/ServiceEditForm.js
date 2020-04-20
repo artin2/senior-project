@@ -14,6 +14,7 @@ import {
   addAlert
 } from '../../reduxFolder/actions'
 import store from '../../reduxFolder/store';
+import { getPictures, deleteHandler, uploadHandler } from '../s3'
 
 class ServiceEditForm extends React.Component {
   constructor(props) {
@@ -34,7 +35,10 @@ class ServiceEditForm extends React.Component {
       ],
       convertedCategory: [],
       workerOptions: [],
-      selectedOption: null
+      selectedOption: null,
+      pictures: [],
+      keys: [],
+      selectedFiles: []
     };
 
     // Schema for yup
@@ -59,7 +63,10 @@ class ServiceEditForm extends React.Component {
       .nullable(),
       category: Yup.array()
       .required("Category is required")
-      .nullable()
+      .nullable(),
+      pictureCount: Yup.number()
+      .required("Pictures are required")
+      .min(1, "Must have at least one picture")
     });
 
     this.triggerServiceDisplay = this.triggerServiceDisplay.bind(this);
@@ -73,6 +80,52 @@ class ServiceEditForm extends React.Component {
         service: returnedService
       }
     })
+  }
+
+  async componentDidUpdate(prevProps, prevState) {
+    if (prevState.service !== this.state.service) {
+      let picturesFetched = await getPictures('stores/' + this.state.service.store_id + '/services/' + this.state.service.name + '/')
+      this.setState({
+        pictures: picturesFetched
+      })
+    }
+
+    // can put this for now so we don't have to upload to s3
+    // this.setState({
+      // pictures: [
+      //   { 
+      //     url: "/hair.jpg",
+      //     key: "/hair.jpg"
+      //   },
+      //   {
+      //     url: "/nails.jpg",
+      //     key: "/nails.jpg"
+      //   },
+      //   {
+      //     url: "/salon.jpg",
+      //     key: "/salon.jpg"
+      //   }
+      // ]
+    // })
+  }
+
+  deleteFileChangeHandler = async (event, setFieldValue, newPictureLength) => {
+    if(event.target.checked){
+      await this.state.keys.push(event.target.id)
+      console.log(this.state.pictures.length, newPictureLength, this.state.keys.length)
+      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+    }
+    else{
+      await this.state.keys.pop(event.target.id)
+      console.log(this.state.pictures.length, newPictureLength, this.state.keys.length)
+      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+    }
+  }
+
+  fileChangedHandler = (event, setFieldValue, pictures) => {
+    this.setState({ selectedFiles: event.target.files })
+    setFieldValue('pictureCount', this.state.pictures.length + event.target.files.length - this.state.keys.length)
+    setFieldValue('pictures', event.target.files)
   }
 
   componentDidMount() {
@@ -112,6 +165,8 @@ class ServiceEditForm extends React.Component {
           })
         }
       });
+
+
 
       // // then we get the worker data to display for user
       // // need to get store category, fetch?
@@ -159,13 +214,14 @@ class ServiceEditForm extends React.Component {
                 cost: this.state.service.cost,
                 duration: this.state.service.duration,
                 description: this.state.service.description,
-                // pictures: this.state.service.pictures,
+                pictures: [],
+                pictureCount: this.state.pictures.length - this.state.keys.length,
                 workers: this.state.service.workers,
                 category: this.state.convertedCategory,
                 store_id: this.props.match.params.store_id
               }}
               validationSchema={this.yupValidationSchema}
-              onSubmit={(values) => {
+              onSubmit={async (values) => {
                 let store_id = this.props.match.params.store_id
                 let service_id = this.props.match.params.service_id
                 let triggerServiceDisplay = this.triggerServiceDisplay
@@ -173,6 +229,13 @@ class ServiceEditForm extends React.Component {
                 values.category = values.category.map(function(val){ 
                   return val.label; 
                 })
+
+                // remove files from s3
+                // await deleteHandler(this.state.keys)
+
+                // upload new images to s3 from client to avoid burdening back end
+                // let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                // await uploadHandler(prefix, this.state.selectedFiles)
 
                 // need to figure out this...
                 // values.workers = values.workers.map(function(val){ 
@@ -323,6 +386,35 @@ class ServiceEditForm extends React.Component {
                   />
                   {touched.category && errors.category ? (
                     <div className="error-message">{errors.category}</div>
+                  ): null}
+                </Form.Group>
+
+                <Form.Group controlId="pictureCount">
+                  <Form.Label>Delete Images</Form.Label>
+                  {this.state.pictures.map((picture, index) => (
+                    <div key={"pic-" + index}>
+                      <img className="img-fluid" src={picture.url} alt={"Slide " + index} />
+                      <Form.Check
+                        // style={{marginLeft: 30}}
+                        id={picture.key}
+                        label={picture.key.split('/').slice(-1)[0]}
+                        onChange={event => this.deleteFileChangeHandler(event, setFieldValue, values.pictures.length)}
+                      />
+                    </div>
+                  ))}
+                </Form.Group>
+
+                <Form.Group controlId="pictures">
+                  <Form.Label>Add Images</Form.Label>
+                  <br/>
+                  <input 
+                    onChange={event => this.fileChangedHandler(event, setFieldValue, values.pictures)}
+                    type="file"
+                    multiple
+                    className={touched.pictures && errors.pictures ? "error" : null}
+                  />
+                  {touched.pictureCount && errors.pictureCount ? (
+                    <div className="error-message">{errors.pictureCount}</div>
                   ): null}
                 </Form.Group>
 
