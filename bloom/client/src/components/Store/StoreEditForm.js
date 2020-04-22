@@ -119,6 +119,9 @@ class StoreEditForm extends React.Component {
       h -= 12
     }
     h = h < 10 ? '0' + h : h;
+    if(h == 0) {
+      h = '12'
+    }
     m = m < 10 ? '0' + m : m;
     if (am) {
       return `${h}:${m}am`;
@@ -142,7 +145,7 @@ class StoreEditForm extends React.Component {
       old_open_time = this.state.storeHours[day].open_time
       old_close_time = this.state.storeHours[day].close_time
     }
-    if(event.target.querySelector('option').value == "0") {
+    if(parseInt(event.target.querySelector('option').value) <= 840) {
       updateNewHours[day] = {open_time: parseInt(event.target.value), close_time: old_close_time}
       newStoreHours = [
         ...this.state.storeHours.slice(0, day),
