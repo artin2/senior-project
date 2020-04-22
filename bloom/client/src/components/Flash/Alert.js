@@ -2,31 +2,17 @@ import React from 'react';
 import store from '../../reduxFolder/store';
 import {
   removeAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
+import { connect } from 'react-redux';
+import './Flash.css';
 
 class Alert extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      message: {
-        status: "",
-        statusText: ""
-      }
-    };
 
-    store.subscribe(() => {
-      this.setState({
-        message: store.getState().alert
-      });
-    });
-
-    this.removeMessage = this.removeMessage.bind(this);
+    this.removeAlert = this.removeAlert.bind(this);
     this.alertClass = this.alertClass.bind(this);
   }
-  
-  // componentWillUnmount() {
-  //   store.unsubscribe()
-  // }
   
   alertClass (status) {
     let classes = {
@@ -38,34 +24,34 @@ class Alert extends React.Component {
     return classes[status] || classes.success;
   }
 
-  removeMessage() {
-    // return <div></div>
-    // const index = this.state.messages.indexOf(statusText);
-    // const statusText = React.addons.update(this.state.statusText, { $splice: [[index, 1]] });
-    // this.setState({ message: { status: "", statusText: ""} });
-    store.dispatch(removeAlert("test"))
+  removeAlert() {
+    store.dispatch(removeAlert())
   }
 
   render() {
-    let message = this.state.message;
-    let alert = null
-    if(!(Object.keys(message).length === 0 && message.constructor === Object) && !(message.status === "")){
-      let alertClassName = `alert ${ this.alertClass(message.status) } mb-0`;
-      alert = <div className={ alertClassName }>
+    let alert = this.props.alert;
+    let alertTag = null
+    if(!(Object.keys(alert).length === 0 && alert.constructor === Object) && !(alert.status === "")){
+      let alertClassName = `alert ${ this.alertClass(alert.status) } mb-0`;
+      alertTag = <div className={ alertClassName }>
                 <button className='close'
-                  onClick={ this.removeMessage }>
+                  onClick={ this.removeAlert }>
                   &times;
                 </button>
-                { message.statusText }
+                { alert.statusText }
               </div>
     }
  
     return(
-      <div>
-        {alert}
+      <div className="alert-fixed">
+        {alertTag}
       </div>
     );
   }
 }
 
-export default Alert;
+const mapStateToProps = state => ({
+  alert: state.alertReducer.alert,
+})
+
+export default connect(mapStateToProps)(Alert);

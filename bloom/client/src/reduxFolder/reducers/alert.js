@@ -1,12 +1,10 @@
-import { ADD_ALERT, REMOVE_ALERT, ADD_USER } from "../actions/index"
+import { ADD_ALERT, REMOVE_ALERT } from "../actions/alert"
 
 const initialState = {
-  alert: {},
-  user: {},
-  update: false
+  alert: {}
 }
 
-function bloomApp(state = initialState, action) {
+function alertReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_ALERT:
       return Object.assign({}, state, {
@@ -16,13 +14,10 @@ function bloomApp(state = initialState, action) {
       return Object.assign({}, state, {
         alert: {}
       })
-    case ADD_USER:
-      return Object.assign({}, state, {
-        user: action.user
-      })
+
     default:
       return state
   }
 }
 
-export default bloomApp
+export default alertReducer

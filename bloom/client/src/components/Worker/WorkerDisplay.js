@@ -4,7 +4,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import {
   addAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 
 

@@ -14,8 +14,9 @@ import * as Yup from 'yup';
 import Select from 'react-select';
 import {
   addAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
+import { getPictures, deleteHandler, uploadHandler } from '../s3'
 
 const override = css`
   display: block;
@@ -41,7 +42,10 @@ class StoreEditForm extends React.Component {
       storeHours: [],
       newHours: [],
       selectedOption: null,
-      loading: true
+      loading: true,
+      pictures: [],
+      selectedFiles: [],
+      keys: []
     };
 
     // options for the categories field
@@ -82,7 +86,10 @@ class StoreEditForm extends React.Component {
         .required("Zipcode is required"),
       category: Yup.array()
         .required("Category is required")
-        .nullable()
+        .nullable(),
+      pictureCount: Yup.number()
+        .required("Pictures are required")
+        .min(1, "Must have at least one picture")
     });
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
@@ -156,6 +163,52 @@ class StoreEditForm extends React.Component {
       storeHours: newStoreHours
     })
   };
+
+  deleteFileChangeHandler = async (event, setFieldValue, newPictureLength) => {
+    if(event.target.checked){
+      await this.state.keys.push(event.target.id)
+      console.log(this.state.pictures.length, newPictureLength, this.state.keys.length)
+      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+    }
+    else{
+      await this.state.keys.pop(event.target.id)
+      console.log(this.state.pictures.length, newPictureLength, this.state.keys.length)
+      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+    }
+  }
+
+  fileChangedHandler = (event, setFieldValue, pictures) => {
+    this.setState({ selectedFiles: event.target.files })
+    setFieldValue('pictureCount', this.state.pictures.length + event.target.files.length - this.state.keys.length)
+    setFieldValue('pictures', event.target.files)
+  }
+
+  async componentDidUpdate(prevProps, prevState) {
+    if (prevState.store !== this.state.store) {
+      let picturesFetched = await getPictures('stores/' + this.state.store.id + '/images/')
+      this.setState({
+        pictures: picturesFetched
+      })
+    }
+
+    // can put this for now so we don't have to upload to s3
+    // this.setState({
+      // pictures: [
+      //   { 
+      //     url: "/hair.jpg",
+      //     key: "/hair.jpg"
+      //   },
+      //   {
+      //     url: "/nails.jpg",
+      //     key: "/nails.jpg"
+      //   },
+      //   {
+      //     url: "/salon.jpg",
+      //     key: "/salon.jpg"
+      //   }
+      // ]
+    // })
+  }
 
   componentDidMount() {
     // if we were given the existing data from calling component use that, else fetch
@@ -246,11 +299,12 @@ class StoreEditForm extends React.Component {
               category: this.state.selectedOption,
               services: null,
               owners: null,
-              pictures: null,
+              pictures: this.state.pictures,
+              pictureCount: this.state.pictures.length - this.state.keys.length,
               storeHours: this.state.storeHours
             }}
             validationSchema={this.yupValidationSchema}
-            onSubmit={(values) => {
+            onSubmit={async (values) => {
               values.category = values.category.map(function (val) {
                 return val.label;
               })
@@ -262,6 +316,14 @@ class StoreEditForm extends React.Component {
                 values.owners = this.state.store.owners
                 values.id = store_id
                 values.storeHours = this.state.newHours
+
+                // remove files from s3
+                await deleteHandler(this.state.keys)
+
+                // upload new images to s3 from client to avoid burdening back end
+                let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                await uploadHandler(prefix, this.state.selectedFiles)
+
                 fetch('http://localhost:8081/stores/edit/' + store_id , {
                   method: "POST",
                   headers: {
@@ -730,6 +792,35 @@ class StoreEditForm extends React.Component {
                         </Form.Control>
                       </Col>
                     </Form.Row>
+                  </Form.Group>
+
+                  <Form.Group controlId="pictureCount">
+                    <Form.Label>Delete Images</Form.Label>
+                    {this.state.pictures.map((picture, index) => (
+                      <div key={"pic-" + index}>
+                        <img className="img-fluid" src={picture.url} alt={"Slide " + index} />
+                        <Form.Check
+                          // style={{marginLeft: 30}}
+                          id={picture.key}
+                          label={picture.key.split('/').slice(-1)[0]}
+                          onChange={event => this.deleteFileChangeHandler(event, setFieldValue, values.pictures.length)}
+                        />
+                      </div>
+                    ))}
+                  </Form.Group>
+
+                  <Form.Group controlId="pictures">
+                    <Form.Label>Add Images</Form.Label>
+                    <br/>
+                    <input 
+                      onChange={event => this.fileChangedHandler(event, setFieldValue, values.pictures)}
+                      type="file"
+                      multiple
+                      className={touched.pictures && errors.pictures ? "error" : null}
+                    />
+                    {touched.pictureCount && errors.pictureCount ? (
+                      <div className="error-message">{errors.pictureCount}</div>
+                    ): null}
                   </Form.Group>
 
 

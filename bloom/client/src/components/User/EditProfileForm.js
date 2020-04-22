@@ -9,11 +9,9 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import { FaLockOpen, FaLock, FaUser, FaPhone } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import Cookies from 'js-cookie';
-import {
-  addAlert
-} from '../../reduxFolder/actions'
-import store from '../../reduxFolder/store';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import {editUser} from '../../reduxFolder/redux.js'
 
 class EditProfileForm extends React.Component {
   constructor(props) {
@@ -55,24 +53,14 @@ class EditProfileForm extends React.Component {
       .oneOf([Yup.ref('password')], 'Passwords do not match')
       .required("Password confirmation is required"),
     });
-
-    this.triggerUserDisplay = this.triggerUserDisplay.bind(this);
   }
 
-  // redirect to the store display page and pass the new store data
-  triggerUserDisplay(returnedUser) {
-    this.props.history.push({
-      pathname: '/users/' + returnedUser.id,
-      // state: {
-      //   user: returnedUser
-      // }
-    })
-  }
-
-  componentDidMount() {
-    this.setState({ 
-      user: JSON.parse(Cookies.get('user').substring(2))
-    });
+  componentDidUpdate(prevProps, prevState)  {
+    if (prevProps.user !== this.props.user) {
+      this.props.history.push({
+        pathname: '/users/' + this.props.user.id,
+      })
+    }
   }
     
   render() {
@@ -83,41 +71,18 @@ class EditProfileForm extends React.Component {
             <Formik
               enableReinitialize
               initialValues={{
-                first_name: this.state.user.first_name,
-                last_name: this.state.user.last_name,
-                phone: this.state.user.phone,
+                first_name: this.props.user.first_name,
+                last_name: this.props.user.last_name,
+                phone: this.props.user.phone,
                 password: '',
                 password_confirmation: '',
                 id: 0
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-                let user_id = this.props.match.params.user_id
-                let triggerUserDisplay = this.triggerUserDisplay
-
                 values.id = this.props.match.params.user_id
-                fetch('http://localhost:8081/users/' + user_id , {
-                  method: "POST",
-                  headers: {
-                    'Content-type': 'application/json'
-                  },
-                  credentials: 'include',
-                  body: JSON.stringify(values)
-                })
-                .then(function(response){
-                  if(response.status!==200){
-                    store.dispatch(addAlert(response))
-                  }
-                  else{
-                    // redirect to home page signed in
-                    return response.json()
-                  }
-                })
-                .then(data => {
-                  if(data){
-                    triggerUserDisplay(data)
-                  }
-                });
+
+                this.props.editProfile(values)
               }}
             >
             {( {values,
@@ -242,4 +207,13 @@ class EditProfileForm extends React.Component {
   }
 }
 
-export default EditProfileForm;
+const mapStateToProps = state => ({
+  user: state.userReducer.user
+})
+
+const mapDispatchToProps = dispatch => bindActionCreators({
+  editProfile: (email, password, auth_token) => editUser(email, password, auth_token)
+}, dispatch)
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(EditProfileForm);

@@ -1,8 +1,14 @@
 import { combineReducers } from 'redux'
-import bloomApp from './alerts'
 import userReducer from './user'
+import alertReducer from './alert'
+// import serviceReducer from './service'
+// import workerReducer from './worker'
 
-export default combineReducers({
+let rootReducer = combineReducers({
   userReducer,
-  bloomApp
-});
+  alertReducer,
+  // serviceReducer,
+  // workerReducer
+})
+
+export default rootReducer;

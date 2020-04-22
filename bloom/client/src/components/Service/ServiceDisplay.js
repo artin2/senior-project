@@ -35,22 +35,24 @@ class ServiceDisplay extends React.Component {
     // }
 
     // can put this for now so we don't have to upload to s3
-    this.setState({
-      pictures: [
-        { 
-          url: "/hair.jpg",
-          key: "/hair.jpg"
-        },
-        {
-          url: "/nails.jpg",
-          key: "/nails.jpg"
-        },
-        {
-          url: "/salon.jpg",
-          key: "/salon.jpg"
-        }
-      ]
-    })
+    if(prevState.service !== this.state.service){
+      this.setState({
+        pictures: [
+          { 
+            url: "/hair.jpg",
+            key: "/hair.jpg"
+          },
+          {
+            url: "/nails.jpg",
+            key: "/nails.jpg"
+          },
+          {
+            url: "/salon.jpg",
+            key: "/salon.jpg"
+          }
+        ]
+      })
+    }
   }
 
   async componentDidMount(): Promise<void> {

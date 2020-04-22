@@ -19,6 +19,15 @@
               height 500ms ease-in;
 }
 
+.alert-fixed {
+  position:fixed; 
+  top: 78px; 
+  left: 0px; 
+  width: 100%;
+  z-index:9999; 
+  border-radius:0px
+}
+
 /* .fade {
   opacity: 0;
   -webkit-transition: opacity 0.15s linear;

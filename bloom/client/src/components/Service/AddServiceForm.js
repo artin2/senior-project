@@ -12,7 +12,7 @@ import Select from 'react-select';
 import * as Yup from 'yup';
 import {
   addAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 // import { uploadHandler } from '../s3';
 
@@ -64,7 +64,7 @@ class AddServiceForm extends React.Component {
       // .nullable()
     });
 
-    this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
+    this.triggerServiceDisplay = this.triggerServiceDisplay.bind(this);
   }
 
   componentDidMount() {
@@ -95,12 +95,25 @@ class AddServiceForm extends React.Component {
     });
   }
 
+  // redirect to the worker display page
+  componentDidUpdate(prevProps, prevState)  {
+    if (prevProps.service !== this.props.service) {
+      this.props.history.push({
+        pathname: '/stores/' + this.props.service.store_id + '/services/' + this.props.service.id
+      })
+    }
+  }
+
   // redirect to the worker display page and pass the new worker data
-  triggerStoreDisplay() {
+  triggerServiceDisplay(service) {
     this.props.history.push({
-      pathname: '/stores/' + this.props.match.params.store_id
+      pathname: '/stores/' + service.store_id + '/services/' + service.id,
+      state: {
+        service: service
+      }
     })
   }
+
 
   fileChangedHandler = event => {
     this.setState({ selectedFiles: event.target.files })
@@ -126,7 +139,7 @@ class AddServiceForm extends React.Component {
               validationSchema={this.yupValidationSchema}
               onSubmit={async (values, {setSubmitting }) => {
                 let store_id = this.props.match.params.store_id
-                let triggerStoreDisplay = this.triggerStoreDisplay
+                let triggerServiceDisplay = this.triggerServiceDisplay
 
                 values.category = values.category.map(function(val){ 
                   return val.label; 
@@ -159,7 +172,7 @@ class AddServiceForm extends React.Component {
                 .then(function(data){
                   // redirect to home page signed in
                   if(data){
-                    triggerStoreDisplay()
+                    triggerServiceDisplay(data)
                   }
                 })
 
@@ -312,4 +325,15 @@ class AddServiceForm extends React.Component {
   }
 }
 
+// const mapStateToProps = state => ({
+//   service: state.serviceReducer.service,
+//   workerOptions: state.workerReducer.workerOptions
+// })
+
+// const mapDispatchToProps = dispatch => bindActionCreators({
+//   addService: (service, store_id) => addService(service, store_id),
+//   getWorkerOptions: (store_id) => getWorkerOptions(store_id)
+// }, dispatch)
+
+// export default connect(mapStateToProps, mapDispatchToProps)(AddServiceForm);
 export default AddServiceForm;

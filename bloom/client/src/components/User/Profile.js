@@ -2,27 +2,11 @@ import React from 'react';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-import Cookies from 'js-cookie'
+import { connect } from 'react-redux';
 
 class Profile extends React.Component {
   constructor(props) {
-    super(props);
-    this.state = {
-      user: {
-        first_name: '',
-        last_name: '',
-        phone: '',
-        password: '',
-        password_confirmation: '',
-        id: ''
-      }
-    }
-  }
-
-  componentDidMount() {
-    this.setState({
-      user: JSON.parse(Cookies.get('user').substring(2))
-    });
+    super(props)
   }
 
   render() {
@@ -31,9 +15,9 @@ class Profile extends React.Component {
       <Container fluid>
         <Row className="justify-content-center">
             <Col>
-              <h1>{this.state.user.first_name} {this.state.user.last_name}</h1>
-              <h1>{this.state.user.phone}</h1>
-              <h1>{this.state.user.email}</h1>
+              <h1>{this.props.user.first_name} {this.props.user.last_name}</h1>
+              <h1>{this.props.user.phone}</h1>
+              <h1>{this.props.user.email}</h1>
             </Col>
         </Row>
       </Container>
@@ -41,4 +25,8 @@ class Profile extends React.Component {
   }
 }
 
-export default Profile;
+const mapStateToProps = state => ({
+  user: state.userReducer.user
+})
+
+export default connect(mapStateToProps)(Profile);

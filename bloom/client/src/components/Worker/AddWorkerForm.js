@@ -12,7 +12,7 @@ import * as Yup from 'yup';
 import Select from 'react-select';
 import {
   addAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 
 class AddWorkerForm extends React.Component {

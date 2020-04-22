@@ -12,7 +12,7 @@ import Select from 'react-select';
 import * as Yup from 'yup';
 import {
   addAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import { getPictures, deleteHandler, uploadHandler } from '../s3'
 

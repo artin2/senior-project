@@ -1,32 +1,40 @@
-import {userLoginSuccess, userLoginFailure} from './actions/user';
+import {userLoginSuccess, userLoginFailure, editUserSuccess} from './actions/user';
+// import {addServiceSuccess} from './actions/service';
+// import {getWorkerOptionsSuccess, addWorker} from './actions/worker';
+import {failure} from './actions/index'
+import {addAlert} from './actions/alert';
 
-// function fetchProducts() {
-//     return dispatch => {
-//         dispatch(fetchProductsPending());
-//         fetch('https://exampleapi.com/products')
-//         .then(res => res.json())
-//         .then(res => {
-//             if(res.error) {
-//                 throw(res.error);
-//             }
-//             dispatch(fetchProductsSuccess(res.products);
-//             return res.products;
-//         })
-//         .catch(error => {
-//             dispatch(fetchProductsError(error));
-//         })
-//     }
-// }
+// USER FUNCTIONS 
 
+export function signup(values){
+  return dispatch => {
+    fetch('http://localhost:8081/signUp' , {
+      method: "POST",
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify(values)
+    })
+    .then(function(response){
+      dispatch(addAlert(response))  // seems this alert is not persisting...
 
-function login(email, password, auth_token) {
+      if(response.status!==200){
+        dispatch(failure(response))
+      }
+      else{
+        // redirect to home page signed in
+        // NOTE: do we want them to be signed in after login? if so we can change this...
+        window.location.href='/'
+      }
+    })
+  }
+}
 
-    console.log("here?", email, password);
-
-    return dispatch => {
-     fetch('http://localhost:8081/login' , {
-          headers: {
-            'Content-Type': 'application/json',
+export function login(email, password, auth_token) {
+  return dispatch => {
+    fetch('http://localhost:8081/login' , {
+      headers: {
+        'Content-Type': 'application/json',
       },
       credentials: 'include',
       method: "POST",
@@ -35,53 +43,142 @@ function login(email, password, auth_token) {
         "password": password
       })
     })
+    .then(function(response){
+      dispatch(addAlert(response))
 
-    .then(res => res.json())
-        .then(res => {
-            
-            if(res.error) {
-                throw(res.error);
-            }
-            console.log("Successful login!", res)
-            dispatch(userLoginSuccess(email, auth_token));
-            return res;
-        })
-        .catch(error => {
-            console.log("Error!", error)
-            dispatch(userLoginFailure(error));
-        })
-    }
+      if(response.status!==200){
+        dispatch(userLoginFailure(response));
+      }
+      else{
+        return response.json()
+      }
+    })
+    .then(data => {
+      if(data){
+        dispatch(userLoginSuccess(data.user));
+        return data;
+      }
+    });
+  }
 }
 
-//     .then(function(res){
-//       console.log(res);
-//       if(res.status!==200){
-//         console.log("Error!", res)
-//         dispatch(userLoginFailure(res.error));
-//         // dispatch(addAlert(response))
+export function editUser(values){
+  return dispatch => {
+    fetch('http://localhost:8081/users/' + values.id , {
+      method: "POST",
+      headers: {
+        'Content-type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify(values)
+    })
+    .then(function(response){
+      dispatch(addAlert(response))
+      
+      if(response.status!==200){
+        dispatch(failure(response))
+      }
+      else{
+        // redirect to home page signed in
+        return response.json()
+      }
+    })
+    .then(data => {
+      if(data){
+        dispatch(editUserSuccess(data))
+        return data
+      }
+    });
+  }
+}
+
+// not going to refactor other code unless extra time left, too time consuming
+
+// SERVICE FUNCTIONS
+
+// export function addService(values, store_id){
+//   return dispatch => {
+//     fetch('http://localhost:8081/stores/addService/' + store_id, {
+//       method: "POST",
+//       headers: {
+//         'Content-type': 'application/json'
+//       },
+//       credentials: 'include',
+//       body: JSON.stringify(values)
+//     })
+//     .then(function(response){
+//       dispatch(addAlert(response))
+
+//       if(response.status!==200){
+//         dispatch(failure(response))
 //       }
 //       else{
-//         // redirect to home page signed in
-//         // const result = yield res.json();
-//         console.log("Successful login!", res)
-//         dispatch(userLoginSuccess(res));
-//
-//         console.log("passed");
-//         //store state
-//         // dispatch(userLogin(email, auth_token));
-//
-//         // self.setState({
-//         //   returnedResponse: response
-//         // })
-//         // return response.json()
+//         return response.json();
 //       }
 //     })
-//     .then(data => {
-//       // if(data){
-//       //   self.triggerHome(data)
-//       // }
+//     .then(function(data){
+//       if(data){
+//         dispatch(addServiceSuccess(data))
+//         return data
+//       }
 //     })
 //   }
 // }
 
-export default login
+// WORKER FUNCTIONS
+
+// export function getWorkerOptions(store_id){
+//   return dispatch => {
+//     fetch('http://localhost:8081/stores/' + store_id + "/workers" , {
+//       method: "GET",
+//       headers: {
+//           'Content-type': 'application/json'
+//       },
+//       credentials: 'include'
+//     })
+//     .then(function(response){
+//       if(response.status!==200){
+//         // throw an error alert
+//         dispatch(addAlert(response))
+//       }
+//       else{
+//         return response.json();
+//       }
+//     })
+//     .then(data => {
+//       if(data){
+//         let convertedWorkers = data.map((worker) => ({ value: worker.id, label: worker.first_name + " " + worker.last_name }));
+//         dispatch(getWorkerOptionsSuccess(convertedWorkers))
+//         return data
+//       }
+//     });
+//   }
+// }
+
+// export function addWorker(values, store_id){
+//   fetch('http://localhost:8081/stores/addWorker/' + store_id, {
+//     method: "POST",
+//     headers: {
+//       'Content-type': 'application/json'
+//     },
+//     credentials: 'include',
+//     body: JSON.stringify(values)
+//   })
+//   .then(function(response){
+//     dispatch(addAlert(response))
+
+//     if(response.status!==200){
+//       dispatch(failure(response))
+//     }
+//     else{
+//       return response.json();
+//     }
+//   })
+//   .then(function(data){
+//     // redirect to home page signed in
+//     if(data){
+//       dispatch(addWorkerSuccess(data))
+//       return data
+//     }
+//   })
+// }

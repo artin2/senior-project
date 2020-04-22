@@ -13,7 +13,7 @@ import Select from 'react-select';
 import Cookies from 'js-cookie';
 import {
   addAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 // import { uploadHandler } from '../s3';
 

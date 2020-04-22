@@ -156,22 +156,6 @@ class Homepage extends React.Component {
 
   }
 
-  componentDidMount() {
-    // if the calling component wants us to update the navbar component
-    // if(this.props.location.state){
-    //   // NOTE THIS IS NOT WORKING, NAVBAR COMPONENT DOES NOT RERENDER
-    //   // // if the calling component set an alert, display it
-    //   // if(this.props.location.state.user){
-    //   //   store.dispatch(addUser(this.props.location.state.user))
-    //   // }
-    //   if(this.props.location.state.response){
-    //     store.dispatch(addAlert(this.props.location.state.response))
-    //   }
-    // }
-
-  }
-
-
   render() {
 
     // console.log(this.state.Visible)

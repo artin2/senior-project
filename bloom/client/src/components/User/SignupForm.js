@@ -12,10 +12,9 @@ import { Formik } from 'formik';
 import paint from '../../assets/abstract-painting.jpg';
 import { Link } from "react-router-dom";
 import * as Yup from 'yup';
-import {
-  addAlert
-} from '../../reduxFolder/actions'
-import store from '../../reduxFolder/store';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import {signup} from '../../reduxFolder/redux.js'
 
 class SignupForm extends React.Component {
   constructor(props) {
@@ -67,22 +66,7 @@ class SignupForm extends React.Component {
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-                fetch('http://localhost:8081/signUp' , {
-                  method: "POST",
-                  headers: {
-                    'Content-type': 'application/json'
-                  },
-                  body: JSON.stringify(values)
-                })
-                .then(function(response){
-                  if(response.status!==200){
-                    store.dispatch(addAlert(response))
-                  }
-                  else{
-                    // redirect to home page signed in
-                    window.location.href='/'
-                  }
-                })
+                this.props.signUpUser(values)
               }}
             >
             {( {values,
@@ -230,4 +214,9 @@ class SignupForm extends React.Component {
   }
 }
 
-export default SignupForm;
+const mapDispatchToProps = dispatch => bindActionCreators({
+  signUpUser: (values) => signup(values)
+}, dispatch)
+
+
+export default connect(null, mapDispatchToProps)(SignupForm);

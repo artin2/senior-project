@@ -12,7 +12,7 @@ import { FaEdit } from 'react-icons/fa';
 import { withRouter } from "react-router-dom";
 import {
   addAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 
 // ***** NOTE: fix to properly display all the stores

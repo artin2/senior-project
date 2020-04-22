@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button';
 import { withRouter } from "react-router-dom";
 import {
   addAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 
 class AdvancedSearch extends React.Component {

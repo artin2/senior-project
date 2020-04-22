@@ -8,7 +8,7 @@ import Cookies from 'js-cookie';
 import { withRouter } from "react-router-dom";
 import {
   addAlert
-} from '../../reduxFolder/actions'
+} from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import './StoreDisplay.css'
 // import { getPictures } from '../s3'

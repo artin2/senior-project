@@ -12,17 +12,12 @@ import FacebookLogin from 'react-facebook-login';
 import {TiSocialFacebookCircular, TiSocialGooglePlus} from 'react-icons/ti';
 import paint from '../../assets/abstract-painting.jpg';
 import { Link } from "react-router-dom";
-import { connect,  } from 'react-redux';
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import login from '../../reduxFolder/redux.js'
+import {login} from '../../reduxFolder/redux.js'
 // import ReactDOM from 'react-dom';
 // import { useGoogleLogin } from 'react-google-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import {
-  addAlert,
-  addUser
-} from '../../reduxFolder/actions'
-import store from '../../reduxFolder/store';
 
 
 const successGoogle = (response) => {
@@ -54,90 +49,25 @@ class LoginForm extends React.Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.triggerHome = this.triggerHome.bind(this);
   }
 
   handleChange(event) {
     this.setState({[event.target.id]: event.target.value});
   }
 
-  // redirect to the home page with the success response
-  triggerHome(returnedUser) {
-
-    console.log("whatttt");
-
-    // let resp = {
-    //   status: this.state.returnedResponse.status,
-    //   statusText: this.state.returnedResponse.statusText
-    // }
-
-    store.dispatch(addAlert(resp))
-    store.dispatch(addUser(returnedUser))
-
-    this.props.history.push({
-      pathname: '/',
-      state: {
-        // response: resp,
-        user: returnedUser
-      }
-    })
-  }
-
   componentDidUpdate(prevProps, prevState)  {
-    // console.log(this.props.user);
-
+    // means we updated redux store with the user and have successfully logged in
     if (prevProps.user !== this.props.user) {
-      // console.log(this.props.user);
-
-      this.triggerHome(this.props.user);
-
-    }
-
-    if (prevProps.error !== this.props.error) {
-
-      console.log("Error logging in -- should show alert with error", this.props.error);
-
+      this.props.history.push({
+        pathname: '/'
+      })
     }
   }
 
   handleSubmit(event) {
-
     //there might be a CORS issue with the backend, this doesn't work without preventDefault..
-    // let self = this
     event.preventDefault();
     this.props.loginUser(this.state.email, this.state.password, "")
-
-    // self.triggerHome(res)
-
-    // fetch('http://localhost:8081/login' , {
-    //   headers: {
-    //     // 'Accept': 'application/json',
-    //     'Content-Type': 'application/json',
-    //     // 'Cache': 'no-cache'
-    //   },
-    //   credentials: 'include',
-    //   method: "POST",
-    //   body: JSON.stringify(this.state)
-    // })
-    // .then(function(response){
-    //   if(response.status!==200){
-    //     // console.log("Error!", response)
-    //     store.dispatch(addAlert(response))
-    //   }
-    //   else{
-    //     // redirect to home page signed in
-    //     // console.log("Successful login!", response)
-    //     self.setState({
-    //       returnedResponse: response
-    //     })
-    //     return response.json()
-    //   }
-    // })
-    // .then(data => {
-    //   if(data){
-    //     self.triggerHome(data)
-    //   }
-    // });
   }
 
   render() {
@@ -205,9 +135,7 @@ class LoginForm extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  user: state.userReducer.user,
-  // response: state.response,
-  error: state.userReducer.error,
+  user: state.userReducer.user
 })
 
 const mapDispatchToProps = dispatch => bindActionCreators({
