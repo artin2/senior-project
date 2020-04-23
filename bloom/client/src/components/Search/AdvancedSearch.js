@@ -13,7 +13,6 @@ class AdvancedSearch extends React.Component {
     super(props);
     this.state = {
       address: '',
-      time: 1,
       distance: 1,
       nails: false,
       hair: false,
@@ -112,19 +111,6 @@ class AdvancedSearch extends React.Component {
 
         <Form.Group>
           <Row>
-          <Form.Label>Time</Form.Label>
-          <Form.Control as="select" id="time" onChange={this.handleChange}>
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
-          </Form.Control>
-          </Row>
-        </Form.Group>
-
-        <Form.Group>
-          <Row>
           <Form.Label>Distance</Form.Label>
           <Form.Control as="select" id="distance" onChange={this.handleChange}>
             <option>1 mile</option>
@@ -136,9 +122,9 @@ class AdvancedSearch extends React.Component {
           </Row>
         </Form.Group>
 
-        <Form.Group controlId="service">
+        <Form.Group controlId="category">
           <Row>
-          <Form.Label>Service</Form.Label>
+          <Form.Label>Category</Form.Label>
           <Form.Check
             style={{marginLeft: 30}}
             id="nails"

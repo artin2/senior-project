@@ -66,23 +66,40 @@ function useScreenWidth(): number {
   // }))
 
   useEffect(() => {
-    const setFromEvent = e => setPosition({  xys: calc(e.clientX, e.clientY) });
-    const setLeaveEvent = e => setPosition({ xys : [0, 0, 1]})
-    window.addEventListener("mousemove", setFromEvent);
+    let mounted = true
+    let setFromEvent;
+    let setLeaveEvent;
+
+    if(mounted){
+      setFromEvent = e => setPosition({  xys: calc(e.clientX, e.clientY) });
+      setLeaveEvent = e => setPosition({ xys : [0, 0, 1]})
+      window.addEventListener("mousemove", setFromEvent);
+    }
+
     return () => {
+      mounted = false;
       window.removeEventListener("mousemove", setLeaveEvent);
     };
   }, []);
   // return position;
 
 
-    const [width, setWidth] = useState(window.innerWidth)
-        useEffect(() => {
-          const handleResize = () => {
-            setWidth(window.innerWidth)
-          }
-          window.addEventListener('resize', handleResize)
-          return () => { window.removeEventListener('resize', handleResize) }
+  const [width, setWidth] = useState(window.innerWidth)
+
+  useEffect(() => {
+    let mounted = true
+    let handleResize;
+
+    if(mounted){
+      handleResize = () => {
+        setWidth(window.innerWidth)
+      }
+      window.addEventListener('resize', handleResize)
+    }
+    return () => { 
+      mounted = false; 
+      window.removeEventListener('resize', handleResize) 
+    }
 
   })
 

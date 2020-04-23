@@ -27,3 +27,12 @@
  .chip {
    margin: 2;
  }
+
+ .btn.btn-link[disabled] {
+  background-color: #F0F0F0;
+  /* box-shadow: none; */
+}
+.btn.btn-link {
+  background-color: #F0F0F0;
+  /* box-shadow: none; */
+}

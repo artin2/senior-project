@@ -97,6 +97,7 @@ async function getStores(req, res, next) {
 
           // we were able to get search results
           if (result && result.rows.length > 0) {
+            console.log(result.rows)
               helper.querySuccess(res, result.rows, "Successfully got Search Results!");
           }
           else{
