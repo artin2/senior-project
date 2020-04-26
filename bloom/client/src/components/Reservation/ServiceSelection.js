@@ -12,7 +12,6 @@ class ServiceSelection extends React.Component {
       categories: ['Nails', 'Hair', 'Makeup', 'Eyelashes', 'Eyebrows', 'Facials', 'Skin Care']
     };
     this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.props.handleSubmit.bind(this);
   }
 
   handleChange(event) {
@@ -24,16 +23,14 @@ class ServiceSelection extends React.Component {
       this.props.updateReservation(false, currService);
     }
     this.setState({ [event.target.id]: !this.state[event.target.id] })
-    console.log('end of handleChange')
   }
 
   render() {
     let that = this;
     const ServiceCheckBoxes = (props) => {
-      console.log('services are: ', props)
       if (props.services) {
         const categories = props.categories.map((category) => {
-          return <div id={category} key={category}>
+          return <div id={category} key={category} className="pl-4">
               <h4>{category}</h4>
               {
                 props.services.map((service) => {
@@ -52,7 +49,7 @@ class ServiceSelection extends React.Component {
                           />
                         </Col>
                         <Col xs='4' sm='2'>
-                          <h5 className="pt-2">${service.cost.toFixed(2)}</h5>
+                          <h5 className="pt-2 text-center">${service.cost.toFixed(2)}</h5>
                         </Col>
                       </Row>
                     </div>
@@ -67,17 +64,18 @@ class ServiceSelection extends React.Component {
     }
     return (
       <Card className='py-3'>
-        <Form onSubmit={this.props.handleSubmit}>
         <h3>Select Services</h3>
-        <Form.Group controlId="service">
           <Row className="text-left">
             <Col>
               <ServiceCheckBoxes categories={this.state.categories} services={this.props.services} />
             </Col>
           </Row>
-        </Form.Group>
-        <Button type="submit">Next</Button>
-      </Form>
+          <Row className="justify-content-center">
+            <Col md="3">
+            <Button block onClick={this.props.handleSubmit}>Next</Button>
+            </Col>
+          </Row>
+        
       </Card>
       
     );

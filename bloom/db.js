@@ -1,6 +1,7 @@
 
 
 const pg = require('pg');
+pg.types.setTypeParser(1114, str => str);
 require('dotenv').config();
 
 // exports.handler = function(event, context) {

@@ -43,7 +43,7 @@ async function getStore(req, res, next) {
 };
 
 async function getStores(req, res, next) {
-  try{
+  try {
     // await auth.verifyToken(req, res, next);
     let geocodeResult = await geocoder.geocode(req.query.address)
     let lat = geocodeResult[0].latitude
@@ -62,20 +62,20 @@ async function getStores(req, res, next) {
     }
 
     // if client didn't mark any categories then they want all of them
-    if(categoryQueryArray.length == 0){
+    if (categoryQueryArray.length == 0) {
       categoryQueryArray = categories
     }
 
     // convert the category array to a string literal array that postgres can understand
     var categoryQuery = '\'{';
-    for(var i = 0; i < categoryQueryArray.length; i++) {
-      if(i == categoryQueryArray.length - 1){
+    for (var i = 0; i < categoryQueryArray.length; i++) {
+      if (i == categoryQueryArray.length - 1) {
         categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'";
       }
-      else if(categoryQueryArray.length == 1){
+      else if (categoryQueryArray.length == 1) {
         categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\"}\'"
       }
-      else{
+      else {
         categoryQuery = categoryQuery + "\"" + categoryQueryArray[i] + "\", "
       }
     }
@@ -87,7 +87,7 @@ async function getStores(req, res, next) {
                   < ` + distance + ` AND category && ` + categoryQuery + `
                 ORDER BY distance;`
 
-    db.client.connect(function(err) {
+    db.client.connect(function (err) {
       // try to get search results
       db.client.query(query,
         async (err, result) => {
@@ -97,19 +97,18 @@ async function getStores(req, res, next) {
 
           // we were able to get search results
           if (result && result.rows.length > 0) {
-            console.log(result.rows)
-              helper.querySuccess(res, result.rows, "Successfully got Search Results!");
+            helper.querySuccess(res, result.rows, "Successfully got Search Results!");
           }
-          else{
+          else {
             helper.queryError(res, "No Search Results!");
           }
-      });
+        });
       if (err) {
         helper.dbConnError(res, err);
       }
     });
   }
-  catch(err){
+  catch (err) {
     helper.authError(res, err);
   }
 };
@@ -267,40 +266,40 @@ async function addStore(req, res, next) {
               let request = req
               let response = res
               let failed = false
-              ; (async (req, res) => {
-                const hourDb = await db.client.connect();
-                try {
-                  await hourDb.query("BEGIN");
-                  const query = 'INSERT INTO store_hours(store_id, day_of_the_week, open_time, close_time) VALUES($1, $2, $3, $4) RETURNING store_id';
-                  console.log("Starting query!")
-                  console.log(request)
-                  for (let i = 0; i < request.body.storeHours.length; i++) {
-                    console.log("loop top")
-                    console.log(request.body.storeHours[i])
-                    if (request.body.storeHours[i] != null) {
-                      let storeHoursValues = [store.id, i, request.body.storeHours[i].open_time, request.body.storeHours[i].close_time]
-                      console.log("Store hours values is", storeHoursValues)
-                      await hourDb.query(query, storeHoursValues);
+                ; (async (req, res) => {
+                  const hourDb = await db.client.connect();
+                  try {
+                    await hourDb.query("BEGIN");
+                    const query = 'INSERT INTO store_hours(store_id, day_of_the_week, open_time, close_time) VALUES($1, $2, $3, $4) RETURNING store_id';
+                    console.log("Starting query!")
+                    console.log(request)
+                    for (let i = 0; i < request.body.storeHours.length; i++) {
+                      console.log("loop top")
+                      console.log(request.body.storeHours[i])
+                      if (request.body.storeHours[i] != null) {
+                        let storeHoursValues = [store.id, i, request.body.storeHours[i].open_time, request.body.storeHours[i].close_time]
+                        console.log("Store hours values is", storeHoursValues)
+                        await hourDb.query(query, storeHoursValues);
+                      }
                     }
+                    console.log("about to commit ")
+                    await hourDb.query("COMMIT");
+                  } catch (e) {
+                    console.log("error is: ", e)
+                    await hourDb.query("ROLLBACK");
+                    console.log('##########Rolling Back#############')
+                    failed = true
+                    throw e;
+                  } finally {
+                    if (!failed) {
+                      helper.querySuccess(response, store, 'Successfully added new store with hours!');
+                    } else {
+                      helper.queryError(response, "Unable to create store because of hours!");
+                    }
+                    hourDb.release();
                   }
-                  console.log("about to commit ")
-                  await hourDb.query("COMMIT");
-                } catch (e) {
-                  console.log("error is: ", e)
-                  await hourDb.query("ROLLBACK");
-                  console.log('##########Rolling Back#############')
-                  failed = true
-                  throw e;
-                } finally {
-                  if (!failed) {
-                    helper.querySuccess(response, store, 'Successfully added new store with hours!');
-                  } else {
-                    helper.queryError(response, "Unable to create store because of hours!");
-                  }
-                  hourDb.release();
-                }
-              })().catch(e => helper.queryError(response, e));
-        
+                })().catch(e => helper.queryError(response, e));
+
             }
             else {
               // there were no results from trying to insert into the stores table
@@ -328,6 +327,7 @@ async function addStore(req, res, next) {
 // NOTE: with nested queries like this, we need to revert successful queries that were made if the inner most one
 // fails...
 async function addWorker(req, res, next) {
+  let store_id = null
   try {
     // lets verify that the user is logged in
     // should add verification to check they are the store owner, maybe can do this in the front end though...
@@ -389,10 +389,10 @@ async function addWorker(req, res, next) {
                                   const hourDb = await db.client.connect();
                                   try {
                                     await hourDb.query("BEGIN");
-                                    const query = 'INSERT INTO worker_hours(worker_id, day_of_the_week, start_time, end_time) VALUES ($1, $2, $3, $4) RETURNING worker_id';
+                                    const query = 'INSERT INTO worker_hours(worker_id, day_of_the_week, start_time, end_time, store_id) VALUES ($1, $2, $3, $4, $5) RETURNING worker_id';
                                     for (let i = 0; i < workerHours.length; i++) {
-                                        let workerHoursValues = [worker_id, i, workerHours[i].start_time, workerHours[i].end_time]
-                                        await hourDb.query(query, workerHoursValues);
+                                      let workerHoursValues = [worker_id, i, workerHours[i].start_time, workerHours[i].end_time, store_id]
+                                      await hourDb.query(query, workerHoursValues);
                                     }
                                     await hourDb.query("COMMIT");
                                   } catch (e) {
@@ -455,15 +455,15 @@ async function addWorker(req, res, next) {
 
 async function editWorker(req, res, next) {
   let worker = null
-  if(!req.body.noChange) {
+  if (!req.body.noChange) {
     try {
 
       console.log("Body looks like: ", req.body)
       await auth.verifyToken(req, res, next);
-  
+
       let query = 'UPDATE workers SET first_name=$1, last_name=$2, services=$3 WHERE id=$4 RETURNING *'
       let values = [req.body.first_name, req.body.last_name, req.body.services, req.params.id]
-  
+
       db.client.connect(function (err) {
         // update the store worker
         db.client.query(query, values,
@@ -471,7 +471,7 @@ async function editWorker(req, res, next) {
             if (err) {
               helper.queryError(res, err);
             }
-  
+
             // we were successfuly able to update the worker
             if (result && result.rows.length == 1) {
               worker = results.rows[0]
@@ -512,7 +512,7 @@ async function editWorker(req, res, next) {
           await hourDb.query("BEGIN");
           const query = 'UPDATE worker_hours SET start_time=$1, end_time=$2 WHERE worker_id=$3 and day_of_the_week=$4 RETURNING worker_id';
           for (let i = 0; i < newHours.length; i++) {
-            if(newHours[i] != null) {
+            if (newHours[i] != null) {
               let newHoursValues = [newHours[i].start_time, newHours[i].end_time, worker_id, i]
               await hourDb.query(query, newHoursValues);
             }
@@ -686,13 +686,19 @@ async function getStoreItem(req, res, next, table) {
 };
 
 async function getWorkersSchedules(req, res, next) {
+  console.log("about to get schedules for workers")
+  // console.log("body looks like: ", req)
   try {
     await auth.verifyToken(req, res, next);
 
     // query for store item
     // add join to get worker ids from store id
-    let query = 'SELECT * FROM worker_hours WHERE store_id = $1 and day between now() and now() + interval \'1 month\''
-    let values = [req.params.item_id]
+    let query = 'SELECT * FROM worker_hours WHERE store_id = $1'
+    let values = [req.params.store_id]
+
+    console.log("query looks like: ", query)
+    console.log("values looks like: ", values)
+    // console.log(req)
 
     db.client.connect(function (err) {
       // try to get the store item based on id
@@ -703,8 +709,8 @@ async function getWorkersSchedules(req, res, next) {
           }
 
           // we were successfuly able to get the store item
-          if (result && result.rows.length == 1) {
-            helper.querySuccess(res, result.rows[0], 'Successfully got worker schedules!');
+          if (result && result.rows.length > 0) {
+            helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
           }
           else {
             helper.queryError(res, new Error("Could not find worker schedules!"));
@@ -793,46 +799,112 @@ async function getStoreHours(req, res, next) {
 };
 
 //Appointments
-async function addAppointment(req, res, next) {
-  if (req.body.user_id && req.body.store_id && req.body.date && req.body.start_time && req.body.end_time && req.body.price && req.body.services && req.body.workers) {
-    try {
-      await auth.verifyToken(req, res, next);
-      let timestamp = helper.getFormattedDate();
-      let query = 'INSERT INTO appointments(user_id, store_id, date, start_time, end_time, price, services, workers, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;'
-      let values = [req.body.user_id, req.body.store_id, req.body.date, req.body.start_time, req.body.end_time, req.body.price, req.body.services, req.body.workers, timestamp]
+async function getAppointmentsByMonth(req, res, next) {
+  try {
+    await auth.verifyToken(req, res, next);
 
-      // connect to the db
-      db.client.connect(function (err) {
-        // try to add the store into the db
-        db.client.query(query, values,
-          async (err, result) => {
-            if (err) {
-              helper.queryError(res, err);
-            }
-
-            // we were successful in creating the store
-            if (result && result.rows.length == 1) {
-              // at this point, we need to add the store hours as well******
-              helper.querySuccess(res, result.rows[0], "Successfully Added Appointment!");
-            }
-            else {
-              // there were no results from trying to insert into the stores table
-              helper.queryError(res, "Unable to add appointment!");
-            }
+    // query for store appointments
+    let query = 'SELECT worker_id, date, start_time, end_time, created_at FROM appointments WHERE store_id = $1 and EXTRACT(MONTH from date) = $2 ORDER BY date'
+    let values = [req.params.store_id, req.params.month]
+    db.client.connect(function (err) {
+      // try to get the store appointments based on month
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
           }
-        );
-
-        if (err) {
-          helper.dbConnError(res, err);
-        }
-      });
-    }
-    catch (err) {
-      helper.authError(res, err);
-    }
+          // we were successfuly able to get the appointments for this month
+          if (result) {
+            helper.querySuccess(res, result.rows, 'Successfully got store appointments!');
+          }
+          else {
+            helper.queryError(res, new Error("Could not find store appointments!"));
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
   }
-  else {
-    helper.queryError(res, "Missing Parameters!");
+  catch (err) {
+    helper.authError(res, err);
+  }
+}
+
+async function addAppointment(req, res, next) {
+  try {
+    await auth.verifyToken(req, res, next);
+    // First, need to find what our appointment's group_id will be: 
+    let query = 'SELECT group_id FROM appointments ORDER BY group_id DESC LIMIT 1'
+
+    // connect to the db
+    db.client.connect(function (err) {
+      // try to get latest group_id from the appointments table
+      db.client.query(query,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+          // we were successful in getting the latest group_id from the appointments tble
+          if (result) {
+            if(result.rows.length == 1) {
+              insertAppointments(req, res, result.rows[0].group_id + 1)
+            }  
+          }
+          else {
+            helper.queryError(res, "Unable to query for appointment!");
+          }
+        }
+      );
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch (err) {
+    helper.authError(res, err);
+  }
+}
+
+async function insertAppointments(req, res, group_id) {
+  let timestamp = helper.getFormattedDate();
+  let failed = false
+  // Time to add to our appointment group one by one
+  let appointments = req.body.appointments
+  // Below is for scoping issues. Res is undefined below
+  let resp = res
+  let request = req
+  if (appointments.length > 0) {
+    let storeId = req.params.store_id
+      ; (async (req, res) => {
+        const hourDb = await db.client.connect();
+        try {
+          await hourDb.query("BEGIN");
+          let query = 'INSERT INTO appointments(user_id, store_id, worker_id, service_id, date, created_at, start_time, end_time, price, group_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;'
+          for (let i = 0; i < appointments.length; i++) {
+            let values = [request.body.user_id, storeId, appointments[i].worker_id, appointments[i].service_id, appointments[i].date.substring(0, 18), timestamp, appointments[i].start_time, appointments[i].end_time, appointments[i].price, group_id]
+            await hourDb.query(query, values);
+          }
+          await hourDb.query("COMMIT");
+        } catch (e) {
+          await hourDb.query("ROLLBACK");
+          failed = true
+          throw e;
+        } finally {
+          if (!failed) {
+            helper.querySuccess(resp, group_id, 'Successfully added appointment!');
+          } else {
+            helper.queryError(res, "Unable to add appointments!");
+          }
+          hourDb.release();
+        }
+      })().catch(e => helper.queryError(resp, e));
+  } else {
+    if (!failed) {
+      helper.querySuccess(res, store, 'Successfully added appointments!');
+    } else {
+      helper.queryError(res, "No appointments were given or failure to upload!");
+    }
   }
 };
 
@@ -851,5 +923,7 @@ module.exports = {
   addService: addService,
   getWorkersSchedules: getWorkersSchedules,
   getStoreHours: getStoreHours,
+  getAppointmentsByMonth: getAppointmentsByMonth,
+  addAppointment: addAppointment,
   getIndividualWorkerHours: getIndividualWorkerHours
 };
