@@ -197,16 +197,16 @@ app.post('/stores/:store_id/workers/:item_id', withAuth, async (req, res, next) 
   await stores.editWorker(req, res, next);
 });
 
+app.get('/stores/:store_id/workers/schedules', withAuth, async (req, res, next) => {
+  await stores.getWorkersSchedules(req, res, next);
+});
+
 app.get('/stores/:store_id/workers/:item_id', withAuth, async (req, res, next) => {
   await stores.getStoreItem(req, res, next, "workers");
 });
 
 app.get('/stores/:store_id/workers', withAuth, async (req, res, next) => {
   await stores.getStoreItems(req, res, next, "workers");
-});
-
-app.get('/stores/:store_id/workers/schedules', withAuth, async (req, res, next) => {
-  await stores.getWorkersSchedules(req, res, next);
 });
 
 app.get('/stores/:store_id/workers/:worker_id/hours', withAuth, async (req, res, next) => {
@@ -229,6 +229,15 @@ app.post('/addStore', withAuth, async (req, res, next) => {
 app.get('/stores/:store_id/storeHours', withAuth, async (req, res, next) => {
   await stores.getStoreHours(req, res, next);
 });
+
+//appointments
+app.post('/stores/:store_id/appointments/new', withAuth, async(req, res, next) => {
+  await stores.addAppointment(req, res, next);
+})
+
+app.get('/stores/:store_id/appointments/month/:month', withAuth, async(req, res, next) => {
+  await stores.getAppointmentsByMonth(req, res, next);
+})
 
 //s3
 app.post('/getPresignedUrl', withAuth, async (req, res) => {

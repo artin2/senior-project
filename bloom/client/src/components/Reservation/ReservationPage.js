@@ -7,6 +7,7 @@ import { FaArrowLeft } from 'react-icons/fa'
 import DateSelection from './DateSelection'
 import { css } from '@emotion/core'
 import GridLoader from 'react-spinners/GridLoader'
+import BookingPage from './BookingPage';
 
 const override = css`
   display: block;
@@ -23,7 +24,10 @@ class ReservationPage extends React.Component {
       currentStep: 1,
       selectedServices: [],
       services: [],
-      isLoading: true
+      loading: true,
+      workers: [],
+      workersSchedules: [],
+      storeHours: []
     };
   }
 
@@ -51,8 +55,7 @@ class ReservationPage extends React.Component {
     })
   }
 
-  handleSubmit = (event) => {
-    event.preventDefault()
+  handleSubmit = () => {
     if (this.state.currentStep < 4) {
       var newStep = this.state.currentStep + 1
       this.setState({
@@ -61,6 +64,12 @@ class ReservationPage extends React.Component {
     } else {
       alert(JSON.stringify(this.state));
     }
+  }
+
+  updateAppointments = (receivedAppointments) => {
+    this.setState({
+      appointments: receivedAppointments
+    })
   }
 
   pluralize = (val, word, plural = word + 's') => {
@@ -80,33 +89,27 @@ class ReservationPage extends React.Component {
   }
 
   prefetchSchedules = () => {
-    fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/workers/schedules" , {
-      method: "GET",
-      headers: {
+    Promise.all([
+      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/workers/schedules', {
+        method: "GET",
+        headers: {
           'Content-type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    .then(function(response){
-      console.log(response)
-      if(response.status!==200){
-        // should throw an error here
-        console.log("Error!", response.status)
-        // throw new Error(response.status)
-        // window.location.href='/'
-      }
-      else{
-        return response.json();
-      }
-    })
-    .then(data => {
-      // form data here
-      console.log("Limited store data from server:", data)
-      let convertedWorkers = data.map((worker) => ({ value: worker.id, label: worker.first_name + " " + worker.last_name }));
+        },
+        credentials: 'include'
+      }).then(value => value.json()),
+      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/storeHours", {
+        method: "GET",
+        headers: {
+          'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      }).then(value => value.json())
+    ]).then(allResponses => {
       this.setState({
-        workerOptions: convertedWorkers
+        storeHours: allResponses[1],
+        workersSchedules: allResponses[0]
       })
-    });
+    })
   }
 
   componentDidMount() {
@@ -127,15 +130,17 @@ class ReservationPage extends React.Component {
       credentials: 'include'
     }).then(value => value.json())
     ]).then(allResponses => {
-      console.log(allResponses)
       const response1 = allResponses[0]
       const response2 = allResponses[1]
       this.setState({
         services: response1,
         storeName: response2.name,
-        isLoading: false
+        workers: response2.workers,
+        loading: false
       })
     })
+
+    this.prefetchSchedules()
   }
 
 
@@ -143,7 +148,7 @@ class ReservationPage extends React.Component {
   render() {
     let that = this;
     const DisplayByStep = (props) => {
-      if (this.state.isLoading) {
+      if (this.state.loading) {
         return <Card className="fullHeight">
           <Row className="vertical-center">
             <Col>
@@ -151,7 +156,7 @@ class ReservationPage extends React.Component {
                 css={override}
                 size={20}
                 color={"#2196f3"}
-                loading={this.state.isLoading}
+                loading={this.state.loading}
               />
             </Col>
           </Row>
@@ -159,8 +164,10 @@ class ReservationPage extends React.Component {
       } else {
         if (this.state.currentStep == 1) {
           return <ServiceSelection services={this.state.services} updateReservation={this.updateReservation} selectedServices={this.state.selectedServices} time={this.state.time} total={this.state.total} handleSubmit={this.handleSubmit} timeConvert={this.timeConvert} pluralize={this.pluralize} />
+        } else if(this.state.currentStep == 2) {
+          return <DateSelection time={this.state.time}  store_id={this.props.match.params.store_id} selectedServices={this.state.selectedServices} storeHours={this.state.storeHours} workersSchedules={this.state.workersSchedules} handleSubmit={this.handleSubmit} updateAppointments={this.updateAppointments}/>
         } else {
-          return <DateSelection time={this.state.time} selectedServices={this.state.selectedServices} />
+          return <BookingPage appointments={this.state.appointments} store_id={this.props.match.params.store_id} history={this.props.history}/>
         }
       }
     }
