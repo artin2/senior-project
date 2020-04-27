@@ -21,6 +21,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 app.use((req, res, next) => {
+  console.log("environemnt variables are: ", process.env.NODE_ENV)
+  console.log("!!!!", process.env.ALLOWED_ORIGIN_PROD)
+  console.log("????", process.env.ALLOWED_ORIGIN_DEV)
   res.header("Access-Control-Allow-Origin", process.env.NODE_ENV === 'production' ? process.env.ALLOWED_ORIGIN_PROD : process.env.ALLOWED_ORIGIN_DEV);
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
@@ -177,5 +180,5 @@ app.get('*', (req,res) =>{
 let port = process.env.PORT || 8081;
 
 app.listen(port, function () {
-    console.log('Node Server is listening at port', port);
+    console.log('New node Server is listening at port', port);
 });
