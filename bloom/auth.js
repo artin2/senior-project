@@ -1,67 +1,25 @@
-const argon2 = require('argon2');
-const crypto = require('crypto');
+var bcrypt = require("bcryptjs");
+const saltRounds = 12;
 const jwt = require('jsonwebtoken');
 
-async function generateSalt() {
-  try {
-    const salt = await crypto.randomBytes(32).toString('base64');
-    console.log("Created Salt")
-    return salt;
-  }
-  catch(err) {
-    console.log(err);
-  }
-}
-
 async function generateHash(pw) {
-  try {
-    const salt = await generateSalt();
-    const hash = await argon2.hash(pw, salt);
-    console.log('Successfully created Argon2 hash:', hash);
-    return hash;
+  try{
+    let hash = await bcrypt.hash(pw, saltRounds)
+    return hash
   }
-  catch(err) {
-    console.log(err);
+  catch(err){
     return null
   }
-
-  // console.log(hash);
-  //
-  // crypto.randomBytes(32).toString('base64').then(salt => {
-  //
-  //   console.log(salt);
-  //
-  //   await argon2.hash(pw, salt).then(hash => {
-  //     console.log('Successfully created Argon2 hash:', hash);
-  //     console.log(hash);
-  //     return hash;
-  //   });
-  //
-  //   // return null;
-  // })
-  //
-  // .catch((err) => {
-  //   console.log(err)
-  // });
-
 }
 
 async function verifyHash(dbPw, userPw) {
-  try {
-    const verified = await argon2.verify(dbPw.toString(), userPw.toString());
-    if(verified) {
-      console.log('Successful Password Supplied!');
-      return true;
-    }
-    else {
-      console.log('Invalid Password Supplied!');
-      return false;
-    }
+  try{
+    let verified = await bcrypt.compare(userPw, dbPw)
+    return verified
   }
-  catch(err) {
-    console.log('Invalid password supplied!');
-    return false;
-  };
+  catch(err){
+    return null
+  }
 }
 
 const generateToken = (res, user) => {
