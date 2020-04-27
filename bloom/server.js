@@ -2,8 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-// const history = require('connect-history-api-fallback');
-const serveStatic = require('serve-static');
 const path = require("path")
 const passport = require('passport');
 const db = require('./db.js');
@@ -19,49 +17,16 @@ require('dotenv').config();
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-// app.use(cors());
-// there might be a CORS issue, can't make a request in front end without event.preventDefault()
-// var allowedOrigins = ['http://localhost:3000'];
-// app.use(cors({
-//   credentials: true,
-//   //CITATION: https://medium.com/@alexishevia/using-cors-in-express-cac7e29b005b
-//   origin: function(origin, callback){
-//     // allow requests with no origin
-//     // (like mobile apps or curl requests)
-//     if(!origin) return callback(null, true);
-//     if(allowedOrigins.indexOf(origin) === -1){
-//       var msg = 'The CORS policy for this site does not ' +
-//                 'allow access from the specified Origin.';
-//       return callback(new Error(msg), false);
-//     }
-//     return callback(null, true);
-//   }
-// }));
-
 app.use(cookieParser());
-// app.all('*', ensureSecure)
-app.use(serveStatic(path.join(__dirname, 'client', '/build')));
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Origin", process.env.NODE_ENV === 'production' ? process.env.ALLOWED_ORIGIN_PROD : process.env.ALLOWED_ORIGIN_DEV);
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
   res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin, Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
   next();
 });
-
-// //CITATION: https://stackoverflow.com/questions/40876599/express-js-force-https-ssl-redirect-error-too-many-redirects
-// //HTTPS redirect middleware
-// function ensureSecure(req, res, next) {
-//   //Heroku stores the origin protocol in a header variable. The app itself is isolated within the dyno and all request objects have an HTTP protocol.
-//   if (req.get('X-Forwarded-Proto')=='https' || req.hostname == 'localhost') {
-//     //Serve Vue App by passing control to the next middleware
-//     next();
-//   } else if(req.get('X-Forwarded-Proto')!='https' && req.get('X-Forwarded-Port')!='443'){
-//     //Redirect if not HTTP with original request URL
-//     res.redirect('https://' + req.hostname + req.url);
-//   }
-// }
 
 // //CITATION https://medium.com/@faizanv/authentication-for-your-react-and-express-application-w-json-web-tokens-923515826e0
 const secret = process.env.JWT_SECRET;
@@ -83,62 +48,6 @@ const withAuth = function(req, res, next) {
   }
 }
 module.exports = withAuth;
-
-
-// Inserted this so that client-side routing works
-// app.use(history({
-//     verbose: true
-// }));
-// Documentation for connect-history-api-fallback requires this again...
-// app.use(serveStatic(path.join(__dirname, '..', '/build')));
-
-// function for errors on database connections
-
-//
-//
-// app.get('/healthCheck', (req, res) => {
-//   res.status(200)
-//   res.send("Hello")
-// })
-//
-// app.get('/getMerchantInfo/:id', (req, res) => {
-//   let response = {
-//     merchant: {
-//       merchantId: 1,
-//       merchantName: 'My Salon',
-//       createdAt: new Date(),
-//       type: 'Salon',
-//       services: ['Nails', 'Hair', 'Makeup']
-//     }
-//   }
-//   res.status(200)
-//   res.json(response)
-// })
-//
-// app.post('/postMenuItem', async (req, res) => {
-//   let query = 'INSERT INTO menu_item(merchant_id, item_name, item_price, item_category) VALUES ($1, $2, $3, $4) RETURNING id;'
-//   let values = [req.body.merchantId, req.body.itemName, req.body.itemPrice, req.body.itemCategory]
-//
-//   //connect to the db
-//   pool.connect(function (err, client, done) {
-//     if (err) {
-//       dbConnError(res, err);
-//       return;
-//     }
-//     client.query(query, values, //do the query
-//       (err, resp) => {
-//         if (err) {
-//           queryError(res, err);
-//           return;
-//         }
-//
-//         res.status(200)
-//         res.json(resp.rows[0].id)
-//       });
-//       client.release()
-//   });
-// });
-
 
 app.post('/signUp', async (req, res) => {
   await users.signup(req, res);
@@ -257,6 +166,11 @@ app.post('/deleteImages', withAuth, async (req, res) => {
 app.get('/clearCookie', (req, res) => {
   res.clearCookie('jwt_token').end();
   res.send('User Logged Out Successfully');
+});
+
+// Handles any requests that don't match the ones above
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname+'/client/build/index.html'));
 });
 
 

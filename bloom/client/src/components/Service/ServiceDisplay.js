@@ -8,6 +8,7 @@ import Col from 'react-bootstrap/Col'
 // import store from '../../reduxFolder/store';
 import LargeCarousel from '../LargeCarousel';
 // import { getPictures } from '../s3'
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class ServiceDisplay extends React.Component {
   constructor(props) {
@@ -63,7 +64,7 @@ class ServiceDisplay extends React.Component {
       })
     }
     else{
-      const response = await fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id, {
+      const response = await fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id, {
         method: "GET",
         headers: {
             'Content-type': 'application/json'

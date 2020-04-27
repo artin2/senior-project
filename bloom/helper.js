@@ -13,9 +13,6 @@ function queryError(res, err) {
   console.log('Query error', err);
   res.statusMessage = err;
   res.status(400).end();
-  // res.status(400).send(err)
-  // res.status(400);
-  // res.json(err);
 }
 
 function authError(res, err) {
@@ -29,7 +26,6 @@ function querySuccess(res, content, msg) {
   res.statusMessage = msg
   res.status(200);
   res.json(content);
-  // res.send(msg);
 }
 
 module.exports = {

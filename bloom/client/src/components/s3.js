@@ -1,3 +1,5 @@
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
+
 // export let getPictures = async(prefixPassed) => {
 // module.exports.getPictures = async function(prefixPassed) {
 //   await getPictures(prefixPassed);
@@ -7,7 +9,7 @@
 // getting an export error, going to leave it for now
 
 async function getPictures(prefixPassed) {
-  const response = await fetch('http://localhost:8081/getImages', {
+  const response = await fetch(fetchDomain + '/getImages', {
       method: "POST",
       headers: {
           'Content-type': 'application/json'
@@ -33,7 +35,7 @@ async function uploadHandler(prefix, selectedFiles) {
       fileType: selectedFiles[i].type
     }
 
-    const response = await fetch('http://localhost:8081/getPresignedUrl/', {
+    const response = await fetch(fetchDomain + '/getPresignedUrl/', {
       method: "POST",
       headers: {
           'Content-type': 'application/json'
@@ -61,7 +63,7 @@ async function uploadHandler(prefix, selectedFiles) {
 // function for uploading all selected files to s3
 async function deleteHandler(keysPassed) {
   // remove each image from s3
-  const response = await fetch('http://localhost:8081/deleteImages/', {
+  const response = await fetch(fetchDomain + '/deleteImages/', {
     method: "POST",
     headers: {
         'Content-type': 'application/json'

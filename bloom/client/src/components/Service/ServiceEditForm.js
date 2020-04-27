@@ -15,6 +15,7 @@ import {
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import { getPictures, deleteHandler, uploadHandler } from '../s3'
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class ServiceEditForm extends React.Component {
   constructor(props) {
@@ -140,7 +141,7 @@ class ServiceEditForm extends React.Component {
     }
     else{
       // first we fetch the service itself
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id, {
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id, {
         method: "GET",
         headers: {
             'Content-type': 'application/json'
@@ -172,7 +173,7 @@ class ServiceEditForm extends React.Component {
       // // need to get store category, fetch?
       // // refactor later to make it a get request
       // // maybe have to refactor the whole table to keep track of names...?
-      // fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/workers" , {
+      // fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/workers" , {
       //   method: "POST",
       //   headers: {
       //       'Content-type': 'application/json'
@@ -242,7 +243,7 @@ class ServiceEditForm extends React.Component {
                 //   return val.value; 
                 // })
 
-                fetch('http://localhost:8081/stores/' + store_id + "/services/" + service_id, {
+                fetch(fetchDomain + '/stores/' + store_id + "/services/" + service_id, {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json'

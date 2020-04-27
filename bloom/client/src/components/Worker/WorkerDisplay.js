@@ -10,6 +10,8 @@ import Calendar from '../Calendar/CalendarPage'
 import WorkerEditForm from './WorkerEditForm';
 import GridLoader from 'react-spinners/GridLoader'
 import { css } from '@emotion/core'
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
+
 const override = css`
   display: block;
   margin: 0 auto;
@@ -93,14 +95,14 @@ class WorkerDisplay extends React.Component {
     if (this.props.location && this.props.location.state && this.props.location.state.worker) {
       let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
       Promise.all([
-        fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id + '/hours', {
+        fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id + '/hours', {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
           },
           credentials: 'include'
         }).then(value => value.json()),
-        fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/storeHours", {
+        fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/storeHours", {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
@@ -127,21 +129,21 @@ class WorkerDisplay extends React.Component {
     }
     else {
       Promise.all([
-        fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id, {
+        fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id, {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
           },
           credentials: 'include'
         }).then(value => value.json()),
-        fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/storeHours", {
+        fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/storeHours", {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
           },
           credentials: 'include'
         }).then(value => value.json()),
-        fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id + '/hours', {
+        fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id + '/hours', {
           method: "GET",
           headers: {
             'Content-type': 'application/json'

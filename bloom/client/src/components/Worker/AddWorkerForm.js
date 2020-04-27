@@ -17,6 +17,8 @@ import store from '../../reduxFolder/store';
 import GridLoader from 'react-spinners/GridLoader'
 import { css } from '@emotion/core'
 
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
+
 const override = css`
   display: block;
   margin: 0 auto;
@@ -123,7 +125,7 @@ class AddWorkerForm extends React.Component {
   }
 
   componentDidMount() {
-    fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/storeHours", {
+    fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/storeHours", {
       method: "GET",
       headers: {
         'Content-type': 'application/json'
@@ -196,7 +198,7 @@ class AddWorkerForm extends React.Component {
                   return val.value;
                 })
 
-                fetch('http://localhost:8081/stores/addWorker/' + store_id, {
+                fetch(fetchDomain + '/stores/addWorker/' + store_id, {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json'

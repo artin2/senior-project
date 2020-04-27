@@ -16,6 +16,7 @@ import {
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import { uploadHandler } from '../s3';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class StoreSignupForm extends React.Component {
   constructor(props) {
@@ -178,7 +179,7 @@ class StoreSignupForm extends React.Component {
 
                 let triggerStoreDisplay = this.triggerStoreDisplay
 
-                fetch('http://localhost:8081/addStore', {
+                fetch(fetchDomain + '/addStore', {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json',

@@ -14,6 +14,7 @@ import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 // ***** NOTE: fix to properly display all the stores
 
@@ -95,7 +96,7 @@ class UserStoresDashboard extends React.Component {
       })
     }
     else{
-      fetch('http://localhost:8081/stores/users/' + this.props.match.params.user_id , {
+      fetch(fetchDomain + '/stores/users/' + this.props.match.params.user_id , {
         method: "GET",
         headers: {
             'Content-type': 'application/json'

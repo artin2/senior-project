@@ -17,6 +17,7 @@ import {
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import { getPictures, deleteHandler, uploadHandler } from '../s3'
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const override = css`
   display: block;
@@ -218,7 +219,7 @@ class StoreEditForm extends React.Component {
     // check if categories are empty, if they are then cache/store needs to be updated. 
     if (this.props.location.state && this.props.location.state.store) {
       let convertedCategory = this.props.location.state.store.category.map((str) => ({ value: str.toLowerCase(), label: str }));
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/storeHours', {
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/storeHours', {
         method: "GET",
         headers: {
             'Content-type': 'application/json'
@@ -245,14 +246,14 @@ class StoreEditForm extends React.Component {
     }
     else {
       Promise.all([
-        fetch('http://localhost:8081/stores/' + this.props.match.params.store_id, {
+        fetch(fetchDomain + '/stores/' + this.props.match.params.store_id, {
         method: "GET",
         headers: {
           'Content-type': 'application/json'
         },
         credentials: 'include'
       }).then(value => value.json()),
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/storeHours', {
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/storeHours', {
         method: "GET",
         headers: {
           'Content-type': 'application/json'
@@ -327,7 +328,7 @@ class StoreEditForm extends React.Component {
                 let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
                 await uploadHandler(prefix, this.state.selectedFiles)
 
-                fetch('http://localhost:8081/stores/edit/' + store_id , {
+                fetch(fetchDomain + '/stores/edit/' + store_id , {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json'

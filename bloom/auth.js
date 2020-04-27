@@ -80,13 +80,13 @@ const generateToken = (res, user) => {
     expires: date,
     secure: false, // set to true if your using https
     httpOnly: false,
-    domain: 'localhost'
+    domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN_PROD : process.env.DEV
   })
   return res.cookie('token', token, {
     expires: date,
     secure: false, // set to true if your using https
     httpOnly: false,
-    domain: 'localhost'
+    domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN_PROD : process.env.DEV
   });
 
 };
