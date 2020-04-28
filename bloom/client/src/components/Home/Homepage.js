@@ -96,9 +96,9 @@ function useScreenWidth(): number {
       }
       window.addEventListener('resize', handleResize)
     }
-    return () => { 
-      mounted = false; 
-      window.removeEventListener('resize', handleResize) 
+    return () => {
+      mounted = false;
+      window.removeEventListener('resize', handleResize)
     }
 
   })
@@ -181,7 +181,7 @@ class Homepage extends React.Component {
         <div>
           <ScreenWidth>
             {(position) =>
-            <img src={paint} alt="paint" style={{top: 0, left: 0, position: 'absolute', height: '700px', width:'100%', transform: `perspective(600px) rotateX(${position.xys[0]/10}deg) rotateY(${position.xys[1]/10}deg) scale(${position.xys[2]})` }}
+            <img src={paint} alt="paint" style={{top: 80, left: 0, position: 'absolute', height: '700px', width:'100%', transform: `perspective(600px) rotateX(${position.xys[0]/10}deg) rotateY(${position.xys[1]/10}deg) scale(${position.xys[2]})` }}
               // onMouseMove={({ clientX: x, clientY: y }) => set({ xys: calc(x, y) })}
               // onMouseLeave={() => set({ xys: [0, 0, 1] })}
             />

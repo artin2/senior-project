@@ -77,7 +77,7 @@ class LoginForm extends React.Component {
 
         <Row className="justify-content-center">
           <Col xs={8} sm={7} md={6} lg={5}>
-            <Form className="formBody rounded container" style={{marginTop: 120}}>
+            <Form className="formBody rounded container" style={{marginTop: 80}}>
               <h3>Login</h3>
               <Form.Group style={{marginTop: 40, width: '65%', marginLeft: '17%'}}>
                 <InputGroup>

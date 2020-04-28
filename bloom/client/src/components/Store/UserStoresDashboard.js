@@ -14,6 +14,9 @@ import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import {addStore} from '../../reduxFolder/actions/stores.js'
 
 // ***** NOTE: fix to properly display all the stores
 
@@ -88,14 +91,24 @@ class UserStoresDashboard extends React.Component {
     })
   }
 
+  triggerShowCalendar(store) {
+    this.props.history.push({
+      pathname: '/storeCalendar/' + store.id,
+      state: {
+        store: store
+      }
+    })
+  }
+
   componentDidMount() {
-    if(this.props.location.state && this.props.location.state.stores){
+    console.log(this.props.store);
+    if(this.props.store){
       this.setState({
-        stores: this.props.location.state.stores
+        stores: this.props.store
       })
     }
     else{
-      fetch('http://localhost:8081/stores/users/' + this.props.match.params.user_id , {
+      fetch('http://localhost:8081/stores/users/' + this.props.user.id , {
         method: "GET",
         headers: {
             'Content-type': 'application/json'
@@ -118,6 +131,7 @@ class UserStoresDashboard extends React.Component {
             stores: data,
           })
         }
+        this.props.addStore(data);
 
       });
     }
@@ -139,6 +153,7 @@ class UserStoresDashboard extends React.Component {
   // ))}
 
   render() {
+    console.log(this.state.stores)
     return (
       <Container fluid style={{backgroundColor: '#bdcddb'}}>
         {this.state.stores.map((store, index) => (
@@ -165,16 +180,24 @@ class UserStoresDashboard extends React.Component {
                   ))}
                 </div>
                 <div>
-                  <p className="description"> 
+                  <p className="description">
                     {store.description}
                   </p>
                 </div>
 
-                <Button onClick={() =>  this.triggerShowWorkers(store.id)}>View Workers</Button> &nbsp;
-                <Button onClick={() =>  this.triggerAddWorker(store.id)}>Add Worker</Button> &nbsp;
-                <Button onClick={() =>  this.triggerShowServices(store.id)}>View Services</Button> &nbsp;
-                <Button onClick={() =>  this.triggerAddService(store.id)}>Add Service</Button>
-
+                <Col>
+                  <Button className="update_button"  onClick={() =>  this.triggerShowCalendar(store)}>View Calendar</Button> &nbsp;
+                <Col>
+                <p className="update"> Your Workers </p>
+                <Button className="update_button" onClick={() =>  this.triggerShowWorkers(store.id)}>View Workers</Button> &nbsp;
+                <Button className="update_button" onClick={() =>  this.triggerAddWorker(store.id)}>Add Worker</Button> &nbsp;
+                </Col>
+                <Col>
+                <p className="update"> Your Services </p>
+                <Button className="update_button" onClick={() =>  this.triggerShowServices(store.id)}>View Services</Button> &nbsp;
+                <Button className="update_button"  onClick={() =>  this.triggerAddService(store.id)}>Add Service</Button>
+                </Col>
+                </Col>
               </Col>
             </Row>
           </div>
@@ -184,4 +207,15 @@ class UserStoresDashboard extends React.Component {
   }
 }
 
-export default withRouter(UserStoresDashboard);
+
+const mapStateToProps = state => ({
+  stores: state.storeReducer.stores,
+  user: state.userReducer.user
+})
+
+const mapDispatchToProps = dispatch => bindActionCreators({
+  addStore: (store) => addStore(store),
+}, dispatch)
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(UserStoresDashboard);

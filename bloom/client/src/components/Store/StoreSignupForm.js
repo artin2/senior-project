@@ -11,6 +11,10 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
 import Cookies from 'js-cookie';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import {updateRole} from '../../reduxFolder/actions/user.js'
+import {addStore} from '../../reduxFolder/actions/stores.js'
 import {
   addAlert
 } from '../../reduxFolder/actions/alert'
@@ -86,6 +90,7 @@ class StoreSignupForm extends React.Component {
 
   // redirect to the store display page and pass the new store data
   triggerStoreDisplay(returnedStore) {
+
     this.props.history.push({
       pathname: '/stores/' + returnedStore.id,
       state: {
@@ -172,7 +177,7 @@ class StoreSignupForm extends React.Component {
                   return val.label;
                 })
 
-                values.owner_id = JSON.parse(Cookies.get('user').substring(2)).id
+                values.owner_id = [JSON.parse(Cookies.get('user').substring(2)).id]
                 values.storeHours = this.state.storeHours
 
 
@@ -202,6 +207,8 @@ class StoreSignupForm extends React.Component {
                       if (this.state.selectedFiles) {
                         await uploadHandler(prefix, this.state.selectedFiles)
                       }
+                      this.props.updateRole(1)
+                      this.props.addStore(data)
                       triggerStoreDisplay(data)
                     }
                   });
@@ -677,4 +684,10 @@ class StoreSignupForm extends React.Component {
   }
 }
 
-export default StoreSignupForm;
+const mapDispatchToProps = dispatch => bindActionCreators({
+  updateRole: (role) => updateRole(role),
+  addStore: (store) => addStore(store),
+}, dispatch)
+
+
+export default connect(null, mapDispatchToProps)(StoreSignupForm);

@@ -25,6 +25,8 @@ async function getStore(req, res, next) {
           }
 
           // were able to find the store
+
+
           if (result && result.rows.length > 0) {
             helper.querySuccess(res, result.rows[0], "Successfully got Store!");
           }
@@ -188,7 +190,7 @@ async function editStore(req, res, next) {
     catch (err) {
       helper.authError(res, err);
     }
-    // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7. 
+    // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7.
     let newHours = req.body.storeHours
     // Below is for scoping issues. Res is undefined below
     let resp = res
@@ -249,6 +251,8 @@ async function addStore(req, res, next) {
       let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, timestamp, req.body.category, req.body.phone, req.body.description, lat, lng, [0], [req.body.owner_id]]
       console.log("About to insert values: ", values)
       console.log('down here')
+      let owners = req.body.owner_id;
+      console.log(owners);
       // connect to the db
       db.client.connect(function (err) {
         // try to add the store into the db
@@ -293,6 +297,18 @@ async function addStore(req, res, next) {
                   } finally {
                     if (!failed) {
                       helper.querySuccess(response, store, 'Successfully added new store with hours!');
+
+                      console.log("Updating the role of all of the users to store owners")
+                      const query = 'UPDATE users SET role = $1 WHERE id = $2';
+
+                          owners.map(async (owner) => {
+                            console.log("starting with ", owner);
+                            let values = [1, owner];
+
+                            await hourDb.query(query, values);
+                      })
+
+
                     } else {
                       helper.queryError(response, "Unable to create store because of hours!");
                     }
@@ -499,7 +515,7 @@ async function editWorker(req, res, next) {
       last_name: req.body.last_name
     }
   }
-  // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7. 
+  // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7.
   let newHours = req.body.newHours
   // Below is for scoping issues. Res is undefined below
   let resp = res
@@ -685,6 +701,41 @@ async function getStoreItem(req, res, next, table) {
   }
 };
 
+
+async function getWorkers(req, res, next) {
+  try {
+    await auth.verifyToken(req, res, next);
+
+    // query for store item
+    let query = 'SELECT first_name, last_name, id FROM workers WHERE store_id = $1'
+    let values = [req.params.store_id]
+
+    db.client.connect(function (err) {
+      // try to get the store item based on id
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+          console.log(result)
+          // we were successfuly able to get the store item
+          if (result && result.rows.length == 1) {
+            helper.querySuccess(res, result.rows, 'Sucessfully got workers!');
+          }
+          else {
+            helper.queryError(res, "Could not find Worker!");
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch (err) {
+    helper.authError(res, err);
+  }
+};
+
 async function getWorkersSchedules(req, res, next) {
   console.log("about to get schedules for workers")
   // console.log("body looks like: ", req)
@@ -831,10 +882,43 @@ async function getAppointmentsByMonth(req, res, next) {
   }
 }
 
+async function getAllAppointments(req, res, next) {
+  try {
+    await auth.verifyToken(req, res, next);
+
+    console.log("---------getting apps")
+    // query for store appointments
+    let query = 'SELECT worker_id, date, start_time, end_time, service_id, title, price, date FROM appointments WHERE store_id = $1'
+    let values = [req.params.store_id]
+    db.client.connect(function (err) {
+      // try to get the store appointments based on month
+      db.client.query(query, values,
+        async (err, result) => {
+          if (err) {
+            helper.queryError(res, err);
+          }
+          // we were successfuly able to get the appointments for this month
+          if (result) {
+            helper.querySuccess(res, result.rows, 'Successfully got store appointments!');
+          }
+          else {
+            helper.queryError(res, new Error("Could not find store appointments!"));
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch (err) {
+    helper.authError(res, err);
+  }
+}
+
 async function addAppointment(req, res, next) {
   try {
     await auth.verifyToken(req, res, next);
-    // First, need to find what our appointment's group_id will be: 
+    // First, need to find what our appointment's group_id will be:
     let query = 'SELECT group_id FROM appointments ORDER BY group_id DESC LIMIT 1'
 
     // connect to the db
@@ -849,7 +933,7 @@ async function addAppointment(req, res, next) {
           if (result) {
             if(result.rows.length == 1) {
               insertAppointments(req, res, result.rows[0].group_id + 1)
-            }  
+            }
           }
           else {
             helper.queryError(res, "Unable to query for appointment!");
@@ -922,8 +1006,10 @@ module.exports = {
   getStoreItem: getStoreItem,
   addService: addService,
   getWorkersSchedules: getWorkersSchedules,
+  getWorkers: getWorkers,
   getStoreHours: getStoreHours,
   getAppointmentsByMonth: getAppointmentsByMonth,
+  getAllAppointments: getAllAppointments,
   addAppointment: addAppointment,
   getIndividualWorkerHours: getIndividualWorkerHours
 };

@@ -13,6 +13,7 @@ class MainNavbar extends React.Component {
   render() {
     let userComponents = null
     let storeDisplay = null
+    console.log(this.props.user);
 
     if(this.props.user == null || (Object.keys(this.props.user).length === 0 && this.props.user.constructor === Object)) {
       console.log(this.props.user)
@@ -26,7 +27,6 @@ class MainNavbar extends React.Component {
       if(this.props.user.role != '0'){
         storeDisplay = <NavDropdown title="Manage Stores" id="basic-nav-dropdown">
                           <NavDropdown.Item href={"/users/" + this.props.user.id + "/stores"}>Dashboard</NavDropdown.Item>
-                          <NavDropdown.Item href="/storeCalendar">Calendar</NavDropdown.Item>
                           {/* <NavDropdown.Item href="/stores/:store_id/services">Services</NavDropdown.Item> */}
                           <NavDropdown.Divider />
                           <NavDropdown.Item href="/store/signup">Create Store</NavDropdown.Item>
@@ -41,7 +41,7 @@ class MainNavbar extends React.Component {
                           <NavDropdown.Item href={"/users/" + this.props.user.id}>View</NavDropdown.Item>
                             <NavDropdown.Item href={"/users/edit/" + this.props.user.id}>Edit</NavDropdown.Item>
                           </NavDropdown>
-                          <Link to="/logout" className="nav-link">Logout</Link>
+                          <Link style={{position: 'absolute', right: 60}} to="/logout" className="nav-link">Logout</Link>
                        </Nav>
     }
     return (

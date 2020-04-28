@@ -63,7 +63,7 @@ function App() {
             <Route path="/users/:user_id/stores" component={redirectWithoutAuth(UserStoresDashboard)}/>
             <Route path="/users/:user_id" component={redirectWithoutAuth(Profile)}/>
 
-            <Route exact path="/storeCalendar" component={redirectWithoutAuth(Calendar)} />
+            <Route exact path="/storeCalendar/:store_id" component={redirectWithoutAuth(Calendar)} />
             <Route path="/book/:store_id" component={ReservationPage} />
             <Route exact path="/store/signup" component={redirectWithoutAuth(StoreSignupForm)} />
             <Route path="/stores/edit/:store_id" component={redirectWithoutAuth(StoreEditForm)}/>

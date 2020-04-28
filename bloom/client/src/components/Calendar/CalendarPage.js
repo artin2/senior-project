@@ -182,19 +182,23 @@ class Calendar extends React.Component {
   constructor(props) {
     super(props);
        this.state = {
+         services: [],
+         workers: [],
+         worker_map: {},
+         service_map: {},
          selectedWorkers: [],
          selectedServices: [],
          selectedAppointments: [
-           { id: '0', startDate: '2020-04-19 15:00', endDate: '2020-04-19 16:00', title: 'Manicure', workers: [2],
-           services: [2], price: 50},
-           { id: '1', startDate: '2020-04-21 09:00', endDate: '2020-04-21 11:00', title: 'Hair Blowout', workers: [0, 1],
-           services: [1], price: 20},
+           // { id: '0', startDate: '2020-04-19 15:00', endDate: '2020-04-19 16:00', title: 'Manicure', workers: [2],
+           // services: [2], price: 50},
+           // { id: '1', startDate: '2020-04-21 09:00', endDate: '2020-04-21 11:00', title: 'Hair Blowout', workers: [0, 1],
+           // services: [1], price: 20},
          ],
          appointments: [
-           { id: '0', startDate: '2020-04-19 15:00', endDate: '2020-04-19 16:00', title: 'Manicure', workers: [2],
-           services: [2], price: 50},
-           { id: '1', startDate: '2020-04-21 09:00', endDate: '2020-04-21 11:00', title: 'Hair Blowout', workers: [0, 1],
-            services: [1], price: 20},
+           // { id: '0', startDate: '2020-04-19 15:00', endDate: '2020-04-19 16:00', title: 'Manicure', workers: [2],
+           // services: [2], price: 50},
+           // { id: '1', startDate: '2020-04-21 09:00', endDate: '2020-04-21 11:00', title: 'Hair Blowout', workers: [0, 1],
+           //  services: [1], price: 20},
          ],
          mainResourceName: 'workers',
           resources: [
@@ -203,8 +207,8 @@ class Calendar extends React.Component {
               title: 'Services',
               allowMultiple: true,
               instances: [
-                { id: 1, text: 'Haircut' },
-                { id: 2, text: 'Manicure' },
+                // { id: 1, text: 'Haircut' },
+                // { id: 2, text: 'Manicure' },
 
               ],
             },
@@ -213,11 +217,11 @@ class Calendar extends React.Component {
               title: 'Workers',
               allowMultiple: true,
               instances: [
-                { id: 0, text: 'Artin Kasumyan' },
-                { id: 1, text: 'Arthur Kasumyan' },
-                { id: 2, text: 'Roula Sharqawe' },
-                { id: 3, text: 'George Clooney' },
-                { id: 4, text: 'Johnny Depp' },
+                // { id: 0, text: 'Artin Kasumyan' },
+                // { id: 1, text: 'Arthur Kasumyan' },
+                // { id: 2, text: 'Roula Sharqawe' },
+                // { id: 3, text: 'George Clooney' },
+                // { id: 4, text: 'Johnny Depp' },
               ],
             },
           ],
@@ -231,6 +235,148 @@ class Calendar extends React.Component {
        this.onRemoveService = this.onRemoveService.bind(this);
        this.onSearch = this.onSearch.bind(this);
   }
+
+    getAppointments = () => {
+
+        fetch('http://localhost:8081/stores/' + this.props.location.state.store.id + '/appointments' , {
+          method: "GET",
+          headers: {
+            'Content-type': 'application/json'
+          },
+          credentials: 'include'
+        }).then(value => value.json())
+        .then(data => {
+
+          let appointments = []
+
+          data.map((appointment, indx) => {
+
+              let date = new Date(appointment.date);
+              let startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), appointment.start_time, 0);
+              let endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), appointment.end_time, 0);
+
+              console.log(startDate)
+
+              appointments.push({
+                id: indx,
+                title: appointment.title,
+                workers: [this.state.worker_map[appointment.worker_id]],
+                services: [this.state.service_map[appointment.service_id]],
+                price: appointment.price,
+                startDate: startDate,
+                endDate: endDate
+              })
+
+              this.setState({
+                appointments: appointments,
+                selectedAppointments: appointments
+
+              })
+
+            })
+        })
+    }
+
+    async componentDidMount() {
+
+      let store_id = this.props.location.state.store.id;
+      let workers = []
+      let services = []
+      let new_workers = []
+      let new_services = []
+
+      console.log(store_id, this.props.location.state.store.services, this.props.location.state.store.workers)
+
+      //fetching  workers and services
+      if(this.props.location.state.store.services.length > 0) {
+
+          await fetch('http://localhost:8081/stores/' + store_id + "/services", {
+          method: "GET",
+          headers: {
+            'Content-type': 'application/json'
+          },
+          credentials: 'include'
+        }).then(function (response) {
+            if (response.status !== 200) {
+              // throw an error alert
+              console.log("error")
+            }
+            else {
+              return response.json();
+            }
+          })
+          .then(async data => {
+            if (data) {
+              services = data;
+              let service_instances = []
+              let service_map = {}
+              console.log("here!!", services);
+
+              services.map((service, indx) => {
+                    service_instances.push({id: indx, text: service.name})
+                    service_map[service.id] = service.name
+              })
+
+              this.setState({
+                  services: services,
+                  service_map: service_map
+              })
+
+              // return new_services;
+            }
+          });
+
+      }
+
+      if(this.props.location.state.store.workers.length > 0) {
+
+
+        await fetch('http://localhost:8081/stores/' + store_id + '/workers_list', {
+          method: "GET",
+          headers: {
+            'Content-type': 'application/json'
+          },
+          credentials: 'include'
+        }).then(function (response) {
+            if (response.status !== 200) {
+              // throw an error alert
+              console.log("error")
+            }
+            else {
+              return response.json();
+            }
+          })
+          .then(async data => {
+            if (data) {
+              workers = data;
+              console.log("here", workers);
+              let worker_instances = []
+              let worker_map = {}
+              workers.map((worker, indx) => {
+                  worker_instances.push({id: indx, text: worker.first_name + ' ' + worker.last_name})
+                  worker_map[worker.id] = worker.first_name + ' ' + worker.last_name
+              })
+              this.setState({
+                workers: worker_instances,
+                worker_map: worker_map
+              })
+            }
+          });
+
+      }
+
+      new_services = this.state.resources[0]
+      new_services.instances = this.state.services;
+      new_workers = this.state.resources[1]
+      new_workers.instances = this.state.workers;
+
+      this.setState({
+        resources: [new_services, new_workers]
+      })
+
+      this.getAppointments();
+
+    }
 
   changeMainResource(mainResourceName) {
     this.setState({ mainResourceName });
@@ -287,7 +433,8 @@ class Calendar extends React.Component {
 
   commitChanges({ added, changed, deleted }) {
     this.setState((state) => {
-      let { appointments } = state;
+      let { selectedAppointments } = state;
+      let appointments = selectedAppointments;
       if (added) {
         const startingAddedId = appointments.length > 0 ? appointments[appointments.length - 1].id + 1 : 0;
         appointments = [...appointments, { id: startingAddedId, ...added }];
