@@ -30,6 +30,7 @@ import AddServiceForm from './components/Service/AddServiceForm';
 import ServiceDashboard from './components/Service/ServiceDashboard';
 import ServiceDisplay from './components/Service/ServiceDisplay';
 import ServiceEditForm from './components/Service/ServiceEditForm';
+import AppointmentDisplay from './components/Appointments/AppointmentDisplay';
 import Alert from './components/Flash/Alert';
 import {
   userLogout
@@ -78,6 +79,8 @@ function App() {
             <Route path="/stores/:store_id/workers/:worker_id" component={redirectWithoutAuth(WorkerDisplay)}/>
             <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
             <Route path="/stores/:store_id" component={StoreDisplay}/>
+
+            <Route path="/appointments/:group_id" component={AppointmentDisplay}/>
 
           </Switch>
         </div>

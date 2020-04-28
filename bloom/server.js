@@ -8,6 +8,7 @@ const db = require('./db.js');
 const auth = require('./auth.js');
 const helper = require('./helper.js')
 const stores = require('./routes/stores.js');
+const appointments = require('./routes/appointments.js')
 const users = require('./routes/users.js');
 const jwt = require('jsonwebtoken');
 const s3 = require('./routes/s3');
@@ -25,7 +26,6 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
   res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin, Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
-  console.log("set cors headers, moving on")
   next();
 });
 
@@ -169,6 +169,16 @@ app.post('/stores/:store_id/appointments/new', withAuth, async(req, res, next) =
 app.get('/stores/:store_id/appointments/month/:month', withAuth, async(req, res, next) => {
   console.log("hit the getAppointmentsByMonth route")
   await stores.getAppointmentsByMonth(req, res, next);
+})
+
+app.get('/appointments/display/:group_id', withAuth, async(req, res, next) => {
+  console.log("hit the getAppointmentsForDisplay route")
+  await appointments.getAppointmentsForDisplay(req, res, next);
+})
+
+app.get('/appointments/delete/:group_id', withAuth, async(req, res, next) => {
+  console.log("hit the deleteAppointment route")
+  await appointments.deleteAppointment(req, res, next);
 })
 
 //s3
