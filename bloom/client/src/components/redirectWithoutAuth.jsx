@@ -1,6 +1,8 @@
 //CITATION: https://medium.com/@faizanv/authentication-for-your-react-and-express-application-w-json-web-tokens-923515826e0
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
+
 export default function redirectWithoutAuth(ComponentToProtect) {
   return class extends Component {
     constructor(props) {
@@ -11,7 +13,7 @@ export default function redirectWithoutAuth(ComponentToProtect) {
       };
     }
     componentDidMount() {
-      fetch('http://localhost:8081/checkToken' , {
+      fetch(fetchDomain + '/checkToken' , {
         method: "GET",
         headers: {
           'Content-type': 'application/json'

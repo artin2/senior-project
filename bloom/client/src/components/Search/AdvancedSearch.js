@@ -7,6 +7,7 @@ import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class AdvancedSearch extends React.Component {
   constructor(props) {
@@ -58,8 +59,12 @@ class AdvancedSearch extends React.Component {
 
     let queryString = require('./helper.js').queryString;
     let query = queryString(this.state)
-
-    fetch('http://localhost:8081/stores' + query, {
+    const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
+    console.log("environment is: ", process.env.NODE_ENV)
+    console.log("fetch prod is: ", process.env.REACT_APP_FETCH_DOMAIN_PROD)
+    console.log("fetch dev is: ", process.env.REACT_APP_FETCH_DOMAIN_DEV)
+    console.log("fetch domain is: ", fetchDomain)
+    fetch(fetchDomain + '/stores' + query, {
       method: "GET",
       headers: {
           'Content-type': 'application/json'

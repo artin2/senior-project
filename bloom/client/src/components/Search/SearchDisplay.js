@@ -11,6 +11,7 @@ import { Multiselect } from 'multiselect-react-dropdown';
 // import MenuItem from '@material-ui/core/MenuItem';
 // import Input from '@material-ui/core/Input';
 import { FiSearch} from 'react-icons/fi';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 
 class SearchDisplay extends React.Component {
@@ -158,7 +159,7 @@ class SearchDisplay extends React.Component {
   }
 
   getResults(query) {
-    fetch('http://localhost:8081/stores' + query, {
+    fetch(fetchDomain + '/stores' + query, {
       method: "GET",
       headers: {
           'Content-type': 'application/json'

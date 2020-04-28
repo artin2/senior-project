@@ -3,12 +3,13 @@ import {userLoginSuccess, userLoginFailure, editUserSuccess} from './actions/use
 // import {getWorkerOptionsSuccess, addWorker} from './actions/worker';
 import {failure} from './actions/index'
 import {addAlert} from './actions/alert';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 // USER FUNCTIONS 
 
 export function signup(values){
   return dispatch => {
-    fetch('http://localhost:8081/signUp' , {
+    fetch(fetchDomain + '/signUp' , {
       method: "POST",
       headers: {
         'Content-type': 'application/json'
@@ -32,7 +33,7 @@ export function signup(values){
 
 export function login(email, password, auth_token) {
   return dispatch => {
-    fetch('http://localhost:8081/login' , {
+    fetch(fetchDomain + '/login' , {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -64,7 +65,7 @@ export function login(email, password, auth_token) {
 
 export function editUser(values){
   return dispatch => {
-    fetch('http://localhost:8081/users/' + values.id , {
+    fetch(fetchDomain + '/users/' + values.id , {
       method: "POST",
       headers: {
         'Content-type': 'application/json'
@@ -98,7 +99,7 @@ export function editUser(values){
 
 // export function addService(values, store_id){
 //   return dispatch => {
-//     fetch('http://localhost:8081/stores/addService/' + store_id, {
+//     fetch(fetchDomain + '/stores/addService/' + store_id, {
 //       method: "POST",
 //       headers: {
 //         'Content-type': 'application/json'
@@ -129,7 +130,7 @@ export function editUser(values){
 
 // export function getWorkerOptions(store_id){
 //   return dispatch => {
-//     fetch('http://localhost:8081/stores/' + store_id + "/workers" , {
+//     fetch(fetchDomain + '/stores/' + store_id + "/workers" , {
 //       method: "GET",
 //       headers: {
 //           'Content-type': 'application/json'
@@ -156,7 +157,7 @@ export function editUser(values){
 // }
 
 // export function addWorker(values, store_id){
-//   fetch('http://localhost:8081/stores/addWorker/' + store_id, {
+//   fetch(fetchDomain + '/stores/addWorker/' + store_id, {
 //     method: "POST",
 //     headers: {
 //       'Content-type': 'application/json'

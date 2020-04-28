@@ -15,6 +15,7 @@ import {
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 // import { uploadHandler } from '../s3';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class AddServiceForm extends React.Component {
   constructor(props) {
@@ -69,7 +70,7 @@ class AddServiceForm extends React.Component {
 
   componentDidMount() {
     // need to get store category, fetch?
-    fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/workers" , {
+    fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/workers" , {
       method: "GET",
       headers: {
           'Content-type': 'application/json'
@@ -153,7 +154,7 @@ class AddServiceForm extends React.Component {
                 // let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
                 // await uploadHandler(prefix, this.state.selectedFiles)
 
-                fetch('http://localhost:8081/stores/addService/' + store_id, {
+                fetch(fetchDomain + '/stores/addService/' + store_id, {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json'

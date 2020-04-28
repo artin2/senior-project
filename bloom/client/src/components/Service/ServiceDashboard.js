@@ -15,6 +15,7 @@ import './Services.css';
 // import wedding from '../../assets/wedding.jpg';
 // import gel from '../../assets/gel.jpg';
 import { FaEdit } from 'react-icons/fa';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const colors = ['#f0d1d9', '#f7e5e4', '#d6ced3'];
 
@@ -88,7 +89,7 @@ class ServiceDashboard extends React.Component {
       })
     }
     else{
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/services/", {
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/services/", {
         method: "GET",
         headers: {
             'Content-type': 'application/json'

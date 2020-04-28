@@ -12,6 +12,7 @@ import {
 import store from '../../reduxFolder/store';
 import './StoreDisplay.css'
 // import { getPictures } from '../s3'
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class StoreDisplay extends React.Component {
   constructor(props) {
@@ -64,7 +65,7 @@ class StoreDisplay extends React.Component {
     }
     else{
       // retrieve the store data from the database
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id , {
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id , {
         method: "GET",
         headers: {
             'Content-type': 'application/json'

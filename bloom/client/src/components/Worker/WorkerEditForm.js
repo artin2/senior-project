@@ -15,6 +15,7 @@ import store from '../../reduxFolder/store';
 import GridLoader from 'react-spinners/GridLoader'
 import { css } from '@emotion/core'
 import { withRouter } from "react-router"
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 const override = css`
   display: block;
   margin: 0 auto;
@@ -220,7 +221,7 @@ class WorkerEditForm extends React.Component {
                   values.noChange = true
                 }
 
-                fetch('http://localhost:8081/stores/' + store_id + '/workers/' + worker_id, {
+                fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id, {
                   method: "POST",
                   headers: {
                     'Content-type': 'application/json'

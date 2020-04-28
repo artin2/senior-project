@@ -12,6 +12,7 @@ import { addAlert } from '../../reduxFolder/actions/alert'
 import GridLoader from 'react-spinners/GridLoader'
 import { css } from '@emotion/core'
 import Cookies from 'js-cookie';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const override = css`
   display: block;
@@ -118,7 +119,7 @@ class DateSelection extends React.Component {
                   values.appointments = this.props.appointments
                   let triggerAppointmentDisplay = this.triggerAppointmentDisplay
 
-                  fetch('http://localhost:8081/stores/' + this.props.store_id + '/appointments/new', {
+                  fetch(fetchDomain + '/stores/' + this.props.store_id + '/appointments/new', {
                     method: "POST",
                     headers: {
                       'Content-type': 'application/json',

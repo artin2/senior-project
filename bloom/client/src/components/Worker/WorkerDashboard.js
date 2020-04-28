@@ -8,6 +8,7 @@ import './Worker.css'
 //   addAlert
 // } from '../../reduxFolder/actions'
 // import store from '../../reduxFolder/store';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class WorkerDashboard extends React.Component {
   constructor(props) {
@@ -44,7 +45,7 @@ class WorkerDashboard extends React.Component {
       })
     }
     else{
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/workers', {
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers', {
         method: "GET",
         headers: {
             'Content-type': 'application/json'

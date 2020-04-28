@@ -8,6 +8,7 @@ import DateSelection from './DateSelection'
 import { css } from '@emotion/core'
 import GridLoader from 'react-spinners/GridLoader'
 import BookingPage from './BookingPage';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const override = css`
   display: block;
@@ -90,14 +91,14 @@ class ReservationPage extends React.Component {
 
   prefetchSchedules = () => {
     Promise.all([
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/workers/schedules', {
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/schedules', {
         method: "GET",
         headers: {
           'Content-type': 'application/json'
         },
         credentials: 'include'
       }).then(value => value.json()),
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/storeHours", {
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/storeHours", {
         method: "GET",
         headers: {
           'Content-type': 'application/json'
@@ -115,14 +116,14 @@ class ReservationPage extends React.Component {
   componentDidMount() {
     // need to get store category, fetch?
     Promise.all([
-      fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + "/services", {
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/services", {
       method: "GET",
       headers: {
         'Content-type': 'application/json'
       },
       credentials: 'include'
     }).then(value => value.json()),
-    fetch('http://localhost:8081/stores/' + this.props.match.params.store_id, {
+    fetch(fetchDomain + '/stores/' + this.props.match.params.store_id, {
       method: "GET",
       headers: {
         'Content-type': 'application/json'
