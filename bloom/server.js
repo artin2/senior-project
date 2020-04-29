@@ -176,6 +176,11 @@ app.get('/appointments/display/:group_id', withAuth, async(req, res, next) => {
   await appointments.getAppointmentsForDisplay(req, res, next);
 })
 
+app.get('/appointments/:user_id', withAuth, async(req, res, next) => {
+  console.log("hit the getAppointmentsForUser route")
+  await appointments.getAppointmentsForUser(req, res, next);
+})
+
 app.get('/appointments/delete/:group_id', withAuth, async(req, res, next) => {
   console.log("hit the deleteAppointment route")
   await appointments.deleteAppointment(req, res, next);

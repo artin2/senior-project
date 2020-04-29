@@ -36,6 +36,7 @@ import {
   userLogout
 } from './reduxFolder/actions/user'
 import store from './reduxFolder/store';
+import UserAppointments from './components/Appointments/UserAppointments';
 
 function App() {
   function handleLogout() {
@@ -62,6 +63,7 @@ function App() {
             <Route exact path="/signup" component={SignupForm} />
             <Route path="/users/edit/:user_id" component={redirectWithoutAuth(EditProfileForm)}/>
             <Route path="/users/:user_id/stores" component={redirectWithoutAuth(UserStoresDashboard)}/>
+            <Route path="/users/:user_id/appointments" component={redirectWithoutAuth(UserAppointments)}/>
             <Route path="/users/:user_id" component={redirectWithoutAuth(Profile)}/>
 
             <Route exact path="/storeCalendar" component={redirectWithoutAuth(Calendar)} />
@@ -80,7 +82,7 @@ function App() {
             <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
             <Route path="/stores/:store_id" component={StoreDisplay}/>
 
-            <Route path="/appointments/:group_id" component={AppointmentDisplay}/>
+            <Route path="/appointments/:group_id" component={redirectWithoutAuth(AppointmentDisplay)}/>
 
           </Switch>
         </div>

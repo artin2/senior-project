@@ -171,7 +171,7 @@ class AppointmentDisplay extends React.Component {
         }
         return <Row className="justify-content-md-center">
           <Col lg={5}>
-            <Card>
+            <Card className="mt-5">
               <Card.Header as="h5">Your Appointment at: {this.state.store_name}</Card.Header>
               <Card.Body>
                 <Card.Text as="div">
