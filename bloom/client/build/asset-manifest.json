@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.71183b62.chunk.css",
-    "main.js": "/static/js/main.e45b1567.chunk.js",
-    "main.js.map": "/static/js/main.e45b1567.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.6402652e.js",
-    "runtime-main.js.map": "/static/js/runtime-main.6402652e.js.map",
-    "static/css/2.9217bea8.chunk.css": "/static/css/2.9217bea8.chunk.css",
-    "static/js/2.97f723f3.chunk.js": "/static/js/2.97f723f3.chunk.js",
-    "static/js/2.97f723f3.chunk.js.map": "/static/js/2.97f723f3.chunk.js.map",
+    "main.css": "/static/css/main.c641d274.chunk.css",
+    "main.js": "/static/js/main.7b6807aa.chunk.js",
+    "main.js.map": "/static/js/main.7b6807aa.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.527bc2ff.js",
+    "runtime-main.js.map": "/static/js/runtime-main.527bc2ff.js.map",
+    "static/css/2.4933125f.chunk.css": "/static/css/2.4933125f.chunk.css",
+    "static/js/2.d505f534.chunk.js": "/static/js/2.d505f534.chunk.js",
+    "static/js/2.d505f534.chunk.js.map": "/static/js/2.d505f534.chunk.js.map",
     "index.html": "/index.html",
-    "precache-manifest.dc3ebfb1620feda77c92e6b9e35ba29c.js": "/precache-manifest.dc3ebfb1620feda77c92e6b9e35ba29c.js",
+    "precache-manifest.0d72f6d65a7a65bd369326f3217f5c31.js": "/precache-manifest.0d72f6d65a7a65bd369326f3217f5c31.js",
     "service-worker.js": "/service-worker.js",
-    "static/css/2.9217bea8.chunk.css.map": "/static/css/2.9217bea8.chunk.css.map",
-    "static/css/main.71183b62.chunk.css.map": "/static/css/main.71183b62.chunk.css.map",
-    "static/js/2.97f723f3.chunk.js.LICENSE.txt": "/static/js/2.97f723f3.chunk.js.LICENSE.txt",
+    "static/css/2.4933125f.chunk.css.map": "/static/css/2.4933125f.chunk.css.map",
+    "static/css/main.c641d274.chunk.css.map": "/static/css/main.c641d274.chunk.css.map",
+    "static/js/2.d505f534.chunk.js.LICENSE": "/static/js/2.d505f534.chunk.js.LICENSE",
     "static/media/abstract-painting.jpg": "/static/media/abstract-painting.4f80cf3e.jpg",
     "static/media/barber.jpg": "/static/media/barber.d2f9dfa8.jpg",
     "static/media/facials.jpg": "/static/media/facials.ed0b2cb9.jpg",
@@ -27,10 +27,10 @@
     "static/media/salon2.jpeg": "/static/media/salon2.5edf0e42.jpeg"
   },
   "entrypoints": [
-    "static/js/runtime-main.6402652e.js",
-    "static/css/2.9217bea8.chunk.css",
-    "static/js/2.97f723f3.chunk.js",
-    "static/css/main.71183b62.chunk.css",
-    "static/js/main.e45b1567.chunk.js"
+    "static/js/runtime-main.527bc2ff.js",
+    "static/css/2.4933125f.chunk.css",
+    "static/js/2.d505f534.chunk.js",
+    "static/css/main.c641d274.chunk.css",
+    "static/js/main.7b6807aa.chunk.js"
   ]
 }

@@ -41,6 +41,7 @@ class MainNavbar extends React.Component {
                           <NavDropdown.Item href={"/users/" + this.props.user.id}>View</NavDropdown.Item>
                             <NavDropdown.Item href={"/users/edit/" + this.props.user.id}>Edit</NavDropdown.Item>
                           </NavDropdown>
+                          <Link to={"/users/" + 'this.props.user.id' + '/appointments'} className="nav-link">My Appointments</Link>
                           <Link style={{position: 'absolute', right: 60}} to="/logout" className="nav-link">Logout</Link>
                        </Nav>
     }

@@ -30,11 +30,13 @@ import AddServiceForm from './components/Service/AddServiceForm';
 import ServiceDashboard from './components/Service/ServiceDashboard';
 import ServiceDisplay from './components/Service/ServiceDisplay';
 import ServiceEditForm from './components/Service/ServiceEditForm';
+import AppointmentDisplay from './components/Appointments/AppointmentDisplay';
 import Alert from './components/Flash/Alert';
 import {
   userLogout
 } from './reduxFolder/actions/user'
 import store from './reduxFolder/store';
+import UserAppointments from './components/Appointments/UserAppointments';
 
 function App() {
   function handleLogout() {
@@ -61,6 +63,7 @@ function App() {
             <Route exact path="/signup" component={SignupForm} />
             <Route path="/users/edit/:user_id" component={redirectWithoutAuth(EditProfileForm)}/>
             <Route path="/users/:user_id/stores" component={redirectWithoutAuth(UserStoresDashboard)}/>
+            <Route path="/users/:user_id/appointments" component={redirectWithoutAuth(UserAppointments)}/>
             <Route path="/users/:user_id" component={redirectWithoutAuth(Profile)}/>
 
             <Route exact path="/storeCalendar/:store_id" component={redirectWithoutAuth(Calendar)} />
@@ -78,6 +81,8 @@ function App() {
             <Route path="/stores/:store_id/workers/:worker_id" component={redirectWithoutAuth(WorkerDisplay)}/>
             <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
             <Route path="/stores/:store_id" component={StoreDisplay}/>
+
+            <Route path="/appointments/:group_id" component={redirectWithoutAuth(AppointmentDisplay)}/>
 
           </Switch>
         </div>

@@ -30,6 +30,7 @@
     "react-bootstrap-multiselect": "^2.4.1",
     "react-bootstrap-sidebar": "0.0.1",
     "react-calendar": "^3.0.0",
+    "react-confirm-alert": "^2.6.1",
     "react-datepicker": "^2.14.0",
     "react-dom": "^16.12.0",
     "react-facebook-login": "^4.1.1",

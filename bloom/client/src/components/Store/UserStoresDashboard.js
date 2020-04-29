@@ -14,11 +14,10 @@ import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
-const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
-
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import {addStore} from '../../reduxFolder/actions/stores.js'
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 // ***** NOTE: fix to properly display all the stores
 
