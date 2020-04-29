@@ -98,12 +98,12 @@ app.post('/stores/:store_id/services/:item_id', withAuth, async (req, res, next)
   await stores.editStoreService(req, res, next);
 });
 
-app.get('/stores/:store_id/services/:item_id', withAuth, async (req, res, next) => {
+app.get('/stores/:store_id/services/:item_id', async (req, res, next) => {
   console.log("hit the getStoreItem route")
   await stores.getStoreItem(req, res, next, "services");
 });
 
-app.get('/stores/:store_id/services', withAuth, async (req, res, next) => {
+app.get('/stores/:store_id/services', async (req, res, next) => {
   console.log("hit the getStoreItems route")
   await stores.getStoreItems(req, res, next, "services");
 });
@@ -119,26 +119,26 @@ app.post('/stores/:store_id/workers/:item_id', withAuth, async (req, res, next) 
   await stores.editWorker(req, res, next);
 });
 
-app.get('/stores/:store_id/workers/schedules', withAuth, async (req, res, next) => {
+app.get('/stores/:store_id/workers/schedules', async (req, res, next) => {
   console.log("hit the check token route")
   await stores.getWorkersSchedules(req, res, next);
 });
 
-app.get('/stores/:store_id/workers/:item_id', withAuth, async (req, res, next) => {
+app.get('/stores/:store_id/workers/:item_id', async (req, res, next) => {
   console.log("hit the getStoreItem route")
   await stores.getStoreItem(req, res, next, "workers");
 });
 
-app.get('/stores/:store_id/workers', withAuth, async (req, res, next) => {
+app.get('/stores/:store_id/workers', async (req, res, next) => {
   console.log("hit the getStoreItems route")
   await stores.getStoreItems(req, res, next, "workers");
 });
 
-app.get('/stores/:store_id/workers_list', withAuth, async (req, res, next) => {
+app.get('/stores/:store_id/workers_list', async (req, res, next) => {
   await stores.getWorkers(req, res, next);
 });
 
-app.get('/stores/:store_id/workers/:worker_id/hours', withAuth, async (req, res, next) => {
+app.get('/stores/:store_id/workers/:worker_id/hours', async (req, res, next) => {
   console.log("hit the getIndividualWorkerHours route")
   await stores.getIndividualWorkerHours(req, res, next);
 });
@@ -159,7 +159,7 @@ app.post('/addStore', withAuth, async (req, res, next) => {
   await stores.addStore(req, res, next);
 });
 
-app.get('/stores/:store_id/storeHours', withAuth, async (req, res, next) => {
+app.get('/stores/:store_id/storeHours', async (req, res, next) => {
   console.log("hit the getStoreHours route")
   await stores.getStoreHours(req, res, next);
 });
@@ -200,7 +200,7 @@ app.post('/getPresignedUrl', withAuth, async (req, res) => {
   await s3.getPresignedUploadUrl(req, res);
 });
 
-app.post('/getImages', withAuth, async (req, res) => {
+app.post('/getImages', async (req, res) => {
   console.log("hit the getImages route")
   await s3.getImages(req, res);
 });
@@ -212,6 +212,7 @@ app.post('/deleteImages', withAuth, async (req, res) => {
 
 
 //Need to fix this: not sure what name of cookie is
+// EDIT: don't think we even need this..
 app.get('/clearCookie', (req, res) => {
   console.log("about to clear cookie")
   res.clearCookie('jwt_token').end();

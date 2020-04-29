@@ -43,7 +43,7 @@ class Alert extends React.Component {
     }
  
     return(
-      <div className="alert-fixed">
+      <div className="alert-fixed" style={{ zIndex: 1}}>
         {alertTag}
       </div>
     );

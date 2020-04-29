@@ -16,11 +16,12 @@ async function login(req, res) {
 
               if(passwordMatch != false) {
                 try {
-                  await auth.generateToken(res, result.rows[0]);
+                  let tokenGen = await auth.generateToken(res, result.rows[0]);
+                  console.log("JUST GENERATED TOKEN, BACK IN USER.JS:", tokenGen)
                   let resultUser = result.rows[0]
                   delete resultUser.password
 
-                  helper.querySuccess(res, { user: resultUser }, "Successfully Logged In!");
+                  helper.querySuccess(res, { user: resultUser, token: tokenGen }, "Successfully Logged In!");
                 } 
                 catch (err) {
                   helper.queryError(res, err);
@@ -82,7 +83,7 @@ async function signup(req, res) {
             try {
               // for some reason the cookie is not being attatched to the response...
               // cookie is successfuly generated for sure tho..
-              await auth.generateToken(res, result.rows[0]);
+              // await auth.generateToken(res, result.rows[0]);
               helper.querySuccess(res, result.rows[0], "Successfully Created User!");
             } 
             catch (err) {

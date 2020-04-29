@@ -633,220 +633,178 @@ async function addService(req, res, next) {
 // Reusable worker/service functions
 // table is either workers or services
 async function getStoreItems(req, res, next, table) {
-  try {
-    await auth.verifyToken(req, res, next);
+  // query for stores within the given distance, and that have any of the categories checked by the client
+  let query = 'SELECT * FROM ' + table + ' WHERE store_id = $1'
 
-    // query for stores within the given distance, and that have any of the categories checked by the client
-    let query = 'SELECT * FROM ' + table + ' WHERE store_id = $1'
+  let values = [req.params.store_id]
 
-    let values = [req.params.store_id]
+  db.client.connect(function (err) {
+    // try to get all items registered to this store
+    db.client.query(query, values,
+      async (err, result) => {
+        if (err) {
+          helper.queryError(res, err);
+        }
 
-    db.client.connect(function (err) {
-      // try to get all items registered to this store
-      db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
-
-          // we were successfuly able to get the store items
-          if (result && result.rows.length > 0) {
-            helper.querySuccess(res, result.rows, "Successfully got Store Items!");
-          }
-          else {
-            helper.queryError(res, "No Store Items");
-          }
-        });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
-  }
-  catch (err) {
-    helper.authError(res, err);
-  }
+        // we were successfuly able to get the store items
+        if (result && result.rows.length > 0) {
+          helper.querySuccess(res, result.rows, "Successfully got Store Items!");
+        }
+        else {
+          helper.queryError(res, "No Store Items");
+        }
+      });
+    if (err) {
+      helper.dbConnError(res, err);
+    }
+  });
 };
 
 async function getStoreItem(req, res, next, table) {
-  try {
-    await auth.verifyToken(req, res, next);
+  // query for store item
+  let query = 'SELECT * FROM ' + table + ' WHERE id = $1'
+  let values = [req.params.item_id]
 
-    // query for store item
-    let query = 'SELECT * FROM ' + table + ' WHERE id = $1'
-    let values = [req.params.item_id]
+  db.client.connect(function (err) {
+    // try to get the store item based on id
+    db.client.query(query, values,
+      async (err, result) => {
+        if (err) {
+          helper.queryError(res, err);
+        }
 
-    db.client.connect(function (err) {
-      // try to get the store item based on id
-      db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
-
-          // we were successfuly able to get the store item
-          if (result && result.rows.length == 1) {
-            helper.querySuccess(res, result.rows[0], 'Sucessfully found store item!');
-          }
-          else {
-            helper.queryError(res, "Could not find Store Item!");
-          }
-        });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
-  }
-  catch (err) {
-    helper.authError(res, err);
-  }
+        // we were successfuly able to get the store item
+        if (result && result.rows.length == 1) {
+          helper.querySuccess(res, result.rows[0], 'Sucessfully found store item!');
+        }
+        else {
+          helper.queryError(res, "Could not find Store Item!");
+        }
+      });
+    if (err) {
+      helper.dbConnError(res, err);
+    }
+  });
 };
 
 
 async function getWorkers(req, res, next) {
-  try {
-    await auth.verifyToken(req, res, next);
+  // query for store item
+  let query = 'SELECT first_name, last_name, id FROM workers WHERE store_id = $1'
+  let values = [req.params.store_id]
 
-    // query for store item
-    let query = 'SELECT first_name, last_name, id FROM workers WHERE store_id = $1'
-    let values = [req.params.store_id]
-
-    db.client.connect(function (err) {
-      // try to get the store item based on id
-      db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
-          console.log(result)
-          // we were successfuly able to get the store item
-          if (result && result.rows.length == 1) {
-            helper.querySuccess(res, result.rows, 'Sucessfully got workers!');
-          }
-          else {
-            helper.queryError(res, "Could not find Worker!");
-          }
-        });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
-  }
-  catch (err) {
-    helper.authError(res, err);
-  }
+  db.client.connect(function (err) {
+    // try to get the store item based on id
+    db.client.query(query, values,
+      async (err, result) => {
+        if (err) {
+          helper.queryError(res, err);
+        }
+        console.log(result)
+        // we were successfuly able to get the store item
+        if (result && result.rows.length == 1) {
+          helper.querySuccess(res, result.rows, 'Sucessfully got workers!');
+        }
+        else {
+          helper.queryError(res, "Could not find Worker!");
+        }
+      });
+    if (err) {
+      helper.dbConnError(res, err);
+    }
+  });
 };
 
 async function getWorkersSchedules(req, res, next) {
   console.log("about to get schedules for workers")
   // console.log("body looks like: ", req)
-  try {
-    await auth.verifyToken(req, res, next);
 
-    // query for store item
-    // add join to get worker ids from store id
-    let query = 'SELECT * FROM worker_hours WHERE store_id = $1'
-    let values = [req.params.store_id]
+  // add join to get worker ids from store id
+  let query = 'SELECT * FROM worker_hours WHERE store_id = $1'
+  let values = [req.params.store_id]
 
-    console.log("query looks like: ", query)
-    console.log("values looks like: ", values)
-    // console.log(req)
+  console.log("query looks like: ", query)
+  console.log("values looks like: ", values)
+  // console.log(req)
 
-    db.client.connect(function (err) {
-      // try to get the store item based on id
-      db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
+  db.client.connect(function (err) {
+    // try to get the store item based on id
+    db.client.query(query, values,
+      async (err, result) => {
+        if (err) {
+          helper.queryError(res, err);
+        }
 
-          // we were successfuly able to get the store item
-          if (result && result.rows.length > 0) {
-            helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
-          }
-          else {
-            helper.queryError(res, new Error("Could not find worker schedules!"));
-          }
-        });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
-  }
-  catch (err) {
-    helper.authError(res, err);
-  }
+        // we were successfuly able to get the store item
+        if (result && result.rows.length > 0) {
+          helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
+        }
+        else {
+          helper.queryError(res, new Error("Could not find worker schedules!"));
+        }
+      });
+    if (err) {
+      helper.dbConnError(res, err);
+    }
+  });
 };
 
 async function getIndividualWorkerHours(req, res, next) {
-  try {
-    await auth.verifyToken(req, res, next);
+  // query for store item
+  let query = 'SELECT start_time, end_time FROM worker_hours WHERE worker_id = $1'
+  let values = [req.params.worker_id]
 
-    // query for store item
-    let query = 'SELECT start_time, end_time FROM worker_hours WHERE worker_id = $1'
-    let values = [req.params.worker_id]
+  console.log("getting worker hours with params", values)
 
-    console.log("getting worker hours with params", values)
+  db.client.connect(function (err) {
+    // try to get the store item based on id
+    db.client.query(query, values,
+      async (err, result) => {
+        if (err) {
+          helper.queryError(res, err);
+        }
 
-    db.client.connect(function (err) {
-      // try to get the store item based on id
-      db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
-
-          // we were successfuly able to get the store item
-          if (result && result.rows.length > 0) {
-            helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
-          }
-          else if (result && result.rows.length == 0) {
-            helper.querySuccess(res, result.rows, 'No worker schedule');
-          }
-          else {
-            helper.queryError(res, new Error("Could not retrieve worker schedules!"));
-          }
-        });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
-  }
-  catch (err) {
-    helper.authError(res, err);
-  }
+        // we were successfuly able to get the store item
+        if (result && result.rows.length > 0) {
+          helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
+        }
+        else if (result && result.rows.length == 0) {
+          helper.querySuccess(res, result.rows, 'No worker schedule');
+        }
+        else {
+          helper.queryError(res, new Error("Could not retrieve worker schedules!"));
+        }
+      });
+    if (err) {
+      helper.dbConnError(res, err);
+    }
+  });
 };
 
 async function getStoreHours(req, res, next) {
-  try {
-    await auth.verifyToken(req, res, next);
+  // query for store item
+  let query = 'SELECT open_time, close_time FROM store_hours WHERE store_id = $1 ORDER BY day_of_the_week'
+  let values = [req.params.store_id]
 
-    // query for store item
-    let query = 'SELECT open_time, close_time FROM store_hours WHERE store_id = $1 ORDER BY day_of_the_week'
-    let values = [req.params.store_id]
-
-    db.client.connect(function (err) {
-      // try to get the store item based on id
-      db.client.query(query, values,
-        async (err, result) => {
-          if (err) {
-            helper.queryError(res, err);
-          }
-          // we were successfuly able to get the store item
-          if (result && result.rows.length > 0) {
-            helper.querySuccess(res, result.rows, 'Successfully got store hours!');
-          }
-          else {
-            helper.queryError(res, new Error("Could not find store hours!"));
-          }
-        });
-      if (err) {
-        helper.dbConnError(res, err);
-      }
-    });
-  }
-  catch (err) {
-    helper.authError(res, err);
-  }
+  db.client.connect(function (err) {
+    // try to get the store item based on id
+    db.client.query(query, values,
+      async (err, result) => {
+        if (err) {
+          helper.queryError(res, err);
+        }
+        // we were successfuly able to get the store item
+        if (result && result.rows.length > 0) {
+          helper.querySuccess(res, result.rows, 'Successfully got store hours!');
+        }
+        else {
+          helper.queryError(res, new Error("Could not find store hours!"));
+        }
+      });
+    if (err) {
+      helper.dbConnError(res, err);
+    }
+  });
 };
 
 //Appointments
