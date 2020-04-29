@@ -37,7 +37,7 @@ export function login(email, password, auth_token) {
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
+      credentials: 'same-origin',
       method: "POST",
       body: JSON.stringify({
         "email": email,
@@ -51,6 +51,7 @@ export function login(email, password, auth_token) {
         dispatch(userLoginFailure(response));
       }
       else{
+        console.log(response)
         return response.json()
       }
     })
