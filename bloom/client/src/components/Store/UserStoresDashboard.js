@@ -2,14 +2,14 @@ import React from 'react';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-import { Button } from 'react-bootstrap';
+import { Button, Image } from 'react-bootstrap';
 // import SearchCard from '../Search/SearchCard';
 import Carousel from 'react-bootstrap/Carousel'
 // import salon from '../../assets/salon.jpg';
 import salon2 from '../../assets/salon2.jpeg';
 import hair from '../../assets/hair_salon.jpg';
 import { FaEdit } from 'react-icons/fa';
-import { withRouter } from "react-router-dom";
+import './UserStoresDashboard.css'
 import {
   addAlert
 } from '../../reduxFolder/actions/alert'
@@ -17,6 +17,7 @@ import store from '../../reduxFolder/store';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import {addStore} from '../../reduxFolder/actions/stores.js'
+import UserStoresDashboardLoader from './UserStoresDashboardLoader';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 // ***** NOTE: fix to properly display all the stores
@@ -46,7 +47,8 @@ class UserStoresDashboard extends React.Component {
         }
       ],
       redirectToWorkerForm: null,
-      store_id: null
+      store_id: null,
+      loading: true
     }
   }
 
@@ -105,7 +107,8 @@ class UserStoresDashboard extends React.Component {
     console.log(this.props.store);
     if(this.props.store){
       this.setState({
-        stores: this.props.store
+        stores: this.props.store,
+        loading: false
       })
     }
     else{
@@ -130,6 +133,7 @@ class UserStoresDashboard extends React.Component {
           // let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
           this.setState({
             stores: data,
+            loading: false
           })
         }
         this.props.addStore(data);
@@ -138,71 +142,59 @@ class UserStoresDashboard extends React.Component {
     }
   }
 
-  // {this.state.stores.map(store => (
-  //   <Col key={"store-" + store.id}>
-  //     <Button onClick={() => this.triggerStoreEdit(store)}>Edit Store</Button>
-  //     <Button onClick={() => this.triggerShowWorkers(store.id)}>Show Workers</Button>
-  //     <Button onClick={() => this.triggerAddWorker(store.id)}>Add Worker</Button>
-  //     <Button onClick={() => this.triggerShowServices(store.id)}>Show Services</Button>
-  //     <Button onClick={() => this.triggerAddService(store.id)}>Add Service</Button>
-  //     <SearchCard store={store}
-  //                 carousel={true}
-  //                 styleVal={{ width: '18rem' }}
-  //                 omitBookOption={true}
-  //                 onClickFunctionStore={() => this.triggerStoreShow(store)}/>
-  //   </Col>
-  // ))}
-
   render() {
-    console.log(this.state.stores)
+    const DisplayWithLoading = (props) => {
+      if (this.state.loading) {
+        return <Row className="mt-5">
+            <Col xs="12">
+              <UserStoresDashboardLoader/>
+            </Col>
+          </Row>
+      } else {
+        return(
+          <>{this.state.stores.map((store, index) => (
+            <div key={"store" + index}>
+              <Row className="justify-content-center align-content-center my-5">
+                {/* <div className="style_column"> </div> */}
+                <Col md={6} className="vertical-align-contents">
+                  <Carousel className="dashboard_carousel" interval="">
+                      <Carousel.Item>
+                        <Image fluid src={salon2} alt="test"/>
+                      </Carousel.Item>
+                      <Carousel.Item >
+                        <Image fluid src={hair} alt="test2"/>
+                      </Carousel.Item>
+                  </Carousel>
+                </Col>
+                <Col md={5} className="vertical-align-contents">
+                  <Row className={"justify-content-center"}>
+                    <Col sm={12}>
+                      <span className="name" onClick={() => this.triggerStoreShow(store)} style={{cursor: 'pointer'}}> {store.name} </span>
+                      <FaEdit className="edit mb-3" size={25} onClick={() => this.triggerStoreEdit(store)}/>
+                    </Col>
+                    <Col sm={12}>
+                      <p className="address">{store.street}, {store.city}, {store.state} </p>
+                    </Col>
+                    <Col sm={8} className={"py-1"}>
+                      <Button block className="update_button"  onClick={() =>  this.triggerShowCalendar(store)}>Calendar</Button> &nbsp;
+                    </Col>
+                    <Col sm={8} className={"py-1"}>
+                      <Button block className="update_button" onClick={() =>  this.triggerShowWorkers(store.id)}>Workers</Button> &nbsp;
+                    </Col>
+                    <Col sm={8} className={"py-1"}>
+                      <Button block className="update_button" onClick={() =>  this.triggerShowServices(store.id)}>Services</Button> &nbsp;
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+            </div>
+          ))}</>
+        )
+      }
+    }
     return (
-      <Container fluid style={{backgroundColor: '#bdcddb'}}>
-        {this.state.stores.map((store, index) => (
-          <div key={"store" + index}>
-            <Row className="justify-content-center" style={{height: 700}}>
-              {/* <div className="style_column"> </div> */}
-              <Col xs={6} sm={6} md={6} lg={6}>
-                <Carousel className="dashboard_carousel" interval="">
-                    <Carousel.Item className="item">
-                      <img className="item" src={salon2} alt="test"/>
-                    </Carousel.Item>
-                    <Carousel.Item className="item">
-                      <img className="item" src={hair} alt="test2"/>
-                    </Carousel.Item>
-                </Carousel>
-              </Col>
-              <Col xs={6} sm={6} md={6} lg={6} style={{top: 125}}>
-                <span className="name" onClick={() => this.triggerStoreShow(store)} style={{cursor: 'pointer'}}> {store.name} </span>
-                <FaEdit className="edit" size={25} onClick={() => this.triggerStoreEdit(store)}/>
-                <p className="address">{store.street}, {store.city}, {store.state} </p>
-                <div>
-                  {store.category.map((category, index) => (
-                    <div className="category" key={store.id + "-category-" + index}> <p style={{color: 'white'}}> {category} </p> </div>
-                  ))}
-                </div>
-                <div>
-                  <p className="description">
-                    {store.description}
-                  </p>
-                </div>
-
-                <Col>
-                  <Button className="update_button"  onClick={() =>  this.triggerShowCalendar(store)}>View Calendar</Button> &nbsp;
-                <Col>
-                <p className="update"> Your Workers </p>
-                <Button className="update_button" onClick={() =>  this.triggerShowWorkers(store.id)}>View Workers</Button> &nbsp;
-                <Button className="update_button" onClick={() =>  this.triggerAddWorker(store.id)}>Add Worker</Button> &nbsp;
-                </Col>
-                <Col>
-                <p className="update"> Your Services </p>
-                <Button className="update_button" onClick={() =>  this.triggerShowServices(store.id)}>View Services</Button> &nbsp;
-                <Button className="update_button"  onClick={() =>  this.triggerAddService(store.id)}>Add Service</Button>
-                </Col>
-                </Col>
-              </Col>
-            </Row>
-          </div>
-        ))}
+      <Container fluid>
+        <DisplayWithLoading/>
       </Container>
     );
   }
