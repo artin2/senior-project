@@ -1,0 +1,26 @@
+.search-title {
+
+  font-size: 28px;
+  font-family: 'Aref Ruqaa', serif;
+  font-weight: bold;
+}
+
+.chips {
+   display: flex;
+   flex-wrap: wrap;
+ }
+ .chip {
+   margin: 2;
+ }
+
+ .full-width {
+  width: 100%; 
+ }
+
+ .not-auto {
+   width: 100% !important;
+ }
+
+ .pac-container {
+   z-index: 9999;
+ }

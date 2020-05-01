@@ -761,7 +761,6 @@ async function getIndividualWorkerHours(req, res, next) {
 
         // we were successfuly able to get the store item
         if (result && result.rows.length > 0) {
-          console.log("!!!!!", result.rows)
           helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
         }
         else if (result && result.rows.length == 0) {

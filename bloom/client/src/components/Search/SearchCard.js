@@ -1,7 +1,7 @@
 import React from 'react';
 import LargeCarousel from '../LargeCarousel';
 import Card from 'react-bootstrap/Card'
-import { Button } from 'react-bootstrap';
+import { Button, Carousel, Image, Col } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row'
 // import { getPictures } from '../s3'
 
@@ -39,37 +39,31 @@ class SearchCard extends React.Component {
   }
 
   render() {
-    let image;
-    if(this.props.carousel){
-      image = <LargeCarousel img={{marginLeft: 20, height: 390, width: 380}} style={{width: 380, height: 400, zIndex: 1}} pictures={this.state.pictures}/>
-    }
-    else{
-      image = <img src={this.state.pictures[0]} alt={"1"} />
-    }
-
-    let button
-    if(!this.props.omitBookOption){
-      button = <Button style={{marginTop:170, backgroundColor: '#8CAFCA', border: 0}} onClick={() => this.props.onClickFunctionBook(this.props.store.id)}>Book Now</Button>
-    }
-
-    let body
-    if(this.props.store){
-      body = <div>
-                <Card.Title onClick={() => this.props.onClickFunctionStore(this.props.store.id)} style={{cursor: 'pointer', marginTop: 30}} >{this.props.store.name}</Card.Title>
-                <Card.Text style={{marginTop: 30}}>{this.props.store.description}</Card.Text>
-             </div>
-    }
-
     return (
-      <Card style={this.props.styleVal}>
-        <Row>
-        {image}
-        <Card.Body style={{flexWrap: 'wrap', width: '20%'}}>
-          {body}
-          {button}
-        </Card.Body>
-        </Row>
-      </Card>
+      <Col xs={12} className="my-3 px-0 h-100">
+        <Card style={{height: '100%'}}>
+          <Row style={{height: '100%'}}>
+            <Col md={6} className="vertical-align-contents px-0 h-100 w-100">
+              <Carousel interval="">
+                {this.state.pictures.map((picture, index) => (
+                  <Carousel.Item key={"pic-" + index}>
+                    <Image fluid src={picture.url} alt={"Slide " + index} />
+                  </Carousel.Item>
+                ))}
+              </Carousel>
+            </Col>
+            <Col md={6} className="vertical-align-contents px-0 h-100">
+              <Card.Body >
+                <div>
+                  <Card.Title onClick={() => this.props.onClickFunctionStore(this.props.store.id)} style={{cursor: 'pointer'}} >{this.props.store.name}</Card.Title>
+                  <Card.Text className="mb-3">{this.props.store.description}</Card.Text>
+                </div>
+                <Button style={{backgroundColor: '#8CAFCA', border: 0}} onClick={() => this.props.onClickFunctionBook(this.props.store.id)}>Book Now</Button>
+              </Card.Body>
+            </Col>
+          </Row>
+        </Card>
+      </Col>
     );
   }
 }
