@@ -11,6 +11,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import { Multiselect } from 'multiselect-react-dropdown';
 import { FiSearch} from 'react-icons/fi';
+import { withRouter } from "react-router"
 
 const today = new Date();
 
@@ -238,7 +239,7 @@ class Calendar extends React.Component {
 
     getAppointments = () => {
 
-        fetch('http://localhost:8081/stores/' + this.props.location.state.store.id + '/appointments' , {
+        fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/appointments' , {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
@@ -278,17 +279,28 @@ class Calendar extends React.Component {
     }
 
     async componentDidMount() {
-
-      let store_id = this.props.location.state.store.id;
+      let store_id = this.props.match.params.store_id
       let workers = []
       let services = []
       let new_workers = []
       let new_services = []
 
-      console.log(store_id, this.props.location.state.store.services, this.props.location.state.store.workers)
-
       //fetching  workers and services
-      if(this.props.location.state.store.services.length > 0) {
+      if(this.props.location.state && this.props.location.state.services) {
+        let service_map = {}
+        let service_instances = []
+
+        this.props.location.state.services.map((service, indx) => {
+          service_instances.push({id: indx, text: service.name})
+          service_map[service.id] = service.name
+        })
+
+        this.setState({
+          services: this.props.location.state.store.services,
+          service_map: service_map
+        })
+      }
+      else {
 
           await fetch('http://localhost:8081/stores/' + store_id + "/services", {
           method: "GET",
@@ -328,7 +340,19 @@ class Calendar extends React.Component {
 
       }
 
-      if(this.props.location.state.store.workers.length > 0) {
+      if(this.props.location.state && this.props.location.state.workers){
+        let worker_instances = []
+        let worker_map = {}
+        this.props.location.state.workers.map((worker, indx) => {
+            worker_instances.push({id: indx, text: worker.first_name + ' ' + worker.last_name})
+            worker_map[worker.id] = worker.first_name + ' ' + worker.last_name
+        })
+        this.setState({
+          workers: worker_instances,
+          worker_map: worker_map
+        })
+      } 
+      else{
 
 
         await fetch('http://localhost:8081/stores/' + store_id + '/workers_list', {
@@ -547,7 +571,7 @@ class Calendar extends React.Component {
   }
 }
 
-export default Calendar;
+export default withRouter(Calendar);
 
 // <ResourceSwitcher
 //  resources={this.state.resources}
