@@ -20,13 +20,20 @@ import {
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import { uploadHandler } from '../s3';
+import { Multiselect } from 'multiselect-react-dropdown';
+
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
+const helper = require('../Search/helper.js');
+
 
 class StoreSignupForm extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      category: helper.getCategories(),
+      categoryError: false,
+      selected: [],
       selectedFiles: null,
       storeHours: [{ open_time: 540, close_time: 1020 },
       { open_time: 540, close_time: 1020 },
@@ -81,12 +88,14 @@ class StoreSignupForm extends React.Component {
       zipcode: Yup.string()
         .max(20, "Zipcode can't be longer than 100 characters")
         .required("Zipcode is required"),
-      category: Yup.array()
-        .required("Category is required")
-        .nullable()
+      // category: Yup.array()
+      //   .required("Category is required")
+      //   .nullable()
     });
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
+    this.onSelect = this.onSelect.bind(this);
+    this.onRemove = this.onRemove.bind(this);
   }
 
   // redirect to the store display page and pass the new store data
@@ -123,6 +132,24 @@ class StoreSignupForm extends React.Component {
     } else {
       return `${h}:${m}pm`;
     }
+
+  }
+
+  onSelect(selectedList, selectedItem) {
+
+    this.setState({
+      selected: selectedList,
+      categoryError: false
+
+    })
+
+  }
+
+  onRemove(selectedList, removedItem, event) {
+
+    this.setState({
+      selected: selectedList
+    })
 
   }
 
@@ -174,12 +201,34 @@ class StoreSignupForm extends React.Component {
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-                values.category = values.category.map(function (val) {
-                  return val.label;
+
+                values.category = this.state.selected.map(function (val) {
+                  val = val.name;
+                  if(val == "Spa & Wellness") {
+                    return "Spa"
+                  }
+                  else if(val == "Barbershops") {
+                    return "Barber"
+                  }
+                  else if(val == "Nail Salon") {
+                    return "Nails"
+                  }
+                  else if(val == "Hair Salon") {
+                    return "Hair"
+                  }
+                  return val;
                 })
 
+                if(values.category.length == 0) {
+
+                  this.setState({
+                    categoryError: true
+                  })
+                  return;
+                }
+
                 values.owner_id = [JSON.parse(Cookies.get('user').substring(2)).id]
-                values.storeHours = this.state.storeHours
+                values.storeHours = this.state.storeHours;
 
 
                 let triggerStoreDisplay = this.triggerStoreDisplay
@@ -370,17 +419,19 @@ class StoreSignupForm extends React.Component {
                     </Form.Group>
 
                     <Form.Group controlId="formCategory">
-                      <Select
-                        value={values.category}
-                        onChange={option => setFieldValue("category", option)}
-                        name="category"
-                        options={this.options}
-                        isMulti={true}
-                        placeholder={"Category"}
-                        className={touched.category && errors.category ? "error" : null}
+                      <Multiselect
+                        options={this.state.category}
+                        onSelect={this.onSelect}
+                        onRemove={this.onRemove}
+                        placeholder="Category"
+                        closeIcon="cancel"
+                        displayValue="name"
+                        avoidHighlightFirstOption={true}
+                        style={{multiselectContainer: { width: '100%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
                       />
-                      {touched.category && errors.category ? (
-                        <div className="error-message">{errors.category}</div>
+
+                      {(this.state.categoryError) ? (
+                        <div className="error-message">Category is required</div>
                       ) : null}
                     </Form.Group>
 

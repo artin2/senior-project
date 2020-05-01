@@ -13,16 +13,17 @@ import { Multiselect } from 'multiselect-react-dropdown';
 import { FiSearch} from 'react-icons/fi';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
+const helper = require('./helper.js');
 
 class SearchDisplay extends React.Component {
   constructor(props) {
     super(props);
     this.state ={
       stores: [],
-      center: {
-        lat: 0.0,
-        lng: 0.0
-      },
+      // center: {
+      //   lat: 0.0,
+      //   lng: 0.0
+      // },
       zoom: 12,
       mapStyles: {
         width: '100%',
@@ -32,18 +33,20 @@ class SearchDisplay extends React.Component {
         lat: '',
         lng: ''
       },
-      category: ["Nail Salon", "Hair Salon",  "Facials",  "Barbershops"],
-      selected: [],
-      address: '',
-      distance: 1,
+      category: helper.getCategories(),
       nails: false,
       hair: false,
       facials: false,
-      barber: false
+      barber: false,
+      spa: false,
+      makeup: false,
+      selected: [],
+      address: '',
+      distance: 1,
     }
 
     this.autocomplete = null
-    
+
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
     this.onSelect = this.onSelect.bind(this);
     this.onRemove = this.onRemove.bind(this);
@@ -52,10 +55,12 @@ class SearchDisplay extends React.Component {
   }
 
   onSelect(selectedList, selectedItem) {
-    console.log(this.state.selected)
+    // console.log(this.state.selected)
     this.setState({
       selected: selectedList
     })
+
+    selectedItem = selectedItem.name;
 
     if(selectedItem == "Nail Salon"){
       this.setState({
@@ -72,18 +77,33 @@ class SearchDisplay extends React.Component {
         facials: true
       })
     }
-    else{
+    else if(selectedItem == "Spa & Wellness"){
       this.setState({
-        barber: true
+        spa: true
       })
     }
+    else if(selectedItem == "Makeup"){
+      this.setState({
+        makeup: true
+      })
+    }
+    else{
+      if(selectedItem == "Barbershops"){
+        this.setState({
+          barber: true
+        })
+      }
+    }
   }
- 
-  onRemove(selectedList, removedItem) {
-    console.log(this.state.selected)
+
+  onRemove(selectedList, removedItem, event) {
+
     this.setState({
       selected: selectedList
     })
+
+    removedItem = removedItem.name;
+
     if(removedItem == "Nail Salon"){
       this.setState({
         nails: false
@@ -99,7 +119,17 @@ class SearchDisplay extends React.Component {
         facials: false
       })
     }
-    else{
+    else if(removedItem == "Spa & Wellness"){
+      this.setState({
+        spa: false
+      })
+    }
+    else if(removedItem == "Makeup"){
+      this.setState({
+        makeup: false
+      })
+    }
+    else if(removedItem == "Barbershops"){
       this.setState({
         barber: false
       })
@@ -147,13 +177,18 @@ class SearchDisplay extends React.Component {
                   }).join(", ");
 
     this.setState({
-      address: address
+      address: address,
+      center: {
+        lat: addressObject.geometry.location.lat(),
+        lng: addressObject.geometry.location.lng()
+      }
+
     })
   }
 
   handleSubmit(){
-    let queryString = require('./helper.js').queryString;
-    const formState = (({ address, distance, nails, hair }) => ({ address, distance, nails, hair }))(this.state);
+    let queryString = helper.queryString;
+    const formState = (({ address, distance, nails, hair, barber, makeup, spa, facials}) => ({ address, distance, nails, hair, barber, makeup, spa, facials}))(this.state);
     let query = queryString(formState)
     this.getResults(query)
   }
@@ -235,7 +270,7 @@ class SearchDisplay extends React.Component {
                 />
 
               </Form.Group>
-              <button className="btn btn-link" style={{paddingRight: "2px", paddingBottom:"20px"}} onClick={this.handleSubmit} disabled={!this.state.address || this.state.selected.length == 0}>
+              <button className="btn btn-link" style={{paddingRight: "2px", paddingBottom:"20px"}} onClick={this.handleSubmit} disabled={!this.state.address}>
                 <FiSearch/>
               </button>
               {/* <Button  size={35} style={{marginLeft: 5, paddingRight:"10px", cursor: "pointer"}} onClick={this.handleSubmit} disabled={!this.state.address}/> */}
@@ -250,14 +285,13 @@ class SearchDisplay extends React.Component {
               </Form.Control>
 
               <Multiselect
-                isObject={false}
                 options={category}
-                // selectedValues={this.state.selected}
+                avoidHighlightFirstOption={true}
                 onSelect={this.onSelect}
                 onRemove={this.onRemove}
                 placeholder="Category"
                 closeIcon="cancel"
-                // displayValue="name"
+                displayValue="name"
                 style={{multiselectContainer: {marginLeft: '2%', width: '65%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: 250, width: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
                 />
             </Row>

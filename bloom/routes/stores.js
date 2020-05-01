@@ -51,7 +51,7 @@ async function getStores(req, res, next) {
     let lat = geocodeResult[0].latitude
     let lng = geocodeResult[0].longitude
     let distance = req.query.distance
-    let categories = ['Nails', 'Hair']
+    let categories = ['Nails', 'Hair', 'Facials', 'Makeup', 'Barber', 'Spa']
     let categoryQueryArray = []
 
     // check to see which categories where marked as true
@@ -59,6 +59,7 @@ async function getStores(req, res, next) {
     while (j--) {
       cat = categories[j].toLowerCase()
       if (req.query[cat] == "true") {
+        console.log(cat);
         categoryQueryArray.push(categories[j])
       }
     }
@@ -82,6 +83,8 @@ async function getStores(req, res, next) {
       }
     }
 
+    console.log(categoryQuery);
+
     // query for stores within the given distance, and that have any of the categories checked by the client
     let query = `SELECT *, ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) ) AS distance
                 FROM stores
@@ -99,6 +102,7 @@ async function getStores(req, res, next) {
 
           // we were able to get search results
           if (result && result.rows.length > 0) {
+            console.log("====", result.rows)
             helper.querySuccess(res, result.rows, "Successfully got Search Results!");
           }
           else {

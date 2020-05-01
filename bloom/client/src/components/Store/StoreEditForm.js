@@ -17,18 +17,21 @@ import {
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import { getPictures, deleteHandler, uploadHandler } from '../s3'
+import { Multiselect } from 'multiselect-react-dropdown';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const override = css`
   display: block;
   margin: 0 auto;
 `;
+const helper = require('../Search/helper.js');
 
 class StoreEditForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       store: {
+
         // pictures: [],
         name: "",
         description: "",
@@ -37,23 +40,26 @@ class StoreEditForm extends React.Component {
         street: "",
         city: "",
         state: "",
-        zipcode: "",
-        category: []
+        zipcode: ""
       },
       storeHours: [],
       newHours: [],
-      selectedOption: null,
+      // selectedOption: [],
       loading: true,
       pictures: [],
       selectedFiles: [],
-      keys: []
+      keys: [],
+      category: helper.getCategories(),
+      categoryError: false,
+      selected: [],
+
     };
 
     // options for the categories field
-    this.options = [
-      { value: 'nails', label: 'Nails' },
-      { value: 'hair', label: 'Hair' },
-    ];
+    // this.options = [
+    //   { value: 'nails', label: 'Nails' },
+    //   { value: 'hair', label: 'Hair' },
+    // ];
 
     // RegEx for phone number validation
     this.phoneRegExp = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
@@ -85,15 +91,37 @@ class StoreEditForm extends React.Component {
       zipcode: Yup.string()
         .max(20, "Zipcode can't be longer than 100 characters")
         .required("Zipcode is required"),
-      category: Yup.array()
-        .required("Category is required")
-        .nullable(),
+      // category: Yup.array()
+      //   .required("Category is required")
+      //   .nullable(),
       pictureCount: Yup.number()
         .required("Pictures are required")
         .min(1, "Must have at least one picture")
     });
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
+
+    this.onSelect = this.onSelect.bind(this);
+    this.onRemove = this.onRemove.bind(this);
+  }
+
+  onSelect(selectedList, selectedItem) {
+
+    this.setState({
+      selected: selectedList,
+      categoryError: false
+
+    })
+
+
+  }
+
+  onRemove(selectedList, removedItem, event) {
+
+    this.setState({
+      selected: selectedList
+    })
+
   }
 
   // redirect to the store display page and pass the new store data
@@ -161,7 +189,7 @@ class StoreEditForm extends React.Component {
         ...this.state.storeHours.slice(day + 1)
       ]
     }
-    
+
     this.setState({
       newHours: updateNewHours,
       storeHours: newStoreHours
@@ -198,7 +226,7 @@ class StoreEditForm extends React.Component {
     // can put this for now so we don't have to upload to s3
     // this.setState({
       // pictures: [
-      //   { 
+      //   {
       //     url: "/hair.jpg",
       //     key: "/hair.jpg"
       //   },
@@ -216,9 +244,11 @@ class StoreEditForm extends React.Component {
 
   componentDidMount() {
     // if we were given the existing data from calling component use that, else fetch
-    // check if categories are empty, if they are then cache/store needs to be updated. 
+    // check if categories are empty, if they are then cache/store needs to be updated.
     if (this.props.location.state && this.props.location.state.store) {
-      let convertedCategory = this.props.location.state.store.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+      // console.log(this.props.location.state.store.category)
+      let convertedCategory = this.props.location.state.store.category.map((str, indx) => ({ id: indx, name: str}));
+      // console.log(convertedCategory)
       fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/storeHours', {
         method: "GET",
         headers: {
@@ -238,13 +268,14 @@ class StoreEditForm extends React.Component {
       .then(data => {
         this.setState({
           store: this.props.location.state.store,
-          selectedOption: convertedCategory,
+          selected: convertedCategory,
           storeHours: data,
           loading: false
         })
       });
     }
     else {
+
       Promise.all([
         fetch(fetchDomain + '/stores/' + this.props.match.params.store_id, {
         method: "GET",
@@ -263,10 +294,12 @@ class StoreEditForm extends React.Component {
       ]).then(allResponses => {
         const response1 = allResponses[0]
         const response2 = allResponses[1]
-        let convertedCategory = response1.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+        console.log(response1.category)
+
+        let convertedCategory = response1.category.map((str, indx) => ({ id: indx, name: str}) );
         this.setState({
           store: response1,
-          selectedOption: convertedCategory,
+          selected: convertedCategory,
           storeHours: response2,
           loading: false
         })
@@ -300,7 +333,7 @@ class StoreEditForm extends React.Component {
               city: this.state.store.city,
               state: this.state.store.state,
               zipcode: this.state.store.zipcode,
-              category: this.state.selectedOption,
+              category: this.state.selected,
               services: null,
               owners: null,
               pictures: this.state.pictures,
@@ -309,9 +342,17 @@ class StoreEditForm extends React.Component {
             }}
             validationSchema={this.yupValidationSchema}
             onSubmit={async (values) => {
-              values.category = values.category.map(function (val) {
-                return val.label;
+              values.category = this.selected.map(function (val) {
+                return val.name;
               })
+
+              if(values.category.length == 0) {
+
+                this.setState({
+                  categoryError: true
+                })
+                return;
+              }
 
                 let store_id = this.props.match.params.store_id
                 let triggerStoreDisplay = this.triggerStoreDisplay
@@ -505,20 +546,25 @@ class StoreEditForm extends React.Component {
                     ) : null}
                   </Form.Group>
 
-                  <Form.Group controlId="formCategory">
-                    <Select
-                      value={values.category}
-                      onChange={option => setFieldValue("category", option)}
-                      name="category"
-                      options={this.options}
-                      isMulti={true}
-                      placeholder={"Category"}
-                      className={touched.category && errors.category ? "error" : null}
+                  <Form.Group controlId="category">
+
+
+                  <Multiselect
+                    selectedValues={this.state.selected}
+                    options={this.state.category}
+                    onSelect={this.onSelect}
+                    onRemove={this.onRemove}
+                    placeholder="Category"
+                    closeIcon="cancel"
+                    displayValue="name"
+                    avoidHighlightFirstOption={true}
+                    style={{multiselectContainer: { width: '100%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
                     />
-                    {touched.category && errors.category ? (
-                      <div className="error-message">{errors.category}</div>
-                    ) : null}
-                  </Form.Group>
+
+                  {(this.state.categoryError) ? (
+                    <div className="error-message">Category is required</div>
+                      ) : null}
+                </Form.Group>
 
                   <h4>Store Hours</h4>
 
@@ -816,7 +862,7 @@ class StoreEditForm extends React.Component {
                   <Form.Group controlId="pictures">
                     <Form.Label>Add Images</Form.Label>
                     <br/>
-                    <input 
+                    <input
                       onChange={event => this.fileChangedHandler(event, setFieldValue, values.pictures)}
                       type="file"
                       multiple

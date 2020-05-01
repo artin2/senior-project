@@ -11,4 +11,11 @@ function queryString(query) {
   return qs && '?' + qs;
 }
 
+
+function getCategories() {
+  return [{ name: "Nail Salon" },{ name: "Hair Salon" },{ name: "Facials" },{ name: "Barbershops"},
+  {name: "Spa & Wellness"}, {name: "Makeup"}];
+}
+
  exports.queryString = queryString;
+ exports. getCategories = getCategories;
