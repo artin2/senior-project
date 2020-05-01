@@ -1,7 +1,7 @@
 import React from "react"
 import ContentLoader from "react-content-loader" 
 
-const SearchDisplayMobileLoader = () => (
+const SearchDisplayMobileLoader = props => (
   <ContentLoader 
     speed={2}
     width={'100%'}
@@ -9,6 +9,7 @@ const SearchDisplayMobileLoader = () => (
     viewBox="0 0 600 1300"
     backgroundColor="#f3f3f3"
     foregroundColor="#ecebeb"
+    {...props}
   >
     <rect x="5" y="20" rx="0" ry="0" width="222" height="50" /> 
     <rect x="5" y="103" rx="0" ry="0" width="5" height="800" /> 

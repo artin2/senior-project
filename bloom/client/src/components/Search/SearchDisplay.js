@@ -1,17 +1,11 @@
 import React from 'react';
-import Container from 'react-bootstrap/Container'
-import { Form, Row, InputGroup, Button, Navbar } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
 import Col from 'react-bootstrap/Col'
 import SearchCard from './SearchCard'
 import './SearchDisplay.css'
 import MapContainer from '../Map/MapContainer'
 import SearchDisplayLoader from './SearchDisplayLoader'
 import SearchDisplayLoaderMobile from './SearchDisplayLoaderMobile'
-// import Chip from '@material-ui/core/Chip';
-// import Select from '@material-ui/core/Select';
-// import MenuItem from '@material-ui/core/MenuItem';
-// import Input from '@material-ui/core/Input';
-import { FiSearch } from 'react-icons/fi';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 
@@ -37,20 +31,21 @@ class SearchDisplay extends React.Component {
       selected: [],
       address: '',
       distance: 1,
-      loading: true
+      loading: true,
+      query: this.props.location.search,
+      ownUpdate: false
     }
   }
 
   componentDidMount() {
-    console.log("this things props are: ", this.props)
     if (this.props.location.state && this.props.location.state.stores && this.props.location.state.center) {
       this.setState({
         stores: this.props.location.state.stores,
-        center: this.props.location.state.center
+        center: this.props.location.state.center,
+        loading: false
       })
     }
     else {
-      console.log("about to get results")
       let link = window.location.href.split("search")
       let query = ""
 
@@ -58,19 +53,36 @@ class SearchDisplay extends React.Component {
         query = link[1]
       }
 
-      this.getResults(query);
+      this.getResults(false, query);
     }
+  }
+
+  static getDerivedStateFromProps(nextProps, preState) {
+    if (preState.ownUpdate) {
+      return null
+    }
+    else {
+      if(nextProps.location.search !== preState.query) {
+        return {
+          loading: true
+        }
+      } else {
+        return null
+      }
+    }
+    
+    
   }
 
   componentDidUpdate(prevProps) {
     if (this.props.location) {
       if (this.props.location.search !== prevProps.location.search) {
-        this.getResults(this.props.location.search);
+        this.getResults(true, this.props.location.search);
       }
     }
   }
 
-  getResults(query) {
+  getResults(update, query) {
     fetch(fetchDomain + '/stores' + query, {
       method: "GET",
       headers: {
@@ -95,7 +107,8 @@ class SearchDisplay extends React.Component {
               lat: data[0].lat,
               lng: data[0].lng,
             },
-            loading: false
+            loading: false,
+            ownUpdate: update
           })
         }
       });
@@ -114,8 +127,8 @@ class SearchDisplay extends React.Component {
       if (this.state.loading) {
         return <Row>
             <Col xs="12">
-              <SearchDisplayLoader className={'d-none d-md-block'}/>
-              <SearchDisplayLoaderMobile className={'d-block d-md-none'}/>
+              <SearchDisplayLoader className={'d-none d-xl-block'}/>
+              <SearchDisplayLoaderMobile className={'d-block d-xl-none'}/>
             </Col>
           </Row>
       } else {
@@ -128,13 +141,17 @@ class SearchDisplay extends React.Component {
         )
       }
     }
-    let map = null
-    if (this.state.stores.length > 0) {
-      map = <MapContainer google={window.google}
+
+    const DisplayMapWithLoading = (props) => {
+      if(this.state.loading) {
+        return <p>Loading...</p>
+      } else {
+        return <MapContainer google={window.google}
         stores={this.state.stores}
         center={this.state.center}
         zoom={this.state.zoom}
         mapStyles={this.state.mapStyles} />
+      }
     }
 
     return (
@@ -145,7 +162,7 @@ class SearchDisplay extends React.Component {
           </Col>
           <Col id="map" xs={12} xl={6}>
             <div className="position-fixed h-100 w-50 d-none d-xl-block">
-              {map}
+              <DisplayMapWithLoading/>
             </div>
           </Col>
         </Row>

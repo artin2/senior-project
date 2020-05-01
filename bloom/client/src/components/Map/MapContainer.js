@@ -9,7 +9,7 @@ class MapContainer extends Component {
       showingInfoWindow: false,  //Hides or the shows the infoWindow
       activeMarker: {},          //Shows the active marker upon click
       selectedPlace: {},          //Shows the infoWindow to the selected place upon a marker
-      activeMarkerIndex: -1
+      activeMarkerIndex: 0
     };
 
     this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -70,7 +70,7 @@ class MapContainer extends Component {
         visible={this.state.showingInfoWindow}
         onClose={this.onClose}
         >
-          <SearchCard store={this.props.stores[this.state.activeMarkerIndex]} styleVal={{ width: '10rem', height: '10rem' }} onClickFunction={this.onClickFunction}/>
+          <p>{this.props.stores[this.state.activeMarkerIndex].name}</p>
         </InfoWindow>
       </Map>
     );

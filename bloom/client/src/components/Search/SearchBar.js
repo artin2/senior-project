@@ -24,7 +24,7 @@ class SearchBar extends React.Component {
       {value: "Barbershops", label: "Barbershops"}],
       selectedCategory: '',
       address: '',
-      distance: 1,
+      distance: 15,
     }
 
     this.autocomplete = null
