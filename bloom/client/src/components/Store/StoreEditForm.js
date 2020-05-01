@@ -29,7 +29,6 @@ class StoreEditForm extends React.Component {
     super(props);
     this.state = {
       store: {
-        // pictures: [],
         name: "",
         description: "",
         phone: "",
@@ -88,9 +87,10 @@ class StoreEditForm extends React.Component {
       category: Yup.array()
         .required("Category is required")
         .nullable(),
-      pictureCount: Yup.number()
-        .required("Pictures are required")
-        .min(1, "Must have at least one picture")
+        // image upload tag not working!! have no idea what it could be
+      // pictureCount: Yup.number()
+      //   .required("Pictures are required")
+      //   .min(1, "Must have at least one picture")
     });
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
@@ -168,25 +168,6 @@ class StoreEditForm extends React.Component {
     })
   };
 
-  deleteFileChangeHandler = async (event, setFieldValue, newPictureLength) => {
-    if(event.target.checked){
-      await this.state.keys.push(event.target.id)
-      console.log(this.state.pictures.length, newPictureLength, this.state.keys.length)
-      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
-    }
-    else{
-      await this.state.keys.pop(event.target.id)
-      console.log(this.state.pictures.length, newPictureLength, this.state.keys.length)
-      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
-    }
-  }
-
-  fileChangedHandler = (event, setFieldValue, pictures) => {
-    this.setState({ selectedFiles: event.target.files })
-    setFieldValue('pictureCount', this.state.pictures.length + event.target.files.length - this.state.keys.length)
-    setFieldValue('pictures', event.target.files)
-  }
-
   async componentDidUpdate(prevProps, prevState) {
     if (prevState.store !== this.state.store) {
       let picturesFetched = await getPictures('stores/' + this.state.store.id + '/images/')
@@ -212,6 +193,23 @@ class StoreEditForm extends React.Component {
       //   }
       // ]
     // })
+  }
+
+  deleteFileChangeHandler = async (event, setFieldValue, newPictureLength) => {
+    if(event.target.checked){
+      await this.state.keys.push(event.target.id)
+      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+    }
+    else{
+      await this.state.keys.pop(event.target.id)
+      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+    }
+  }
+
+  fileChangedHandler = async (event, setFieldValue, pictures) => {
+    this.setState({ selectedFiles: event.target.files })
+    setFieldValue('pictureCount', this.state.pictures.length + event.target.files.length - this.state.keys.length)
+    setFieldValue('pictures', event.target.files)
   }
 
   componentDidMount() {
@@ -303,7 +301,7 @@ class StoreEditForm extends React.Component {
               category: this.state.selectedOption,
               services: null,
               owners: null,
-              pictures: this.state.pictures,
+              pictures: [],
               pictureCount: this.state.pictures.length - this.state.keys.length,
               storeHours: this.state.storeHours
             }}
@@ -798,7 +796,7 @@ class StoreEditForm extends React.Component {
                     </Form.Row>
                   </Form.Group>
 
-                  <Form.Group controlId="pictureCount">
+                  <Form.Group controlId="pictures">
                     <Form.Label>Delete Images</Form.Label>
                     {this.state.pictures.map((picture, index) => (
                       <div key={"pic-" + index}>
@@ -813,7 +811,7 @@ class StoreEditForm extends React.Component {
                     ))}
                   </Form.Group>
 
-                  <Form.Group controlId="pictures">
+                  <Form.Group controlId="pictureCount">
                     <Form.Label>Add Images</Form.Label>
                     <br/>
                     <input 
@@ -826,7 +824,6 @@ class StoreEditForm extends React.Component {
                       <div className="error-message">{errors.pictureCount}</div>
                     ): null}
                   </Form.Group>
-
 
                   <Button onClick={handleSubmit}>Submit</Button>
                 </Form>
