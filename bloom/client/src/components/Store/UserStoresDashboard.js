@@ -155,9 +155,8 @@ class UserStoresDashboard extends React.Component {
           <>{this.state.stores.map((store, index) => (
             <div key={"store" + index}>
               <Row className="justify-content-center align-content-center my-5">
-                {/* <div className="style_column"> </div> */}
                 <Col md={6} className="vertical-align-contents">
-                  <Carousel className="dashboard_carousel" interval="">
+                  <Carousel className="dashboard-carousel" interval="">
                       <Carousel.Item>
                         <Image fluid src={salon2} alt="test"/>
                       </Carousel.Item>

@@ -6,6 +6,7 @@ import SearchCard from './SearchCard'
 import './SearchDisplay.css'
 import MapContainer from '../Map/MapContainer'
 import SearchDisplayLoader from './SearchDisplayLoader'
+import SearchDisplayLoaderMobile from './SearchDisplayLoaderMobile'
 // import Chip from '@material-ui/core/Chip';
 // import Select from '@material-ui/core/Select';
 // import MenuItem from '@material-ui/core/MenuItem';
@@ -103,29 +104,26 @@ class SearchDisplay extends React.Component {
   render() {
     const RenderStoreCards = (props) => {
       return this.state.stores.map(store => (
-        <Row className="mx-0" key={"store-" + store.id} style={{ width: '100%', height: 350, marginBottom: 10 }}>
-          <SearchCard store={store}
-            carousel={true}
-            styleVal={{ width: '100%', height: '100%' }}
+          <SearchCard key={"store-" + store.id} store={store}
             onClickFunctionBook={() => window.location.href = '/book/' + store.id}
             onClickFunctionStore={() => window.location.href = '/stores/' + store.id}
-
           />
-
-        </Row>
       ))
     }
     const DisplayWithLoading = (props) => {
       if (this.state.loading) {
-        return <Row className="mt-5">
+        return <Row>
             <Col xs="12">
-              <SearchDisplayLoader/>
+              <SearchDisplayLoader className={'d-none d-md-block'}/>
+              <SearchDisplayLoaderMobile className={'d-block d-md-none'}/>
             </Col>
           </Row>
       } else {
         return(<div>
           <h3 className="text-left"> {this.state.stores.length} results </h3>
-          <RenderStoreCards/>
+          <Row className="mx-0 justify-content-center search-cards-row">
+            <RenderStoreCards/>
+          </Row>
         </div>
         )
       }
@@ -142,11 +140,11 @@ class SearchDisplay extends React.Component {
     return (
       <div>
         <Row className="restrict-viewport mx-0">
-          <Col xs={12} xl={6} className="px-5 my-3">
+          <Col xs={12} xl={6} className="px-5 my-3 h-100">
             <DisplayWithLoading/>
           </Col>
           <Col id="map" xs={12} xl={6}>
-            <div className="position-fixed" style={{ height: '100%', width: '50%' }}>
+            <div className="position-fixed h-100 w-50 d-none d-xl-block">
               {map}
             </div>
           </Col>
