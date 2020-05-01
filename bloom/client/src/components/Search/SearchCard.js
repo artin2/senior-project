@@ -41,7 +41,7 @@ class SearchCard extends React.Component {
   render() {
     let image;
     if(this.props.carousel){
-      image = <LargeCarousel img={{marginLeft: 20, height: 390, width: 380}} style={{width: 380, height: 400, zIndex: 1}} pictures={this.state.pictures}/>
+      image = <LargeCarousel img={{height: '100%', width: 380}} style={{width: 380, height: 350}} pictures={this.state.pictures}/>
     }
     else{
       image = <img src={this.state.pictures[0]} alt={"1"} />
@@ -55,7 +55,7 @@ class SearchCard extends React.Component {
     let body
     if(this.props.store){
       body = <div>
-                <Card.Title onClick={() => this.props.onClickFunctionStore(this.props.store.id)} style={{cursor: 'pointer', marginTop: 30}} >{this.props.store.name}</Card.Title>
+                <Card.Title className="mt-3" onClick={() => this.props.onClickFunctionStore(this.props.store.id)} style={{cursor: 'pointer'}} >{this.props.store.name}</Card.Title>
                 <Card.Text style={{marginTop: 30}}>{this.props.store.description}</Card.Text>
              </div>
     }
