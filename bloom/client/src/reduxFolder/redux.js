@@ -37,7 +37,7 @@ export function login(email, password, auth_token) {
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'same-origin',
+      credentials: 'include',
       method: "POST",
       body: JSON.stringify({
         "email": email,

@@ -42,7 +42,7 @@ const withAuth = function(req, res, next) {
         res.status(401).send('Unauthorized: Invalid token');
       } else {
         req.email = decoded.email;
-        console.log("verified, email is: ", decoded.email)
+        console.log("verified, email is: ", decoded.email)  //why is this printing undefined?
         next();
       }
     });
@@ -75,7 +75,7 @@ app.get('/checkToken', withAuth, function(req, res) {
 
 //**** STORE ROUTES ****//
 
-app.get('/stores/users/:store_id', withAuth, async (req, res, next) => {
+app.get('/stores/users/:user_id', withAuth, async (req, res, next) => {
   console.log("hit the getUserStores route")
   await stores.getUserStores(req, res, next);
 });

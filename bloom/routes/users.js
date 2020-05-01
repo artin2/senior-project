@@ -7,9 +7,9 @@ async function login(req, res) {
     let query = 'SELECT * from users WHERE email = $1'
     let values = [req.body.email]
 
-    db.client.connect(function(err) {
-      db.client.query(query, values,
-        async (err, result) => {
+    db.client.connect((err, client, done) => {
+      db.client.query(query, values, async (err, result) => {
+        done()
           if (result && result.rows.length == 1) {
             try {
               let passwordMatch = await auth.verifyHash(result.rows[0]["password"], req.body.password);
@@ -70,10 +70,10 @@ async function signup(req, res) {
     let query = 'INSERT INTO users(email, first_name, last_name, password, role, created_at, phone) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;'
     let values = [req.body.email, req.body.first_name, req.body.last_name, hash, req.body.role, timestamp, req.body.phone]
 
-    db.client.connect(function(err) {
+    db.client.connect((err, client, done) => {
       // try to add user to user table
-      db.client.query(query, values,
-        async (err, result) => {
+      db.client.query(query, values, (err, result) => {
+        done()
           if (err) {
             helper.queryError(res, err);
           }
@@ -120,10 +120,10 @@ async function edit(req, res, next) {
     let query = 'UPDATE users SET first_name=$1, last_name=$2, phone=$3, password=$4 WHERE id=$5 RETURNING *'
     let values = [req.body.first_name, req.body.last_name, req.body.phone, hash, req.body.id]
 
-    db.client.connect(function(err) {
+    db.client.connect((err, client, done) => {
       // query to update the user
-      db.client.query(query, values,
-        async (err, result) => {
+      db.client.query(query, values, (err, result) => {
+        done()
           if (err) {
             helper.queryError(res, err);
           }

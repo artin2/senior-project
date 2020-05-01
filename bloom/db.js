@@ -12,6 +12,11 @@ const dbConfig = {
 
 const client = new pg.Pool(dbConfig);
 
+client.on('error', (err, client) => {
+  console.error('Unexpected error on idle client', err) // your callback here
+  process.exit(-1)
+})
+
 module.exports = {
   client: client
 };

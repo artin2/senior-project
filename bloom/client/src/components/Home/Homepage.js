@@ -78,9 +78,9 @@ function useScreenWidth(): number {
 
     return () => {
       mounted = false;
-      window.removeEventListener("mousemove", setLeaveEvent);
+      window.removeEventListener("mousemove", setFromEvent);
     };
-  }, []);
+  });
   // return position;
 
 
@@ -136,7 +136,6 @@ function ScreenWidth ({ listen, children }) {
 };
 
 function useScroll() : number {
-
   const [scrollPosition, setSrollPosition] = useState(0);
   const handleScroll = () => {
       const position = window.pageYOffset;
@@ -145,7 +144,6 @@ function useScroll() : number {
 
   useEffect(() => {
       window.addEventListener('scroll', handleScroll);
-
       return () => {
           window.removeEventListener('scroll', handleScroll);
       };

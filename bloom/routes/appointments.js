@@ -6,19 +6,19 @@ async function getAppointmentsForUser(req, res) {
   console.log("about to get appointments for user")
   console.log("user_id is: ", req.params.user_id)
 
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     let query = 'SELECT store_id, date, start_time, end_time, price, group_id, service_id FROM appointments WHERE user_id=$1 ORDER BY group_id DESC'
     let values = [req.params.user_id]
     console.log("values is: ", values)
-    db.client.query(query, values,
-      async (errFirst, resultFirst) => {
-        if (errFirst) {
-          helper.queryError(res, errFirst);
+    db.client.query(query, values, (err, result) => {
+      done()
+        if (err) {
+          helper.queryError(res, err);
         }
         // we were able to retrieve the appointments
-        if (resultFirst && resultFirst.rows.length > 0) {
+        if (result && result.rows.length > 0) {
           console.log("first query was successful")
-          console.log(resultFirst.rows)
+          console.log(result.rows)
           
           let stores = []
           let dates =[]
@@ -30,41 +30,41 @@ async function getAppointmentsForUser(req, res) {
           let curr_group_services = []
           let grouped_service_ids = []
           let i = 1
-          let group_id = resultFirst.rows[0].group_id
-          let earliest_start_time = resultFirst.rows[0].start_time
-          let latest_end_time = resultFirst.rows[0].end_time
-          let cost = resultFirst.rows[0].price
-          curr_group_services.push(resultFirst.rows[0].service_id)
-          service_ids.push(resultFirst.rows[0].service_id)
-          while(i < resultFirst.rows.length) {
-            if(resultFirst.rows[i].group_id != group_id) {
-              stores.push(resultFirst.rows[i-1].store_id)
-              dates.push(resultFirst.rows[i-1].date)
+          let group_id = result.rows[0].group_id
+          let earliest_start_time = result.rows[0].start_time
+          let latest_end_time = result.rows[0].end_time
+          let cost = result.rows[0].price
+          curr_group_services.push(result.rows[0].service_id)
+          service_ids.push(result.rows[0].service_id)
+          while(i < result.rows.length) {
+            if(result.rows[i].group_id != group_id) {
+              stores.push(result.rows[i-1].store_id)
+              dates.push(result.rows[i-1].date)
               group_ids.push(group_id)
               start_times.push(earliest_start_time)
               end_times.push(latest_end_time)
               costs.push(cost)
               grouped_service_ids.push(curr_group_services)
               curr_group_services = [] 
-              group_id = resultFirst.rows[i].group_id
-              earliest_start_time = resultFirst.rows[i].start_time
-              latest_end_time = resultFirst.rows[i].end_time
-              cost = resultFirst.rows[i].price
+              group_id = result.rows[i].group_id
+              earliest_start_time = result.rows[i].start_time
+              latest_end_time = result.rows[i].end_time
+              cost = result.rows[i].price
             } else {
-              if(resultFirst.rows[i].start_time < earliest_start_time) {
-                earliest_start_time = resultFirst.rows[i].start_time
+              if(result.rows[i].start_time < earliest_start_time) {
+                earliest_start_time = result.rows[i].start_time
               }
-              if(resultFirst.rows[i].end_time > latest_end_time) {
-                latest_end_time = resultFirst.rows[i].end_time
+              if(result.rows[i].end_time > latest_end_time) {
+                latest_end_time = result.rows[i].end_time
               }
-              cost += resultFirst.rows[i].price
+              cost += result.rows[i].price
             }
-            curr_group_services.push(resultFirst.rows[i].service_id)
-            service_ids.push(resultFirst.rows[i].service_id)
+            curr_group_services.push(result.rows[i].service_id)
+            service_ids.push(result.rows[i].service_id)
             i += 1
           }
-          stores.push(resultFirst.rows[i-1].store_id)
-          dates.push(resultFirst.rows[i-1].date)
+          stores.push(result.rows[i-1].store_id)
+          dates.push(result.rows[i-1].date)
           start_times.push(earliest_start_time)
           end_times.push(latest_end_time)
           costs.push(cost)
@@ -97,7 +97,7 @@ async function getAppointmentsForUser(req, res) {
             })
           })
         }
-        else if(resultFirst) {
+        else if(result) {
           helper.querySuccess(res, {}, 'No appointments exist for user!');
         }
         else {
@@ -115,7 +115,7 @@ async function getAppointmentsForUser(req, res) {
 async function getServiceMappings(res, service_ids, callback) {
   console.log("about to get service mappings")
   
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     var params = [];
     for(var i = 1; i <= service_ids.length; i++) {
       params.push('$' + i);
@@ -123,15 +123,15 @@ async function getServiceMappings(res, service_ids, callback) {
     //get the service mappings for our appointment
     query = 'SELECT id, name FROM services WHERE id IN (' + params.join(',') + ')'
     values = service_ids
-    db.client.query(query, values,
-      async (errFirst, resultFirst) => {
-        if (errFirst) {
-          helper.queryError(res, errFirst);
+    db.client.query(query, values, (err, result) => {
+      done()
+        if (err) {
+          helper.queryError(res, err);
         }
         // we were able to retrieve the service mappings
-        if (resultFirst) {
-          console.log("got results: ", resultFirst)
-          callback(resultFirst.rows)
+        if (result) {
+          console.log("got results: ", result)
+          callback(result.rows)
         }
         else {
           helper.queryError(res, "Could not retrieve service mappings!");
@@ -148,7 +148,7 @@ async function getServiceMappings(res, service_ids, callback) {
 function getStoreNameMappings(res, stores, callback) {
   console.log("about to get store name mappings")
   
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     //get the store name mappings
     var params = [];
     for(var i = 1; i <= stores.length; i++) {
@@ -156,14 +156,14 @@ function getStoreNameMappings(res, stores, callback) {
     }
     query = 'SELECT id, name FROM stores WHERE id IN (' + params.join(',') + ')'
     values = stores
-    db.client.query(query, values,
-      async (errFirst, resultFirst) => {
-        if (errFirst) {
-          helper.queryError(res, errFirst);
+    db.client.query(query, values, (err, result) => {
+      done()
+        if (err) {
+          helper.queryError(res, err);
         }
         // we were able to retrieve the store name
-        if (resultFirst && resultFirst.rows.length > 0) {
-          callback(resultFirst.rows)
+        if (result && result.rows.length > 0) {
+          callback(result.rows)
         }
         else {
           helper.queryError(res, "Could not retrieve the store name mappings!");
@@ -189,27 +189,27 @@ async function getAppointmentsForDisplay(req, res) {
   let end_time = 0
   let user_id = 0
 
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     let query = 'SELECT user_id, store_id, worker_id, service_id, date, start_time, end_time, price FROM appointments WHERE group_id=$1 ORDER BY start_time ASC'
     let values = [req.params.group_id]
-    db.client.query(query, values,
-      async (errFirst, resultFirst) => {
-        if (errFirst) {
-          helper.queryError(res, errFirst);
+    db.client.query(query, values, (err, result) => {
+      done()
+        if (err) {
+          helper.queryError(res, err);
         }
         // we were able to retrieve the appointments
-        if (resultFirst) {
+        if (result) {
           console.log("first query was successful")
-          start_time = resultFirst.rows[0].start_time
-          end_time = resultFirst.rows[resultFirst.rows.length - 1].end_time
-          store_id = resultFirst.rows[0].store_id
-          for (let i = 0; i < resultFirst.rows.length; i++) {
-            cost += resultFirst.rows[i].price
-            service_ids.push(resultFirst.rows[i].service_id)
-            worker_ids.push(resultFirst.rows[i].worker_id)
+          start_time = result.rows[0].start_time
+          end_time = result.rows[result.rows.length - 1].end_time
+          store_id = result.rows[0].store_id
+          for (let i = 0; i < result.rows.length; i++) {
+            cost += result.rows[i].price
+            service_ids.push(result.rows[i].service_id)
+            worker_ids.push(result.rows[i].worker_id)
           }
-          user_id = resultFirst.rows[0].user_id
-          getWorkerNames(res, resultFirst.rows, user_id, start_time, end_time, store_id, cost, service_ids, worker_ids)
+          user_id = result.rows[0].user_id
+          getWorkerNames(res, result.rows, user_id, start_time, end_time, store_id, cost, service_ids, worker_ids)
         }
         else {
           helper.queryError(res, "Could not retrieve appointments!");
@@ -235,7 +235,7 @@ function getWorkerNames(res, appointment, user_id, start_time, end_time, store_i
   console.log("service_ids: ", service_ids)
   console.log("worker_ids: ", worker_ids)
   
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     var params = [];
     for(var i = 1; i <= worker_ids.length; i++) {
       params.push('$' + i);
@@ -243,14 +243,14 @@ function getWorkerNames(res, appointment, user_id, start_time, end_time, store_i
     //get the worker names that serve our appointment
     query = 'SELECT first_name, last_name FROM workers WHERE id IN (' + params.join(',') + ')'
     values = worker_ids
-    db.client.query(query, values,
-      async (errFirst, resultFirst) => {
-        if (errFirst) {
-          helper.queryError(res, errFirst);
+    db.client.query(query, values, (err, result) => {
+      done()
+        if (err) {
+          helper.queryError(res, err);
         }
         // we were able to retrieve the worker names
-        if (resultFirst) {
-          worker_names = resultFirst.rows.map(name => name.first_name+ ' ' + name.last_name)
+        if (result) {
+          worker_names = result.rows.map(name => name.first_name+ ' ' + name.last_name)
           getServiceNames(res, appointment, user_id, start_time, end_time, store_id, cost, service_ids, worker_names)
         }
         else {
@@ -271,7 +271,7 @@ function getServiceNames(res, appointment, user_id, start_time, end_time, store_
   console.log("worker_names: ", worker_names)
   let service_names = []
   
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     var params = [];
     for(var i = 1; i <= service_ids.length; i++) {
       params.push('$' + i);
@@ -279,14 +279,14 @@ function getServiceNames(res, appointment, user_id, start_time, end_time, store_
     //get the service names for our appointment
     query = 'SELECT name FROM services WHERE id IN (' + params.join(',') + ')'
     values = service_ids
-    db.client.query(query, values,
-      async (errFirst, resultFirst) => {
-        if (errFirst) {
-          helper.queryError(res, errFirst);
+    db.client.query(query, values, (err, result) => {
+      done()
+        if (err) {
+          helper.queryError(res, err);
         }
         // we were able to retrieve the service names
-        if (resultFirst) {
-          service_names = resultFirst.rows.map(service => service.name)
+        if (result) {
+          service_names = result.rows.map(service => service.name)
           getStoreName(res, appointment, user_id, start_time, end_time, store_id, cost, service_names, worker_names)
         }
         else {
@@ -307,18 +307,18 @@ function getStoreName(res, appointment, user_id, start_time, end_time, store_id,
   console.log("service_names: ", service_names)
   let store_name = ''
   
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     //get the store name
     query = 'SELECT name FROM stores WHERE id=$1'
     values = [store_id]
-    db.client.query(query, values,
-      async (errFirst, resultFirst) => {
-        if (errFirst) {
-          helper.queryError(res, errFirst);
+    db.client.query(query, values, (err, result) => {
+      done()
+        if (err) {
+          helper.queryError(res, err);
         }
         // we were able to retrieve the store name
-        if (resultFirst) {
-          store_name = resultFirst.rows[0].name
+        if (result) {
+          store_name = result.rows[0].name
           let response = {
             appointment: appointment,
             user_id: user_id,
@@ -348,17 +348,17 @@ async function deleteAppointment(req, res) {
   console.log("about to delete appointments")
   console.log("group_id is: ", req.params.group_id)
 
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     let query = 'DELETE FROM appointments where group_id=$1'
     let values = [req.params.group_id]
-    db.client.query(query, values,
-      async (errFirst, resultFirst) => {
-        if (errFirst) {
-          helper.queryError(res, errFirst);
+    db.client.query(query, values, (err, result) => {
+      done()
+        if (err) {
+          helper.queryError(res, err);
         }
         // we were able to delete the appointment
-        if (resultFirst) {
-          console.log("delete query was successful", resultFirst)
+        if (result) {
+          console.log("delete query was successful", result)
           helper.querySuccess(res, req.params.group_id, 'Successfully deleted appointment')
         }
         else {

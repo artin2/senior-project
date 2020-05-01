@@ -15,10 +15,10 @@ async function getStore(req, res, next) {
     let storeId = req.params.store_id
     let query = 'SELECT * FROM stores WHERE id=' + storeId
 
-    db.client.connect(function (err) {
+    db.client.connect((err, client, done) => {
       // try to get the store
-      db.client.query(query,
-        async (err, result) => {
+      db.client.query(query, (err, result) => {
+        done()
           if (err) {
             // check err if it's a string
             helper.queryError(res, err);
@@ -89,10 +89,10 @@ async function getStores(req, res, next) {
                   < ` + distance + ` AND category && ` + categoryQuery + `
                 ORDER BY distance;`
 
-    db.client.connect(function (err) {
+    db.client.connect((err, client, done) => {
       // try to get search results
-      db.client.query(query,
-        async (err, result) => {
+      db.client.query(query, (err, result) => {
+        done()
           if (err) {
             helper.queryError(res, err);
           }
@@ -119,19 +119,18 @@ async function getUserStores(req, res, next) {
   try {
     await auth.verifyToken(req, res, next);
 
-    // query for stores within the given distance, and that have any of the categories checked by the client
+    // query for stores owned by the user
     let query = `SELECT *
                 FROM stores
-                WHERE ` + req.params.store_id + ` = ANY(owners)`
+                WHERE ` + req.params.user_id + ` = ANY(owners)`
 
-    db.client.connect(function (err) {
+    db.client.connect((err, client, done) => {
       // try to get all stores registered to this user
-      db.client.query(query,
-        async (err, result) => {
+      db.client.query(query, (err, result) => {
+        done()
           if (err) {
             helper.queryError(res, err);
           }
-
           // we were successfuly able to get the users stores
           if (result && result.rows.length > 0) {
             helper.querySuccess(res, result.rows, "Successfully got User's Stores!");
@@ -164,10 +163,10 @@ async function editStore(req, res, next) {
       let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, req.body.category, req.body.phone, req.body.services, req.body.owners, req.body.description, lat, lng, req.body.id]
 
       // connect to the db
-      db.client.connect(function (err) {
+      db.client.connect((err, client, done) => {
         // try to update the store
-        db.client.query(query, values,
-          async (err, result) => {
+        db.client.query(query, values, (err, result) => {
+          done()
             if (err) {
               helper.queryError(res, err);
             }
@@ -254,10 +253,10 @@ async function addStore(req, res, next) {
       let owners = req.body.owner_id;
       console.log(owners);
       // connect to the db
-      db.client.connect(function (err) {
+      db.client.connect((err, client, done) => {
         // try to add the store into the db
-        db.client.query(query, values,
-          async (err, result) => {
+        db.client.query(query, values, (err, result) => {
+          done()
             if (err) {
               helper.queryError(res, err);
             }
@@ -349,12 +348,11 @@ async function addWorker(req, res, next) {
     // should add verification to check they are the store owner, maybe can do this in the front end though...
     await auth.verifyToken(req, res, next);
 
-    db.client.connect(function (err) {
+    db.client.connect((err, client, done) => {
       // check to see if the user exists
       let query = 'SELECT * from users WHERE email = $1'
       let values = [req.body.email]
-      db.client.query(query, values,
-        async (err, result) => {
+      db.client.query(query, values, (err, result) => {
           if (err) {
             helper.queryError(res, err);
           }
@@ -365,8 +363,7 @@ async function addWorker(req, res, next) {
             let values = [result.rows[0].first_name, result.rows[0].last_name, [0], req.params.store_id, result.rows[0].id, timestamp]
 
             // try to insert the worker in the workers table
-            db.client.query(query, values,
-              async (errFirst, resultFirst) => {
+            db.client.query(query, values, (errFirst, resultFirst) => {
                 if (errFirst) {
                   helper.queryError(res, errFirst);
                 }
@@ -378,8 +375,7 @@ async function addWorker(req, res, next) {
                   // query = 'UPDATE users SET role = array_append(role, 1) WHERE id=$2 RETURNING *'
                   query = 'UPDATE users SET role=1 WHERE email=$1 RETURNING *'
                   values = [req.body.email]
-                  db.client.query(query, values,
-                    async (errSecond, resultSecond) => {
+                  db.client.query(query, values, (errSecond, resultSecond) => {
                       if (errSecond) {
                         helper.queryError(res, errSecond);
                       }
@@ -389,8 +385,8 @@ async function addWorker(req, res, next) {
                         // note, may want to update query to this...
                         query = 'UPDATE stores SET workers = array_append(workers, $1) WHERE id=$2 RETURNING *'
                         values = [resultFirst.rows[0].id, req.params.store_id]
-                        db.client.query(query, values,
-                          async (errLast, resultLast) => {
+                        db.client.query(query, values, (errLast, resultLast) => {
+                          done()
                             if (errLast) {
                               helper.queryError(res, errLast);
                             }
@@ -480,10 +476,10 @@ async function editWorker(req, res, next) {
       let query = 'UPDATE workers SET first_name=$1, last_name=$2, services=$3 WHERE id=$4 RETURNING *'
       let values = [req.body.first_name, req.body.last_name, req.body.services, req.params.id]
 
-      db.client.connect(function (err) {
+      db.client.connect((err, client, done) => {
         // update the store worker
-        db.client.query(query, values,
-          async (err, result) => {
+        db.client.query(query, values, (err, result) => {
+          done()
             if (err) {
               helper.queryError(res, err);
             }
@@ -569,12 +565,11 @@ async function addService(req, res, next) {
     // should add verification to check they are the store owner, maybe can do this in the front end though...
     await auth.verifyToken(req, res, next);
 
-    db.client.connect(function (err) {
+    db.client.connect((err, client, done) => {
       // check to see if the user exists
       let query = 'INSERT INTO services(name, cost, workers, store_id, category, description, duration) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;'
       let values = [req.body.name, req.body.cost, req.body.workers, req.params.store_id, req.body.category, req.body.description, req.body.duration]
-      db.client.query(query, values,
-        async (errFirst, resultFirst) => {
+      db.client.query(query, values, (errFirst, resultFirst) => {
           if (errFirst) {
             helper.queryError(res, errFirst);
           }
@@ -585,8 +580,7 @@ async function addService(req, res, next) {
             for (var i = 0; i < req.body.workers.length; i++) {
               query = 'UPDATE workers SET services = array_append(services, $1) WHERE id=$2 RETURNING *'
               values = [resultFirst.rows[0].id, req.body.workers[i]]
-              db.client.query(query, values,
-                async (errSecond, resultSecond) => {
+              db.client.query(query, values, (errSecond, resultSecond) => {
                   if (errSecond) {
                     helper.queryError(res, errSecond);
                   }
@@ -600,8 +594,8 @@ async function addService(req, res, next) {
 
             query = 'UPDATE stores SET services = array_append(services, $1) WHERE id=$2 RETURNING *'
             values = [resultFirst.rows[0].id, req.params.store_id]
-            db.client.query(query, values,
-              async (errLast, resultLast) => {
+            db.client.query(query, values, (errLast, resultLast) => {
+              done()
                 if (errLast) {
                   helper.queryError(res, errLast);
                 }
@@ -638,10 +632,10 @@ async function getStoreItems(req, res, next, table) {
 
   let values = [req.params.store_id]
 
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     // try to get all items registered to this store
-    db.client.query(query, values,
-      async (err, result) => {
+    db.client.query(query, values, (err, result) => {
+        done()
         if (err) {
           helper.queryError(res, err);
         }
@@ -665,10 +659,10 @@ async function getStoreItem(req, res, next, table) {
   let query = 'SELECT * FROM ' + table + ' WHERE id = $1'
   let values = [req.params.item_id]
 
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     // try to get the store item based on id
-    db.client.query(query, values,
-      async (err, result) => {
+    db.client.query(query, values, (err, result) => {
+      done()
         if (err) {
           helper.queryError(res, err);
         }
@@ -693,10 +687,10 @@ async function getWorkers(req, res, next) {
   let query = 'SELECT first_name, last_name, id FROM workers WHERE store_id = $1'
   let values = [req.params.store_id]
 
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     // try to get the store item based on id
-    db.client.query(query, values,
-      async (err, result) => {
+    db.client.query(query, values, (err, result) => {
+      done()
         if (err) {
           helper.queryError(res, err);
         }
@@ -727,10 +721,10 @@ async function getWorkersSchedules(req, res, next) {
   console.log("values looks like: ", values)
   // console.log(req)
 
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     // try to get the store item based on id
-    db.client.query(query, values,
-      async (err, result) => {
+    db.client.query(query, values, (err, result) => {
+      done()
         if (err) {
           helper.queryError(res, err);
         }
@@ -756,10 +750,10 @@ async function getIndividualWorkerHours(req, res, next) {
 
   console.log("getting worker hours with params", values)
 
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     // try to get the store item based on id
-    db.client.query(query, values,
-      async (err, result) => {
+    db.client.query(query, values, (err, result) => {
+      done()
         if (err) {
           helper.queryError(res, err);
         }
@@ -786,10 +780,10 @@ async function getStoreHours(req, res, next) {
   let query = 'SELECT open_time, close_time FROM store_hours WHERE store_id = $1 ORDER BY day_of_the_week'
   let values = [req.params.store_id]
 
-  db.client.connect(function (err) {
+  db.client.connect((err, client, done) => {
     // try to get the store item based on id
-    db.client.query(query, values,
-      async (err, result) => {
+    db.client.query(query, values, (err, result) => {
+      done()
         if (err) {
           helper.queryError(res, err);
         }
@@ -815,10 +809,10 @@ async function getAppointmentsByMonth(req, res, next) {
     // query for store appointments
     let query = 'SELECT worker_id, date, start_time, end_time, created_at FROM appointments WHERE store_id = $1 and EXTRACT(MONTH from date) = $2 ORDER BY date'
     let values = [req.params.store_id, req.params.month]
-    db.client.connect(function (err) {
+    db.client.connect((err, client, done) => {
       // try to get the store appointments based on month
-      db.client.query(query, values,
-        async (err, result) => {
+      db.client.query(query, values, (err, result) => {
+        done()
           if (err) {
             helper.queryError(res, err);
           }
@@ -848,10 +842,10 @@ async function getAllAppointments(req, res, next) {
     // query for store appointments
     let query = 'SELECT worker_id, date, start_time, end_time, service_id, title, price, date FROM appointments WHERE store_id = $1'
     let values = [req.params.store_id]
-    db.client.connect(function (err) {
+    db.client.connect((err, client, done) => {
       // try to get the store appointments based on month
-      db.client.query(query, values,
-        async (err, result) => {
+      db.client.query(query, values, (err, result) => {
+        done()
           if (err) {
             helper.queryError(res, err);
           }
@@ -880,10 +874,10 @@ async function addAppointment(req, res, next) {
     let query = 'SELECT group_id FROM appointments ORDER BY group_id DESC LIMIT 1'
 
     // connect to the db
-    db.client.connect(function (err) {
+    db.client.connect((err, client, done) => {
       // try to get latest group_id from the appointments table
-      db.client.query(query,
-        async (err, result) => {
+      db.client.query(query, (err, result) => {
+        done()
           if (err) {
             helper.queryError(res, err);
           }

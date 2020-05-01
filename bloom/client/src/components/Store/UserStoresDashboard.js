@@ -102,40 +102,32 @@ class UserStoresDashboard extends React.Component {
   }
 
   componentDidMount() {
-    console.log(this.props.store);
-    if(this.props.store){
-      this.setState({
-        stores: this.props.store
-      })
-    }
-    else{
-      fetch(fetchDomain + '/stores/users/' + this.props.match.params.user_id , {
-        method: "GET",
-        headers: {
-            'Content-type': 'application/json'
-        },
-        credentials: 'include'
-      })
-      .then(function(response){
-        if(response.status!==200){
-          // throw an error alert
-          store.dispatch(addAlert(response))
-        }
-        else{
-          return response.json();
-        }
-      })
-      .then(data => {
-        if(data){
-          // let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
-          this.setState({
-            stores: data,
-          })
-        }
-        this.props.addStore(data);
+    fetch(fetchDomain + '/stores/users/' + this.props.match.params.user_id , {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    .then(function(response){
+      if(response.status!==200){
+        // throw an error alert
+        store.dispatch(addAlert(response))
+      }
+      else{
+        return response.json();
+      }
+    })
+    .then(data => {
+      if(data){
+        // let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+        this.setState({
+          stores: data,
+        })
+      }
+      this.props.addStore(data);
 
-      });
-    }
+    });
   }
 
   // {this.state.stores.map(store => (
@@ -154,7 +146,6 @@ class UserStoresDashboard extends React.Component {
   // ))}
 
   render() {
-    console.log(this.state.stores)
     return (
       <Container fluid style={{backgroundColor: '#bdcddb'}}>
         {this.state.stores.map((store, index) => (
