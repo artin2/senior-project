@@ -92,10 +92,9 @@ app.post('/stores/addService/:store_id', withAuth, async (req, res, next) => {
   await stores.addService(req, res, next);
 });
 
-app.post('/stores/:store_id/services/:item_id', withAuth, async (req, res, next) => {
-  // **still need to implement
+app.post('/stores/:store_id/services/:service_id', withAuth, async (req, res, next) => {
   console.log("hit the edit store service route")
-  await stores.editStoreService(req, res, next);
+  await stores.editService(req, res, next);
 });
 
 app.get('/stores/:store_id/services/:item_id', async (req, res, next) => {
