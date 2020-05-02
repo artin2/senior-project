@@ -60,7 +60,7 @@ app.post('/login', async (req, res) => {
   await users.login(req, res);
 });
 
-app.post('/users/:id', async (req, res, next) => {
+app.post('/users/:id', withAuth, async (req, res, next) => {
   console.log('hit the users.edit route')
   await users.edit(req, res, next);
 });
@@ -82,7 +82,7 @@ app.post('/checkTokenAndPermissions', withAuth, async(req, res, next) => {
     }
     else if(req.body.worker_id){
       let worker = await stores.getWorkerInfo(req.body.worker_id)
-      
+
       if(worker.user_id == req.body.user_id){
         res.sendStatus(200)
       }

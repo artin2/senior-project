@@ -194,6 +194,7 @@ class AddWorkerForm extends React.Component {
                 let store_id = this.props.match.params.store_id
                 let triggerWorkerDisplay = this.triggerWorkerDisplay
 
+                values.workerHours = this.state.workerHours
                 values.services = values.services.map(function (val) {
                   return val.value;
                 })

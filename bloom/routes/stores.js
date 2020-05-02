@@ -11,7 +11,6 @@ const geocoder = NodeGeocoder(options);
 
 async function getStore(req, res, next) {
   try {
-    // await auth.verifyToken(req, res, next);
     let storeId = req.params.store_id
     let query = 'SELECT * FROM stores WHERE id=' + storeId
 
@@ -46,7 +45,6 @@ async function getStore(req, res, next) {
 
 async function getStores(req, res, next) {
   try {
-    // await auth.verifyToken(req, res, next);
     let geocodeResult = await geocoder.geocode(req.query.address)
     let lat = geocodeResult[0].latitude
     let lng = geocodeResult[0].longitude
@@ -121,8 +119,6 @@ async function getStores(req, res, next) {
 
 async function getUserStores(req, res, next) {
   try {
-    await auth.verifyToken(req, res, next);
-
     // query for stores owned by the user
     let query = `SELECT *
                 FROM stores
@@ -158,7 +154,6 @@ async function editStore(req, res, next) {
   let store = null
   if (req.body.name && req.body.address && req.body.category && req.body.phone && req.body.services && req.body.owners && req.body.description && req.body.id) {
     try {
-      await auth.verifyToken(req, res, next);
       // should fix this later so it only does it when the address has changed
       let geocodeResult = await geocoder.geocode({ address: req.body.address })
       let lat = geocodeResult[0].latitude
@@ -243,7 +238,6 @@ async function addStore(req, res, next) {
   console.log("!!!! ENTER !!!!")
   if (req.body.name && req.body.address && req.body.category && req.body.phone && req.body.description && req.body.owner_id) {
     try {
-      await auth.verifyToken(req, res, next);
       console.log(req.body)
       let geocodeResult = await geocoder.geocode({ address: req.body.address })
       console.log(geocodeResult)
@@ -341,10 +335,6 @@ async function addStore(req, res, next) {
 async function addWorker(req, res, next) {
   let store_id = null
   try {
-    // lets verify that the user is logged in
-    // should add verification to check they are the store owner, maybe can do this in the front end though...
-    await auth.verifyToken(req, res, next);
-
     db.client.connect((err, client, done) => {
       // check to see if the user exists
       let query = 'SELECT * from users WHERE email = $1'
@@ -382,7 +372,7 @@ async function addWorker(req, res, next) {
                         // note, may want to update query to this...
                         query = 'UPDATE stores SET workers = array_append(workers, $1) WHERE id=$2 RETURNING *'
                         values = [resultFirst.rows[0].id, req.params.store_id]
-                        db.client.query(query, values, (errLast, resultLast) => {
+                        db.client.query(query, values, async (errLast, resultLast) => {
                           done()
                             if (errLast) {
                               helper.queryError(res, errLast);
@@ -392,37 +382,24 @@ async function addWorker(req, res, next) {
                               let workerHours = req.body.workerHours
                               // Below is for scoping issues. Res is undefined below
                               let resp = res
-                              let failed = false
                               let worker_id = resultFirst.rows[0].id
-                                ; (async (req, res) => {
-                                  const hourDb = await db.client.connect();
-                                  try {
-                                    await hourDb.query("BEGIN");
-                                    const query = 'INSERT INTO worker_hours(worker_id, day_of_the_week, start_time, end_time, store_id) VALUES ($1, $2, $3, $4, $5) RETURNING worker_id';
-                                    for (let i = 0; i < workerHours.length; i++) {
-                                      let workerHoursValues = [worker_id, i, workerHours[i].start_time, workerHours[i].end_time, store_id]
-                                      await hourDb.query(query, workerHoursValues);
-                                    }
-                                    await hourDb.query("COMMIT");
-                                  } catch (e) {
-                                    await hourDb.query("ROLLBACK");
-                                    console.log('##########Rolling Back#############')
-                                    failed = true
-                                    throw e;
-                                  } finally {
-                                    if (!failed) {
-                                      helper.querySuccess(resp, resultFirst.rows[0], "Successfully Added Worker!");
-                                    } else {
-                                      helper.queryError(resp, "Unable to add worker!");
-                                    }
-                                    hourDb.release();
-                                  }
-                                })().catch(e => helper.queryError(resp, e));
-                              if (!failed) {
-                                // ******this is not working at the moment, need to wait for both queries to finish before sending this message....
-                                helper.querySuccess(resp, resultFirst.rows[0], "Successfully Added Worker!");
-                              } else {
-                                helper.queryError(resp, "Unable to add worker!");
+                              try{
+                                console.log("before entering")
+                                console.log(workerHours)
+                                let failed = await addWorkerHours(workerHours, worker_id, req.params.store_id)
+                                console.log("after entering")
+
+                                if (!failed) {
+                                  // ******this is not working at the moment, need to wait for both queries to finish before sending this message....
+                                  console.log("usually stops working here")
+                                  helper.querySuccess(resp, resultFirst.rows[0], "Successfully Added Worker!");
+                                } else {
+                                  helper.queryError(resp, "Unable to add worker!");
+                                }
+                              }
+                              catch(err){
+                                console.log("Unable to add worker hours error:", err)
+                                helper.queryError(resp, "Unable to add worker hours!");
                               }
                             }
                             else {
@@ -462,13 +439,43 @@ async function addWorker(req, res, next) {
   }
 };
 
+async function addWorkerHours(workerHours, worker_id, store_id){
+  try {
+    console.log("inside!")
+    let failed = true
+    const hourDb = await db.client.connect();
+    console.log("connect")
+    try {
+      await hourDb.query("BEGIN");
+      console.log("began")
+      const query = 'INSERT INTO worker_hours(worker_id, day_of_the_week, start_time, end_time, store_id) VALUES ($1, $2, $3, $4, $5) RETURNING worker_id';
+      for (let i = 0; i < workerHours.length; i++) {
+        console.log("worker hour", i)
+        let workerHoursValues = [worker_id, i, workerHours[i].start_time, workerHours[i].end_time, store_id]
+        await hourDb.query(query, workerHoursValues);
+      }
+      await hourDb.query("COMMIT");
+      console.log("commit")
+      failed = false
+    } catch (e) {
+      await hourDb.query("ROLLBACK");
+      console.log('##########Rolling Back#############', e)
+      failed = true
+    } finally {
+      hourDb.release();
+    }
+    console.log("failed is", failed)
+    return failed
+  } catch (err) {
+    console.log("couldn't connect?", err)
+  }
+}
+
 async function editWorker(req, res, next) {
   let worker = null
   if (!req.body.noChange) {
     try {
-
       console.log("Body looks like: ", req.body)
-      await auth.verifyToken(req, res, next);
 
       let query = 'UPDATE workers SET first_name=$1, last_name=$2, services=$3 WHERE id=$4 RETURNING *'
       let values = [req.body.first_name, req.body.last_name, req.body.services, req.body.id]
@@ -558,10 +565,6 @@ async function editWorker(req, res, next) {
 // fails...
 async function addService(req, res, next) {
   try {
-    // lets verify that the user is logged in
-    // should add verification to check they are the store owner, maybe can do this in the front end though...
-    await auth.verifyToken(req, res, next);
-
     db.client.connect((err, client, done) => {
       // check to see if the user exists
       let query = 'INSERT INTO services(name, cost, workers, store_id, category, description, duration) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;'
@@ -622,199 +625,221 @@ async function addService(req, res, next) {
 };
 
 async function editService(req, res, next) {
-  db.client.connect((err, client, done) => {
-    let query = 'UPDATE services SET name=$1, cost=$2, workers=$3, category=$4, description=$5, duration=$6 WHERE id=$7 RETURNING *'
-    let values = [req.body.name, req.body.cost, req.body.workers, req.body.category, req.body.description, req.body.duration, req.params.service_id]
-
-    db.client.query(query, values, (errFirst, resultFirst) => {
-        if (errFirst) {
-          helper.queryError(res, errFirst);
-        }
-
-        // we were able to update the service
-        if (resultFirst && resultFirst.rows.length == 1) {
-          // update each workers services array
-          for (var i = 0; i < req.body.workers.length; i++) {
-            query = 'UPDATE workers SET services = array_append(services, $1) WHERE id=$2 RETURNING *'
-            values = [resultFirst.rows[0].id, req.body.workers[i]]
-            db.client.query(query, values, (errSecond, resultSecond) => {
-              done()
-                if (errSecond) {
-                  helper.queryError(res, errSecond);
+  try{
+    db.client.connect((err, client, done) => {
+      let query = 'UPDATE services SET name=$1, cost=$2, workers=$3, category=$4, description=$5, duration=$6 WHERE id=$7 RETURNING *'
+      let values = [req.body.name, req.body.cost, req.body.workers, req.body.category, req.body.description, req.body.duration, req.params.service_id]
+  
+      db.client.query(query, values, (errFirst, resultFirst) => {
+          if (errFirst) {
+            helper.queryError(res, errFirst);
+          }
+  
+          // we were able to update the service
+          if (resultFirst && resultFirst.rows.length == 1) {
+            // update each workers services array
+            for (var i = 0; i < req.body.workers.length; i++) {
+              query = 'UPDATE workers SET services = array_append(services, $1) WHERE id=$2 RETURNING *'
+              values = [resultFirst.rows[0].id, req.body.workers[i]]
+              db.client.query(query, values, (errSecond, resultSecond) => {
+                done()
+                  if (errSecond) {
+                    helper.queryError(res, errSecond);
+                  }
+                  // we were not able to update this worker's services
+                  if (!(resultSecond && resultSecond.rows.length == 1)) {
+                    helper.queryError(res, "Could not Update Worker's Services!");
+                  }
+                  else{
+                    helper.querySuccess(res, resultFirst.rows[0], "Successfully Updated Service!")
+                  }
                 }
-                // we were not able to update this worker's services
-                if (!(resultSecond && resultSecond.rows.length == 1)) {
-                  helper.queryError(res, "Could not Update Worker's Services!");
-                }
-                else{
-                  helper.querySuccess(res, resultFirst.rows[0], "Successfully Updated Service!")
-                }
-              }
-            )
+              )
+            }
+          }
+          else {
+            helper.queryError(res, "Could not Update Service!");
           }
         }
-        else {
-          helper.queryError(res, "Could not Update Service!");
-        }
+      );
+  
+      if (err) {
+        helper.dbConnError(res, err);
       }
-    );
-
-    if (err) {
-      helper.dbConnError(res, err);
-    }
-  });
+    });
+  }
+  catch(err){
+    helper.queryError(res, "Some sort of error!");
+  }
 };
 
 // Reusable worker/service functions
 // table is either workers or services
 async function getStoreItems(req, res, next, table) {
-  // query for stores within the given distance, and that have any of the categories checked by the client
-  let query = 'SELECT * FROM ' + table + ' WHERE store_id = $1'
+  try{
+    // query for stores within the given distance, and that have any of the categories checked by the client
+    let query = 'SELECT * FROM ' + table + ' WHERE store_id = $1'
 
-  let values = [req.params.store_id]
+    let values = [req.params.store_id]
 
-  db.client.connect((err, client, done) => {
-    // try to get all items registered to this store
-    db.client.query(query, values, (err, result) => {
-        done()
-        if (err) {
-          helper.queryError(res, err);
-        }
+    db.client.connect((err, client, done) => {
+      // try to get all items registered to this store
+      db.client.query(query, values, (err, result) => {
+          done()
+          if (err) {
+            helper.queryError(res, err);
+          }
 
-        // we were successfuly able to get the store items
-        if (result && result.rows.length > 0) {
-          helper.querySuccess(res, result.rows, "Successfully got Store Items!");
-        }
-        else {
-          helper.queryError(res, "No Store Items");
-        }
-      });
-    if (err) {
-      helper.dbConnError(res, err);
-    }
-  });
+          // we were successfuly able to get the store items
+          if (result && result.rows.length > 0) {
+            helper.querySuccess(res, result.rows, "Successfully got Store Items!");
+          }
+          else {
+            helper.queryError(res, "No Store Items");
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.queryError(res, "Some sort of error!");
+  }
+  
 };
 
 async function getStoreItem(req, res, next, table) {
-  // query for store item
-  let query = 'SELECT * FROM ' + table + ' WHERE id = $1'
-  let values = [req.params.item_id]
+  try{
+     // query for store item
+    let query = 'SELECT * FROM ' + table + ' WHERE id = $1'
+    let values = [req.params.item_id]
 
-  db.client.connect((err, client, done) => {
-    // try to get the store item based on id
-    db.client.query(query, values, (err, result) => {
-      done()
-        if (err) {
-          helper.queryError(res, err);
-        }
+    db.client.connect((err, client, done) => {
+      // try to get the store item based on id
+      db.client.query(query, values, (err, result) => {
+        done()
+          if (err) {
+            helper.queryError(res, err);
+          }
 
-        // we were successfuly able to get the store item
-        if (result && result.rows.length == 1) {
-          helper.querySuccess(res, result.rows[0], 'Sucessfully found store item!');
-        }
-        else {
-          helper.queryError(res, "Could not find Store Item!");
-        }
-      });
-    if (err) {
-      helper.dbConnError(res, err);
-    }
-  });
+          // we were successfuly able to get the store item
+          if (result && result.rows.length == 1) {
+            helper.querySuccess(res, result.rows[0], 'Sucessfully found store item!');
+          }
+          else {
+            helper.queryError(res, "Could not find Store Item!");
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.queryError(res, "Some sort of error!");
+  }
 };
 
 
 async function getWorkers(req, res, next) {
-  // query for store item
-  let query = 'SELECT first_name, last_name, id FROM workers WHERE store_id = $1'
-  let values = [req.params.store_id]
+  try{
+    // query for store item
+    let query = 'SELECT first_name, last_name, id FROM workers WHERE store_id = $1'
+    let values = [req.params.store_id]
 
-  db.client.connect((err, client, done) => {
-    // try to get the store item based on id
-    db.client.query(query, values, (err, result) => {
-      done()
-        if (err) {
-          helper.queryError(res, err);
-        }
-        console.log(result)
-        // we were successfuly able to get the store item
-        if (result && result.rows.length == 1) {
-          helper.querySuccess(res, result.rows, 'Sucessfully got workers!');
-        }
-        else {
-          // right now this is not working with the view worker page (because of calendar child component? not sure tho)
-          helper.queryError(res, "Could not find Worker!");
-        }
-      });
-    if (err) {
-      helper.dbConnError(res, err);
-    }
-  });
+    db.client.connect((err, client, done) => {
+      // try to get the store item based on id
+      db.client.query(query, values, (err, result) => {
+        done()
+          if (err) {
+            helper.queryError(res, err);
+          }
+          console.log(result)
+          // we were successfuly able to get the store item
+          if (result && result.rows.length == 1) {
+            helper.querySuccess(res, result.rows, 'Sucessfully got workers!');
+          }
+          else {
+            // right now this is not working with the view worker page (because of calendar child component? not sure tho)
+            helper.queryError(res, "Could not find Worker!");
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.queryError(res, "Some sort of error!");
+  }
 };
 
 async function getWorkersSchedules(req, res, next) {
-  console.log("about to get schedules for workers")
-  // console.log("body looks like: ", req)
+  try{
+    // add join to get worker ids from store id
+    let query = 'SELECT * FROM worker_hours WHERE store_id = $1'
+    let values = [req.params.store_id]
 
-  // add join to get worker ids from store id
-  let query = 'SELECT * FROM worker_hours WHERE store_id = $1'
-  let values = [req.params.store_id]
+    db.client.connect((err, client, done) => {
+      // try to get the store item based on id
+      db.client.query(query, values, (err, result) => {
+        done()
+          if (err) {
+            helper.queryError(res, err);
+          }
 
-  console.log("query looks like: ", query)
-  console.log("values looks like: ", values)
-  // console.log(req)
-
-  db.client.connect((err, client, done) => {
-    // try to get the store item based on id
-    db.client.query(query, values, (err, result) => {
-      done()
-        if (err) {
-          helper.queryError(res, err);
-        }
-
-        // we were successfuly able to get the store item
-        if (result && result.rows.length > 0) {
-          helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
-        }
-        else {
-          helper.queryError(res, new Error("Could not find worker schedules!"));
-        }
-      });
-    if (err) {
-      helper.dbConnError(res, err);
-    }
-  });
+          // we were successfuly able to get the store item
+          if (result && result.rows.length > 0) {
+            helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
+          }
+          else {
+            helper.queryError(res, "Could not find worker schedules!");
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.queryError(res, "Some sort of error!");
+  }
 };
 
 async function getIndividualWorkerHours(req, res, next) {
-  // query for store item
-  let query = 'SELECT start_time, end_time FROM worker_hours WHERE worker_id = $1'
-  let values = [req.params.worker_id]
+  try {
+    // query for store item
+    let query = 'SELECT start_time, end_time FROM worker_hours WHERE worker_id = $1 ORDER BY day_of_the_week'
+    let values = [req.params.worker_id]
 
-  console.log("getting worker hours with params", values)
+    db.client.connect((err, client, done) => {
+      // try to get the store item based on id
+      db.client.query(query, values, (err, result) => {
+        done()
+          if (err) {
+            helper.queryError(res, err);
+          }
 
-  db.client.connect((err, client, done) => {
-    // try to get the store item based on id
-    db.client.query(query, values, (err, result) => {
-      done()
-        if (err) {
-          helper.queryError(res, err);
-        }
-
-        // we were successfuly able to get the store item
-        if (result && result.rows.length > 0) {
-          helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
-        }
-        else if (result && result.rows.length == 0) {
-          helper.querySuccess(res, result.rows, 'No worker schedule');
-        }
-        else {
-          helper.queryError(res, new Error("Could not retrieve worker schedules!"));
-        }
-      });
-    if (err) {
-      helper.dbConnError(res, err);
-    }
-  });
+          // we were successfuly able to get the store item
+          if (result && result.rows.length > 0) {
+            helper.querySuccess(res, result.rows, 'Successfully got worker schedules!');
+          }
+          else if (result && result.rows.length == 0) {
+            helper.querySuccess(res, result.rows, 'No worker schedule');
+          }
+          else {
+            helper.queryError(res, "Could not retrieve worker schedules!");
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  } 
+  catch (err) {
+    helper.queryError(res, "Some sort of error!!");
+  }
 };
 
 async function getStoreHours(req, res, next) {
@@ -846,8 +871,6 @@ async function getStoreHours(req, res, next) {
 //Appointments
 async function getAppointmentsByMonth(req, res, next) {
   try {
-    await auth.verifyToken(req, res, next);
-
     // query for store appointments
     let query = 'SELECT worker_id, date, start_time, end_time, created_at FROM appointments WHERE store_id = $1 and EXTRACT(MONTH from date) = $2 ORDER BY date'
     let values = [req.params.store_id, req.params.month]
@@ -878,8 +901,6 @@ async function getAppointmentsByMonth(req, res, next) {
 
 async function getAllAppointments(req, res, next) {
   try {
-    await auth.verifyToken(req, res, next);
-
     console.log("---------getting apps")
     // query for store appointments
     let query = 'SELECT worker_id, date, start_time, end_time, service_id, title, price, date FROM appointments WHERE store_id = $1'
@@ -911,7 +932,6 @@ async function getAllAppointments(req, res, next) {
 
 async function addAppointment(req, res, next) {
   try {
-    await auth.verifyToken(req, res, next);
     // First, need to find what our appointment's group_id will be:
     let query = 'SELECT group_id FROM appointments ORDER BY group_id DESC LIMIT 1'
 

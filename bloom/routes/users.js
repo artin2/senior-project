@@ -107,7 +107,6 @@ async function signup(req, res) {
 
 async function edit(req, res, next) {
   try{
-    await auth.verifyToken(req, res, next);
     // should fix this later so it only changes values that did change
     try {
       hash = await auth.generateHash(req.body.password);
@@ -152,7 +151,7 @@ async function edit(req, res, next) {
     });
   }
   catch(err){
-    helper.authError(res, err);
+    helper.queryError(res, "Some sort of error!");
   }
 };
 
