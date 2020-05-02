@@ -254,8 +254,6 @@ async function addStore(req, res, next) {
       let values = [req.body.name, req.body.address, timestamp, req.body.category, req.body.phone, req.body.description, lat, lng, [0], [req.body.owner_id]]
       console.log("About to insert values: ", values)
       console.log('down here')
-      let owners = req.body.owner_id;
-      console.log(owners);
       // connect to the db
       db.client.connect((err, client, done) => {
         // try to add the store into the db
@@ -303,13 +301,8 @@ async function addStore(req, res, next) {
 
                       console.log("Updating the role of all of the users to store owners")
                       const query = 'UPDATE users SET role = $1 WHERE id = $2';
-
-                          owners.map(async (owner) => {
-                            console.log("starting with ", owner);
-                            let values = [1, owner];
-
-                            await hourDb.query(query, values);
-                      })
+                      // isn't the role of an owner 2?
+                      await hourDb.query(query, [1, request.body.owner_id]);
 
 
                     } else {
@@ -626,6 +619,50 @@ async function addService(req, res, next) {
   } catch (err) {
     helper.authError(res, err);
   }
+};
+
+async function editService(req, res, next) {
+  db.client.connect((err, client, done) => {
+    let query = 'UPDATE services SET name=$1, cost=$2, workers=$3, category=$4, description=$5, duration=$6 WHERE id=$7 RETURNING *'
+    let values = [req.body.name, req.body.cost, req.body.workers, req.body.category, req.body.description, req.body.duration, req.params.service_id]
+
+    db.client.query(query, values, (errFirst, resultFirst) => {
+        if (errFirst) {
+          helper.queryError(res, errFirst);
+        }
+
+        // we were able to update the service
+        if (resultFirst && resultFirst.rows.length == 1) {
+          // update each workers services array
+          for (var i = 0; i < req.body.workers.length; i++) {
+            query = 'UPDATE workers SET services = array_append(services, $1) WHERE id=$2 RETURNING *'
+            values = [resultFirst.rows[0].id, req.body.workers[i]]
+            db.client.query(query, values, (errSecond, resultSecond) => {
+              done()
+                if (errSecond) {
+                  helper.queryError(res, errSecond);
+                }
+                // we were not able to update this worker's services
+                if (!(resultSecond && resultSecond.rows.length == 1)) {
+                  helper.queryError(res, "Could not Update Worker's Services!");
+                }
+                else{
+                  helper.querySuccess(res, resultFirst.rows[0], "Successfully Updated Service!")
+                }
+              }
+            )
+          }
+        }
+        else {
+          helper.queryError(res, "Could not Update Service!");
+        }
+      }
+    );
+
+    if (err) {
+      helper.dbConnError(res, err);
+    }
+  });
 };
 
 // Reusable worker/service functions
@@ -962,6 +999,7 @@ module.exports = {
   getStoreItems: getStoreItems,
   getStoreItem: getStoreItem,
   addService: addService,
+  editService: editService,
   getWorkersSchedules: getWorkersSchedules,
   getWorkers: getWorkers,
   getStoreHours: getStoreHours,
