@@ -153,8 +153,10 @@ class AddServiceForm extends React.Component {
                 })
 
                 // upload to s3 from client to avoid burdening back end
-                let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
-                await uploadHandler(prefix, this.state.selectedFiles)
+                if(this.state.selectedFiles.length > 0){
+                  let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                  await uploadHandler(prefix, this.state.selectedFiles)
+                }
 
                 fetch(fetchDomain + '/stores/addService/' + store_id, {
                   method: "POST",

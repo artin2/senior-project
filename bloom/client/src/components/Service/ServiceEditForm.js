@@ -232,11 +232,15 @@ class ServiceEditForm extends React.Component {
                 })
 
                 // remove files from s3
-                await deleteHandler(this.state.keys)
+                if(this.state.keys.length > 0){
+                  await deleteHandler(this.state.keys)
+                }
 
                 // upload new images to s3 from client to avoid burdening back end
-                let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
-                await uploadHandler(prefix, this.state.selectedFiles)
+                if(this.state.selectedFiles.length > 0){
+                  let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                  await uploadHandler(prefix, this.state.selectedFiles)
+                }
 
                 // need to figure out this...
                 // values.workers = values.workers.map(function(val){ 

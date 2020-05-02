@@ -21,10 +21,7 @@ class StoreDisplay extends React.Component {
       store: {
         id: "",
         name: "",
-        street: "",
-        city: "",
-        state: "",
-        zipcode: "",
+        address: "",
         created_at: "",
         category: [],
         services: [],
@@ -131,7 +128,7 @@ class StoreDisplay extends React.Component {
         <Row className="justify-content-md-center" style={{ marginTop: '15px', marginBottom: '15px'}}>
           <Col lg={3}>
             <h1>{this.state.store.name}</h1>
-            <h5 style={{color: "gray"}}>{this.state.store.street}, {this.state.store.city}, {this.state.store.state}, {this.state.store.zipcode}</h5>
+            <h5 style={{color: "gray"}}>{this.state.store.address}</h5>
             <hr/>
             <p style={{fontSize: "25px"}}>{this.state.store.description}</p>
             <ul>

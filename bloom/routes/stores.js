@@ -156,15 +156,15 @@ async function getUserStores(req, res, next) {
 async function editStore(req, res, next) {
   let failed = false
   let store = null
-  if (req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.services && req.body.owners && req.body.description && req.body.id) {
+  if (req.body.name && req.body.address && req.body.category && req.body.phone && req.body.services && req.body.owners && req.body.description && req.body.id) {
     try {
       await auth.verifyToken(req, res, next);
       // should fix this later so it only does it when the address has changed
-      let geocodeResult = await geocoder.geocode({ address: req.body.street, city: req.body.city, state: req.body.state, zipcode: req.body.zipcode })
+      let geocodeResult = await geocoder.geocode({ address: req.body.address })
       let lat = geocodeResult[0].latitude
       let lng = geocodeResult[0].longitude
-      let query = 'UPDATE stores SET name=$1, street=$2, city=$3, state=$4, zipcode=$5, category=$6, phone=$7, services=$8, owners=$9, description=$10, lat=$11, lng=$12 WHERE id=$13 RETURNING *'
-      let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, req.body.category, req.body.phone, req.body.services, req.body.owners, req.body.description, lat, lng, req.body.id]
+      let query = 'UPDATE stores SET name=$1, address=$2, category=$3, phone=$4, services=$5, owners=$6, description=$7, lat=$8, lng=$9 WHERE id=$10 RETURNING *'
+      let values = [req.body.name, req.body.address, req.body.category, req.body.phone, req.body.services, req.body.owners, req.body.description, lat, lng, req.body.id]
 
       // connect to the db
       db.client.connect((err, client, done) => {
@@ -241,17 +241,17 @@ async function editStore(req, res, next) {
 
 async function addStore(req, res, next) {
   console.log("!!!! ENTER !!!!")
-  if (req.body.name && req.body.street && req.body.city && req.body.state && req.body.zipcode && req.body.category && req.body.phone && req.body.description && req.body.owner_id) {
+  if (req.body.name && req.body.address && req.body.category && req.body.phone && req.body.description && req.body.owner_id) {
     try {
       await auth.verifyToken(req, res, next);
       console.log(req.body)
-      let geocodeResult = await geocoder.geocode({ address: req.body.street, city: req.body.city, state: req.body.state, zipcode: req.body.zipcode })
+      let geocodeResult = await geocoder.geocode({ address: req.body.address })
       console.log(geocodeResult)
       let timestamp = helper.getFormattedDate();
       let lat = geocodeResult[0].latitude
       let lng = geocodeResult[0].longitude
-      let query = 'INSERT INTO stores(name, street, city, state, zipcode, created_at, category, phone, description, lat, lng, services, owners) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *;'
-      let values = [req.body.name, req.body.street, req.body.city, req.body.state, req.body.zipcode, timestamp, req.body.category, req.body.phone, req.body.description, lat, lng, [0], [req.body.owner_id]]
+      let query = 'INSERT INTO stores(name, address, created_at, category, phone, description, lat, lng, services, owners) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;'
+      let values = [req.body.name, req.body.address, timestamp, req.body.category, req.body.phone, req.body.description, lat, lng, [0], [req.body.owner_id]]
       console.log("About to insert values: ", values)
       console.log('down here')
       let owners = req.body.owner_id;

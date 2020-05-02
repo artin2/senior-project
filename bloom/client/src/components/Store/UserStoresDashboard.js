@@ -30,10 +30,7 @@ class UserStoresDashboard extends React.Component {
         {
           id: "",
           name: "",
-          street: "",
-          city: "",
-          state: "",
-          zipcode: "",
+          address: "",
           created_at: "",
           category: [],
           services: [],
@@ -163,7 +160,7 @@ class UserStoresDashboard extends React.Component {
                       <FaEdit className="edit mb-3" size={25} onClick={() => this.triggerStoreEdit(store)}/>
                     </Col>
                     <Col sm={12}>
-                      <p className="address">{store.street}, {store.city}, {store.state} </p>
+                      <p className="address">{store.address} </p>
                     </Col>
                     <Col sm={8} className={"py-1"}>
                       <Button block className="update_button"  onClick={() =>  this.triggerShowCalendar(store)}>Calendar</Button> &nbsp;

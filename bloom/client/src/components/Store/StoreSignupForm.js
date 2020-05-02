@@ -6,7 +6,7 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
-import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPhone } from 'react-icons/fa';
+import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPhone, FaMap } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Select from 'react-select';
@@ -43,6 +43,7 @@ class StoreSignupForm extends React.Component {
       { open_time: 540, close_time: 1020 },
       { open_time: 540, close_time: 1020 },
       { open_time: 540, close_time: 1020 }],
+      address: []
     }
 
     // options for store categories
@@ -74,36 +75,41 @@ class StoreSignupForm extends React.Component {
       phone: Yup.string()
         .matches(this.phoneRegExp, "Phone number is not valid")
         .required("Phone number is required"),
-      street: Yup.string()
-        .min(6, "Street must have at least 6 characters")
-        .max(100, "Street can't be longer than 100 characters")
-        .required("Street is required"),
-      city: Yup.string()
-        .min(2, "City must have at least 2 characters")
-        .max(40, "City can't be longer than 40 characters")
-        .required("City is required"),
-      state: Yup.string()
-        .min(2, "State must have at least 2 characters")
-        .max(12, "State can't be longer than 12 characters")
-        .required("State is required"),
-      zipcode: Yup.string()
-        .max(20, "Zipcode can't be longer than 100 characters")
-        .required("Zipcode is required"),
-
       // category: Yup.array()
       //   .required("Category is required")
-      //   .nullable()
-
-      // pictureCount: Yup.number()
-      // .required("Pictures are required")
-      // .min(1, "Must have at least one picture")
-
+      //   .nullable(),
+      address: Yup.string()
+        .required("Address is required"),
+      pictureCount: Yup.number()
+      .required("Pictures are required")
+      .min(1, "Must have at least one picture")
     });
+
+    this.autocomplete = null
+    this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
     this.onSelect = this.onSelect.bind(this);
     this.onRemove = this.onRemove.bind(this);
     this.shorterVersion = this.shorterVersion.bind(this);
+  }
+
+  componentDidMount() {
+    const google = window.google;
+    this.autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'), { })
+
+    this.autocomplete.addListener("place_changed", this.handlePlaceSelect)
+  }
+
+  handlePlaceSelect() {
+    let addressObject = this.autocomplete.getPlace()
+    let address = addressObject.address_components.map(function(elem){
+                      return elem.long_name;
+                  }).join(", ");
+
+    this.setState({
+      address: address
+    })
   }
 
   // redirect to the store display page and pass the new store data
@@ -218,10 +224,7 @@ class StoreSignupForm extends React.Component {
                 name: '',
                 description: '',
                 phone: '',
-                street: '',
-                city: '',
-                state: '',
-                zipcode: '',
+                address: '',
                 category: [],
                 owner_id: "",
                 pictureCount: this.state.selectedFiles.length,
@@ -229,8 +232,10 @@ class StoreSignupForm extends React.Component {
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
 
+                let shorterVersion = this.shorterVersion
+
                 values.category = this.state.selected.map(function (val) {
-                  return this.shorterVersion(val.name)
+                  return shorterVersion(val.name)
                 })
 
                 if(values.category.length == 0) {
@@ -241,8 +246,9 @@ class StoreSignupForm extends React.Component {
                   return;
                 }
 
-                values.owner_id = [JSON.parse(Cookies.get('user').substring(2)).id]
-                values.storeHours = this.state.storeHours;
+                values.owner_id = JSON.parse(Cookies.get('user').substring(2)).id
+                values.storeHours = this.state.storeHours
+                values.address = this.state.address
 
 
                 let triggerStoreDisplay = this.triggerStoreDisplay
@@ -268,7 +274,7 @@ class StoreSignupForm extends React.Component {
                   .then(async data => {
                     if (data) {
                       let prefix = 'stores/' + data.id + '/images/'
-                      if (this.state.selectedFiles) {
+                      if (this.state.selectedFiles.length > 0) {
                         await uploadHandler(prefix, this.state.selectedFiles)
                       }
                       this.props.updateRole(1)
@@ -352,86 +358,26 @@ class StoreSignupForm extends React.Component {
                       ) : null}
                     </Form.Group>
 
-                    <Form.Group controlId="formStreet">
+                    <Form.Group controlId="autocomplete">
                       <InputGroup>
                         <InputGroup.Prepend>
                           <InputGroup.Text>
-                            <FaRoad />
-                          </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control type="text"
-                          value={values.street}
-                          placeholder="Street"
-                          name="street"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          className={touched.street && errors.street ? "error" : null} />
-                      </InputGroup>
-                      {touched.street && errors.street ? (
-                        <div className="error-message">{errors.street}</div>
-                      ) : null}
-                    </Form.Group>
-
-                    <Form.Group controlId="formCity">
-                      <InputGroup>
-                        <InputGroup.Prepend>
-                          <InputGroup.Text>
-                            <FaBuilding />
-                          </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control type="text"
-                          value={values.city}
-                          placeholder="City"
-                          name="city"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          className={touched.city && errors.city ? "error" : null} />
-                      </InputGroup>
-                      {touched.city && errors.city ? (
-                        <div className="error-message">{errors.city}</div>
-                      ) : null}
-                    </Form.Group>
-
-                    <Form.Group controlId="formState">
-                      <InputGroup>
-                        <InputGroup.Prepend>
-                          <InputGroup.Text>
-                            <FaUniversity />
+                            <FaMap />
                           </InputGroup.Text>
                         </InputGroup.Prepend>
                         <Form.Control
-                          value={values.state}
-                          placeholder="State"
-                          name="state"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          className={touched.state && errors.state ? "error" : null} />
+                          type="text"
+                          placeholder="Address"
+                          autoComplete="new-password"
+                          onChange={event => setFieldValue("address", event.target.value)}
+                          className={touched.address && errors.address ? "error" : null}
+                        />
                       </InputGroup>
-                      {touched.state && errors.state ? (
-                        <div className="error-message">{errors.state}</div>
+                      {touched.address && errors.address ? (
+                        <div className="error-message">{errors.address}</div>
                       ) : null}
                     </Form.Group>
-
-                    <Form.Group controlId="formZipcode">
-                      <InputGroup>
-                        <InputGroup.Prepend>
-                          <InputGroup.Text>
-                            <FaGlobe />
-                          </InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <Form.Control
-                          value={values.zipcode}
-                          placeholder="Zipcode"
-                          name="zipcode"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          className={touched.zipcode && errors.zipcode ? "error" : null} />
-                      </InputGroup>
-                      {touched.zipcode && errors.zipcode ? (
-                        <div className="error-message">{errors.zipcode}</div>
-                      ) : null}
-                    </Form.Group>
-
+                    
                     <Form.Group controlId="formCategory">
                       <Multiselect
                         options={this.state.category}

@@ -7,7 +7,7 @@ import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
 import GridLoader from 'react-spinners/GridLoader'
-import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPhone } from 'react-icons/fa';
+import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPhone, FaMap } from 'react-icons/fa';
 import { Formik } from 'formik';
 import { css } from '@emotion/core'
 import * as Yup from 'yup';
@@ -18,6 +18,7 @@ import {
 import store from '../../reduxFolder/store';
 import { getPictures, deleteHandler, uploadHandler } from '../s3'
 import { Multiselect } from 'multiselect-react-dropdown';
+import { withRouter } from "react-router-dom";
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const override = css`
@@ -35,12 +36,17 @@ class StoreEditForm extends React.Component {
         description: "",
         phone: "",
         id: "",
-        street: "",
-        city: "",
-        state: "",
-        zipcode: ""
+        address: "",
+        category: []
       },
-      storeHours: [],
+      address: "",
+      storeHours: [{ open_time: 540, close_time: 1020 },
+      { open_time: 540, close_time: 1020 },
+      { open_time: 540, close_time: 1020 },
+      { open_time: 540, close_time: 1020 },
+      { open_time: 540, close_time: 1020 },
+      { open_time: 540, close_time: 1020 },
+      { open_time: 540, close_time: 1020 }],
       newHours: [],
       // selectedOption: [],
       loading: true,
@@ -74,35 +80,27 @@ class StoreEditForm extends React.Component {
       phone: Yup.string()
         .matches(this.phoneRegExp, "Phone number is not valid")
         .required("Phone number is required"),
-      street: Yup.string()
-        .min(6, "Street must have at least 6 characters")
-        .max(100, "Street can't be longer than 100 characters")
-        .required("Street is required"),
-      city: Yup.string()
-        .min(2, "City must have at least 2 characters")
-        .max(40, "City can't be longer than 40 characters")
-        .required("City is required"),
-      state: Yup.string()
-        .min(2, "State must have at least 2 characters")
-        .max(12, "State can't be longer than 12 characters")
-        .required("State is required"),
-      zipcode: Yup.string()
-        .max(20, "Zipcode can't be longer than 100 characters")
-        .required("Zipcode is required"),
-      // category: Yup.array()
-      //   .required("Category is required")
-      //   .nullable(),
+      address: Yup.string()
+        .required("Address is required"),
+      category: Yup.array()
+        .required("Category is required")
+        .nullable(),
         // image upload tag not working!! have no idea what it could be
       // pictureCount: Yup.number()
       //   .required("Pictures are required")
       //   .min(1, "Must have at least one picture")
     });
 
+    this.autocomplete = null
+    this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
+
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
     this.onSelect = this.onSelect.bind(this);
     this.onRemove = this.onRemove.bind(this);
     this.shorterVersion = this.shorterVersion.bind(this);
-    this.longerVersion = this.shorterVersion.bind(this);
+    this.longerVersion = this.longerVersion.bind(this);
+    this.triggerStoreDisplayNoResp = this.triggerStoreDisplayNoResp.bind(this);
+    this.autocompleteChange = this.autocompleteChange.bind(this)
   }
 
   onSelect(selectedList, selectedItem) {
@@ -124,6 +122,24 @@ class StoreEditForm extends React.Component {
 
   }
 
+  autocompleteChange(event, setFieldValue){
+    setFieldValue("address", event.target.value)
+    this.setState({
+      address: event.target.value
+    })
+  }
+
+  handlePlaceSelect() {
+    let addressObject = this.autocomplete.getPlace()
+    let address = addressObject.address_components.map(function(elem){
+                      return elem.long_name;
+                  }).join(", ");
+
+    this.setState({
+      address: address
+    })
+  }
+
   // redirect to the store display page and pass the new store data
   triggerStoreDisplay(returnedStore) {
     this.props.history.push({
@@ -131,6 +147,12 @@ class StoreEditForm extends React.Component {
       state: {
         store: returnedStore
       }
+    })
+  }
+
+  triggerStoreDisplayNoResp() {
+    this.props.history.push({
+      pathname: '/stores/' + this.props.match.params.store_id
     })
   }
 
@@ -301,6 +323,7 @@ class StoreEditForm extends React.Component {
         this.setState({
           store: this.props.location.state.store,
           selected: convertedCategory,
+          address: this.props.location.state.store.address,
           storeHours: data,
           loading: false
         })
@@ -332,28 +355,21 @@ class StoreEditForm extends React.Component {
         this.setState({
           store: response1,
           selected: convertedCategory,
+          address: response1.address,
           storeHours: response2,
           loading: false
         })
       })
     }
+
+    const google = window.google;
+    this.autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'), { })
+
+    this.autocomplete.addListener("place_changed", this.handlePlaceSelect)
   }
 
   render() {
-    const DisplayWithLoading = (props) => {
-      if (this.state.loading) {
-        return <Row className="vertical-center">
-            <Col>
-              <GridLoader
-                css={override}
-                size={20}
-                color={"#2196f3"}
-                loading={this.state.isLoading}
-              />
-            </Col>
-          </Row>
-      } else {
-        return <Row className="justify-content-center">
+        return <Row className="justify-content-center" id="test">
         <Col xs={8} sm={7} md={6} lg={5}>
           <Formik
             enableReinitialize
@@ -361,10 +377,7 @@ class StoreEditForm extends React.Component {
               name: this.state.store.name,
               description: this.state.store.description,
               phone: this.state.store.phone,
-              street: this.state.store.street,
-              city: this.state.store.city,
-              state: this.state.store.state,
-              zipcode: this.state.store.zipcode,
+              address: this.state.store.address,
               category: this.state.selected,
               services: null,
               owners: null,
@@ -374,8 +387,10 @@ class StoreEditForm extends React.Component {
             }}
             validationSchema={this.yupValidationSchema}
             onSubmit={async (values) => {
+              let shorterVersion = this.shorterVersion
+
               values.category = this.state.selected.map(function (val) {
-                return this.shorterVersion(val.name)
+                return shorterVersion(val.name)
               })
 
               if(values.category.length == 0) {
@@ -388,18 +403,24 @@ class StoreEditForm extends React.Component {
 
                 let store_id = this.props.match.params.store_id
                 let triggerStoreDisplay = this.triggerStoreDisplay
+                let triggerStoreDisplayNoResp = this.triggerStoreDisplayNoResp
 
                 values.services = this.state.store.services
                 values.owners = this.state.store.owners
                 values.id = store_id
                 values.storeHours = this.state.newHours
+                values.address = this.state.address
 
                 // remove files from s3
-                await deleteHandler(this.state.keys)
+                if(this.state.keys.length > 0){
+                  await deleteHandler(this.state.keys)
+                }
 
                 // upload new images to s3 from client to avoid burdening back end
-                let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
-                await uploadHandler(prefix, this.state.selectedFiles)
+                if(this.state.selectedFiles.length > 0){
+                  let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                  await uploadHandler(prefix, this.state.selectedFiles)
+                }
 
                 fetch(fetchDomain + '/stores/edit/' + store_id , {
                   method: "POST",
@@ -421,6 +442,10 @@ class StoreEditForm extends React.Component {
                 .then(data => {
                   if(data){
                     triggerStoreDisplay(data)
+                  }
+                  else{
+                    console.log("should not be here, but going to redirect until this is fixed")
+                    this.triggerStoreDisplayNoResp()
                   }
                 });
             }}
@@ -498,85 +523,26 @@ class StoreEditForm extends React.Component {
                     ) : null}
                   </Form.Group>
 
-                  <Form.Group controlId="formStreet">
-                    <InputGroup>
-                      <InputGroup.Prepend>
-                        <InputGroup.Text>
-                          <FaRoad />
-                        </InputGroup.Text>
-                      </InputGroup.Prepend>
-                      <Form.Control type="text"
-                        value={values.street}
-                        placeholder="Street"
-                        name="street"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className={touched.street && errors.street ? "error" : null} />
-                    </InputGroup>
-                    {touched.street && errors.street ? (
-                      <div className="error-message">{errors.street}</div>
-                    ) : null}
-                  </Form.Group>
-
-                  <Form.Group controlId="formCity">
-                    <InputGroup>
-                      <InputGroup.Prepend>
-                        <InputGroup.Text>
-                          <FaBuilding />
-                        </InputGroup.Text>
-                      </InputGroup.Prepend>
-                      <Form.Control type="text"
-                        value={values.city}
-                        placeholder="City"
-                        name="city"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className={touched.city && errors.city ? "error" : null} />
-                    </InputGroup>
-                    {touched.city && errors.city ? (
-                      <div className="error-message">{errors.city}</div>
-                    ) : null}
-                  </Form.Group>
-
-                  <Form.Group controlId="formState">
-                    <InputGroup>
-                      <InputGroup.Prepend>
-                        <InputGroup.Text>
-                          <FaUniversity />
-                        </InputGroup.Text>
-                      </InputGroup.Prepend>
-                      <Form.Control
-                        value={values.state}
-                        placeholder="State"
-                        name="state"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className={touched.state && errors.state ? "error" : null} />
-                    </InputGroup>
-                    {touched.state && errors.state ? (
-                      <div className="error-message">{errors.state}</div>
-                    ) : null}
-                  </Form.Group>
-
-                  <Form.Group controlId="formZipcode">
-                    <InputGroup>
-                      <InputGroup.Prepend>
-                        <InputGroup.Text>
-                          <FaGlobe />
-                        </InputGroup.Text>
-                      </InputGroup.Prepend>
-                      <Form.Control
-                        value={values.zipcode}
-                        placeholder="Zipcode"
-                        name="zipcode"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className={touched.zipcode && errors.zipcode ? "error" : null} />
-                    </InputGroup>
-                    {touched.zipcode && errors.zipcode ? (
-                      <div className="error-message">{errors.zipcode}</div>
-                    ) : null}
-                  </Form.Group>
+                  <Form.Group controlId="autocomplete">
+                      <InputGroup>
+                        <InputGroup.Prepend>
+                          <InputGroup.Text>
+                            <FaMap />
+                          </InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <Form.Control
+                          type="text"
+                          placeholder="Address"
+                          autoComplete="new-password"
+                          onChange={event => this.autocompleteChange(event, setFieldValue) }
+                          className={touched.address && errors.address ? "error" : null}
+                          value={this.state.address}
+                        />
+                      </InputGroup>
+                      {touched.address && errors.address ? (
+                        <div className="error-message">{errors.address}</div>
+                      ) : null}
+                    </Form.Group>
 
                   <Form.Group controlId="category">
 
@@ -914,12 +880,4 @@ class StoreEditForm extends React.Component {
       }
     }
 
-    return (
-      <Container fluid>
-        <DisplayWithLoading/>
-      </Container>
-    );
-  }
-}
-
-export default StoreEditForm;
+export default withRouter(StoreEditForm);
