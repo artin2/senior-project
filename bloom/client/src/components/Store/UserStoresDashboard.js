@@ -16,8 +16,9 @@ import {
 import store from '../../reduxFolder/store';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import {addStore} from '../../reduxFolder/actions/stores.js'
+// import {addStore} from '../../reduxFolder/actions/stores.js'
 import UserStoresDashboardLoader from './UserStoresDashboardLoader';
+import { getPictures } from '../s3'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 // ***** NOTE: fix to properly display all the stores
@@ -117,16 +118,58 @@ class UserStoresDashboard extends React.Component {
         return response.json();
       }
     })
-    .then(data => {
+    .then(async data => {
       if(data){
         // let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+
+        var appendedStores = await Promise.all(data.map(async (store): Promise<Object> => {
+          let pictures = await getPictures('stores/' + store.id + '/images/')
+
+          // once all data is clean and picture requirement is enforced we can remove this
+          if(pictures.length == 0){
+            pictures = [
+              {
+                url: "/hair.jpg",
+                key: "/hair.jpg"
+              },
+              {
+                url: "/nails.jpg",
+                key: "/nails.jpg"
+              },
+              {
+                url: "/salon.jpg",
+                key: "/salon.jpg"
+              }
+            ]
+          }
+
+          // we can use this for now to avoid s3 fetches
+          // let pictures = [
+          //     {
+          //       url: "/hair.jpg",
+          //       key: "/hair.jpg"
+          //     },
+          //     {
+          //       url: "/nails.jpg",
+          //       key: "/nails.jpg"
+          //     },
+          //     {
+          //       url: "/salon.jpg",
+          //       key: "/salon.jpg"
+          //     }
+          //   ]
+
+          var newstore = Object.assign({}, store);
+          newstore.pictures = pictures;
+          return newstore;
+        }));
+
         this.setState({
-          stores: data,
+          stores: appendedStores,
           loading: false
         })
       }
-      this.props.addStore(data);
-
+      // this.props.addStore(data);
     });
   }
 
@@ -145,12 +188,12 @@ class UserStoresDashboard extends React.Component {
               <Row className="justify-content-center align-content-center my-5">
                 <Col md={6} className="vertical-align-contents">
                   <Carousel className="dashboard-carousel" interval="">
-                      <Carousel.Item>
-                        <Image fluid src={salon2} alt="test"/>
+                    {store.pictures.map((picture, index) => (
+                      <Carousel.Item key={"pic-" + index}>
+                        <Image fluid src={picture.url} alt={"alt-" + index}/>
+                        <img style={this.props.img} src={picture.url} alt={"Slide " + index} />
                       </Carousel.Item>
-                      <Carousel.Item >
-                        <Image fluid src={hair} alt="test2"/>
-                      </Carousel.Item>
+                    ))}
                   </Carousel>
                 </Col>
                 <Col md={5} className="vertical-align-contents">
@@ -189,13 +232,13 @@ class UserStoresDashboard extends React.Component {
 
 
 const mapStateToProps = state => ({
-  stores: state.storeReducer.stores,
+  // stores: state.storeReducer.stores,
   user: state.userReducer.user
 })
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-  addStore: (store) => addStore(store),
-}, dispatch)
+// const mapDispatchToProps = dispatch => bindActionCreators({
+//   addStore: (store) => addStore(store),
+// }, dispatch)
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserStoresDashboard);
+export default connect(mapStateToProps/*, mapDispatchToProps*/)(UserStoresDashboard);

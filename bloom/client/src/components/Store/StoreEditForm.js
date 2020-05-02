@@ -85,10 +85,9 @@ class StoreEditForm extends React.Component {
       category: Yup.array()
         .required("Category is required")
         .nullable(),
-        // image upload tag not working!! have no idea what it could be
-      // pictureCount: Yup.number()
-      //   .required("Pictures are required")
-      //   .min(1, "Must have at least one picture")
+      pictureCount: Yup.number()
+        .required("Pictures are required")
+        .min(1, "Must have at least one picture")
     });
 
     this.autocomplete = null
@@ -418,7 +417,7 @@ class StoreEditForm extends React.Component {
 
                 // upload new images to s3 from client to avoid burdening back end
                 if(this.state.selectedFiles.length > 0){
-                  let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                  let prefix = 'stores/' + this.props.match.params.store_id + '/images/'
                   await uploadHandler(prefix, this.state.selectedFiles)
                 }
 

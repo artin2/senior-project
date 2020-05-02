@@ -3,7 +3,6 @@ import LargeCarousel from '../LargeCarousel';
 import Card from 'react-bootstrap/Card'
 import { Button, Carousel, Image, Col } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row'
-// import { getPictures } from '../s3'
 
 class SearchCard extends React.Component {
   constructor(props) {
@@ -13,31 +12,6 @@ class SearchCard extends React.Component {
     }
   }
 
-  async componentDidMount() {
-    // let picturesFetched = await getPictures('stores/' + this.props.store.id + '/images/')
-    // this.setState({
-    //   pictures: picturesFetched
-    // })
-
-    // can put this for now so we don't have to upload to s3
-    this.setState({
-      pictures: [
-        {
-          url: "/hair.jpg",
-          key: "/hair.jpg"
-        },
-        {
-          url: "/nails.jpg",
-          key: "/nails.jpg"
-        },
-        {
-          url: "/salon.jpg",
-          key: "/salon.jpg"
-        }
-      ]
-    })
-  }
-
   render() {
     return (
       <Col xs={12} className="my-3 px-0 h-100">
@@ -45,7 +19,7 @@ class SearchCard extends React.Component {
           <Row style={{height: '100%'}}>
             <Col md={6} className="vertical-align-contents px-0 h-100 w-100">
               <Carousel interval="">
-                {this.state.pictures.map((picture, index) => (
+                {this.props.store.pictures.map((picture, index) => (
                   <Carousel.Item key={"pic-" + index}>
                     <Image fluid src={picture.url} alt={"Slide " + index} />
                   </Carousel.Item>

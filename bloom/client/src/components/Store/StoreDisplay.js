@@ -11,7 +11,7 @@ import {
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import './StoreDisplay.css'
-// import { getPictures } from '../s3'
+import { getPictures } from '../s3'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class StoreDisplay extends React.Component {
@@ -29,6 +29,7 @@ class StoreDisplay extends React.Component {
         owners: [],
         phone: "",
         clients: [],
+        pictures: [],
         description: "",
         lat: "",
         lng: ""
@@ -51,12 +52,33 @@ class StoreDisplay extends React.Component {
     })
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     // if we were passed the store data from calling component
+    let pictures = await getPictures('stores/' + this.props.match.params.store_id + '/images/')
+    if(pictures.length == 0){
+      pictures = [
+        {
+          url: "/hair.jpg",
+          key: "/hair.jpg"
+        },
+        {
+          url: "/nails.jpg",
+          key: "/nails.jpg"
+        },
+        {
+          url: "/salon.jpg",
+          key: "/salon.jpg"
+        }
+      ]
+    }
+
     if(this.props.location.state && this.props.location.state.store){
       let convertedCategory = this.props.location.state.store.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+      let appendedStore = this.props.location.state.store
+      appendedStore.pictures = pictures
+
       this.setState({
-        store: this.props.location.state.store,
+        store: appendedStore,
         selectedOption: convertedCategory
       })
     }
@@ -81,39 +103,14 @@ class StoreDisplay extends React.Component {
       .then(data => {
         if(data){
           let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
+          data.pictures = pictures
+
           this.setState({
             store: data,
             selectedOption: convertedCategory
           })
         }
       });
-    }
-  }
-
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevState.store !== this.state.store) {
-      // let picturesFetched = await getPictures('stores/' + this.state.store.id + '/images/')
-      // this.setState({
-      //   pictures: picturesFetched
-      // })
-      
-      // can put this for now so we don't have to upload to s3
-      this.setState({
-        pictures: [
-          { 
-            url: "/hair.jpg",
-            key: "/hair.jpg"
-          },
-          {
-            url: "/nails.jpg",
-            key: "/nails.jpg"
-          },
-          {
-            url: "/salon.jpg",
-            key: "/salon.jpg"
-          }
-        ]
-      })
     }
   }
 
@@ -142,7 +139,7 @@ class StoreDisplay extends React.Component {
             </div>
           </Col>
           <Col xs={10} sm={9} md={8} lg={7}>
-            <LargeCarousel className="carousel" pictures={this.state.pictures}/>
+            <LargeCarousel className="carousel" pictures={this.state.store.pictures}/>
           </Col>
         </Row>
         <Row>

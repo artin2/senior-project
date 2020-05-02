@@ -36,7 +36,7 @@ class AdvancedSearch extends React.Component {
     this.redirect = false
 
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
-    // this.handleChange = this.handleChange.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.onSelect = this.onSelect.bind(this);
     this.onRemove = this.onRemove.bind(this);
@@ -147,14 +147,11 @@ class AdvancedSearch extends React.Component {
     })
   }
 
-  // handleChange(event) {
-  //   if (event.target.type === "checkbox") {
-  //     this.setState({[event.target.id]: !this.state[event.target.id]})
-  //   }
-  //   else{
-  //     this.setState({[event.target.id]: parseInt(event.target.value) || event.target.value});
-  //   }
-  // }
+  handleChange(event) {
+    this.setState({
+      distance: parseInt(event.target.value.split(" ")[0])
+    })
+  }
 
   handleSubmit(event) {
     // for some reason doesn't work without this..

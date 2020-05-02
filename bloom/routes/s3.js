@@ -53,33 +53,35 @@ async function getImages(req, res) {
     })
   }
 
-  // async.eachLimit(pictures, 10, function(picture, next) { 
-  //   var params = {
-  //       Bucket: process.env.AWSBucket, // bucket name
-  //       Key: picture.Key
-  //   };
-  //   s3.getObject(params, function(err, data) {
-  //       if (err) {
-  //           console.log('get image files err',err, err.stack); // an error occurred
-
-  //       } else {
-  //           zip.file(pictures.indexOf(picture) + picture.name, data.Body);
-  //           next();
-  //       }
-  //   });
-  // }, function(err) {
-  //     if (err) {
-  //         console.log('err', err);
-
-  //     } else {
-  //         content = zip.generate({
-  //             type: 'nodebuffer'
-  //         });
-  //         console.log(content)
-  //     }
-  // });
-
   helper.querySuccess(res, signedUrls, "Successfuly got pictures")
+}
+
+async function getImagesLocal(prefix) {
+  const s3 = new aws.S3({
+    region: process.env.AWSRegion,
+    accessKeyId: process.env.AWSAccessKey,
+    secretAccessKey: process.env.AWSSecretKey
+  });  // Create a new instance of S3
+
+  let pictures = await s3.listObjectsV2({
+    Bucket: process.env.AWSBucket,
+    Prefix: prefix
+  }).promise()
+
+  let signedUrls = []
+  for (let i = 0; i < pictures.Contents.length; i++) {
+    var params = {
+      Bucket: process.env.AWSBucket, // bucket name
+      Key: pictures.Contents[i].Key
+    };
+    var signedUrl = await getSignedUrl(s3, params)
+    signedUrls.push({
+      key: pictures.Contents[i].Key,
+      url: signedUrl
+    })
+  }
+
+  return signedUrls
 }
 
 async function deleteImages(req, res) {
@@ -132,5 +134,6 @@ async function getSignedUrl(s3, params){
 module.exports = {
   getPresignedUploadUrl: getPresignedUploadUrl,
   getImages: getImages,
+  getImagesLocal: getImagesLocal,
   deleteImages: deleteImages
 };

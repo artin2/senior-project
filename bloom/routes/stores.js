@@ -1,6 +1,7 @@
 const helper = require('../helper.js')
 const db = require('../db.js');
 const auth = require('../auth.js');
+const s3 = require('./s3.js')
 
 const NodeGeocoder = require('node-geocoder');
 const options = {
@@ -81,18 +82,18 @@ async function getStores(req, res, next) {
       }
     }
 
-    console.log(categoryQuery);
+    console.log(lat, lng, distance, categoryQuery);
 
     // query for stores within the given distance, and that have any of the categories checked by the client
     let query = `SELECT *, ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) ) AS distance
                 FROM stores
                 WHERE ( 3959 * acos( cos( radians(` + lat + `) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(` + lng + `) ) + sin( radians(` + lat + `) ) * sin( radians( lat ) ) ) )
-                  < ` + distance + ` AND category && ` + categoryQuery + `
+                  < ` + distance + ` AND services IS NOT NULL AND category && ` + categoryQuery + `
                 ORDER BY distance;`
 
     db.client.connect((err, client, done) => {
       // try to get search results
-      db.client.query(query, (err, result) => {
+      db.client.query(query, async (err, result) => {
         done()
           if (err) {
             helper.queryError(res, err);
@@ -100,7 +101,10 @@ async function getStores(req, res, next) {
 
           // we were able to get search results
           if (result && result.rows.length > 0) {
-            console.log("====", result.rows)
+            for (let i = 0; i < result.rows.length; i++) {
+              let pictures = await s3.getImagesLocal('stores/' + result.rows[i].id + '/images/')
+              result.rows[i].pictures = pictures
+            }
             helper.querySuccess(res, result.rows, "Successfully got Search Results!");
           }
           else {
@@ -244,8 +248,8 @@ async function addStore(req, res, next) {
       let timestamp = helper.getFormattedDate();
       let lat = geocodeResult[0].latitude
       let lng = geocodeResult[0].longitude
-      let query = 'INSERT INTO stores(name, address, created_at, category, phone, description, lat, lng, services, owners) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;'
-      let values = [req.body.name, req.body.address, timestamp, req.body.category, req.body.phone, req.body.description, lat, lng, [0], [req.body.owner_id]]
+      let query = 'INSERT INTO stores(name, address, created_at, category, phone, description, lat, lng, owners) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;'
+      let values = [req.body.name, req.body.address, timestamp, req.body.category, req.body.phone, req.body.description, lat, lng, [req.body.owner_id]]
       console.log("About to insert values: ", values)
       console.log('down here')
       // connect to the db
