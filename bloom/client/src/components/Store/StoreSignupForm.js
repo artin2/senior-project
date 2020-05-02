@@ -31,10 +31,11 @@ class StoreSignupForm extends React.Component {
     super(props);
 
     this.state = {
+
       category: helper.getCategories(),
       categoryError: false,
       selected: [],
-      selectedFiles: null,
+      selectedFiles: [],
       storeHours: [{ open_time: 540, close_time: 1020 },
       { open_time: 540, close_time: 1020 },
       { open_time: 540, close_time: 1020 },
@@ -88,9 +89,15 @@ class StoreSignupForm extends React.Component {
       zipcode: Yup.string()
         .max(20, "Zipcode can't be longer than 100 characters")
         .required("Zipcode is required"),
+
       // category: Yup.array()
       //   .required("Category is required")
       //   .nullable()
+
+      // pictureCount: Yup.number()
+      // .required("Pictures are required")
+      // .min(1, "Must have at least one picture")
+
     });
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
@@ -178,7 +185,8 @@ class StoreSignupForm extends React.Component {
     })
   };
 
-  fileChangedHandler = event => {
+  fileChangedHandler = (event, setFieldValue) => {
+    setFieldValue('pictureCount', event.target.files.length)
     this.setState({ selectedFiles: event.target.files })
   }
 
@@ -197,7 +205,8 @@ class StoreSignupForm extends React.Component {
                 state: '',
                 zipcode: '',
                 category: [],
-                owner_id: ""
+                owner_id: "",
+                pictureCount: this.state.selectedFiles.length,
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
@@ -713,17 +722,20 @@ class StoreSignupForm extends React.Component {
                       </Form.Row>
                     </Form.Group>
 
-                    <Form.Group controlId="formPictures">
+                    <Form.Group controlId="formPictureCount">
                       <input
-                        onChange={this.fileChangedHandler}
+                        onChange={event => this.fileChangedHandler(event, setFieldValue)}
                         type="file"
                         multiple
-                        className={touched.pictures && errors.pictures ? "error" : null}
+                        className={touched.pictureCount && errors.pictureCount ? "error" : null}
                       />
-                      {touched.pictures && errors.pictures ? (
+                      {touched.pictureCount && errors.pictureCount ? (
                         <div className="error-message">{errors.pictures}</div>
                       ) : null}
                     </Form.Group>
+                    {touched.pictureCount && errors.pictureCount ? (
+                      <div className="error-message">{errors.pictureCount}</div>
+                    ): null}
 
                     <Button onClick={handleSubmit}>Submit</Button>
                   </Form>

@@ -14,7 +14,7 @@ import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
-// import { uploadHandler } from '../s3';
+import { uploadHandler } from '../s3';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class AddServiceForm extends React.Component {
@@ -34,7 +34,7 @@ class AddServiceForm extends React.Component {
       ],
       workerOptions: [],
       selectedOption: null,
-      selectedFiles: null
+      selectedFiles: []
     };
 
     // Schema for yup
@@ -59,10 +59,10 @@ class AddServiceForm extends React.Component {
       .nullable(),
       category: Yup.array()
       .required("Category is required")
-      .nullable()
-      // pictures: Yup.array()
-      // .required("Picture is required")
-      // .nullable()
+      .nullable(),
+      pictureCount: Yup.number()
+      .required("Pictures are required")
+      .min(1, "Must have at least one picture")
     });
 
     this.triggerServiceDisplay = this.triggerServiceDisplay.bind(this);
@@ -116,7 +116,8 @@ class AddServiceForm extends React.Component {
   }
 
 
-  fileChangedHandler = event => {
+  fileChangedHandler = (event, setFieldValue) => {
+    setFieldValue('pictureCount', event.target.files.length)
     this.setState({ selectedFiles: event.target.files })
   }
     
@@ -135,7 +136,8 @@ class AddServiceForm extends React.Component {
                 pictures: [],
                 workers: [],
                 category: [],
-                store_id: this.props.match.params.store_id
+                store_id: this.props.match.params.store_id,
+                pictureCount: this.state.selectedFiles.length
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={async (values, {setSubmitting }) => {
@@ -151,8 +153,8 @@ class AddServiceForm extends React.Component {
                 })
 
                 // upload to s3 from client to avoid burdening back end
-                // let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
-                // await uploadHandler(prefix, this.state.selectedFiles)
+                let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                await uploadHandler(prefix, this.state.selectedFiles)
 
                 fetch(fetchDomain + '/stores/addService/' + store_id, {
                   method: "POST",
@@ -303,15 +305,15 @@ class AddServiceForm extends React.Component {
                   ): null}
                 </Form.Group>
 
-                <Form.Group controlId="formPictures">
+                <Form.Group controlId="formPictureCount">
                   <input 
-                    onChange={this.fileChangedHandler}
+                    onChange={event => this.fileChangedHandler(event, setFieldValue)}
                     type="file"
                     multiple
-                    className={touched.pictures && errors.pictures ? "error" : null}
+                    className={touched.pictureCount && errors.pictureCount ? "error" : null}
                   />
-                  {touched.pictures && errors.pictures ? (
-                    <div className="error-message">{errors.pictures}</div>
+                  {touched.pictureCount && errors.pictureCount ? (
+                    <div className="error-message">{errors.pictureCount}</div>
                   ): null}
                 </Form.Group>
 
