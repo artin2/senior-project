@@ -45,14 +45,12 @@ class AddServiceForm extends React.Component {
       .required("Name is required"),
       description: Yup.string()
       .min(20, "Description must have at least 20 characters")
-      .required("Description is required"), // will make it required soon,
+      .required("Description is required"),
       cost: Yup.number()
       .positive("Cost must be positive")
-      // .integer()
       .required("Cost is required"),
       duration: Yup.number()
       .positive("Duration must be positive")
-      .integer("Duration must be an integer")
       .required("Duration is required"),
       workers: Yup.array()
       .required("Worker is required")
@@ -142,6 +140,7 @@ class AddServiceForm extends React.Component {
               validationSchema={this.yupValidationSchema}
               onSubmit={async (values, {setSubmitting }) => {
                 let store_id = this.props.match.params.store_id
+                let selectedFiles = this.state.selectedFiles
                 let triggerServiceDisplay = this.triggerServiceDisplay
 
                 values.category = values.category.map(function(val){ 
@@ -151,12 +150,6 @@ class AddServiceForm extends React.Component {
                 values.workers = values.workers.map(function(val){ 
                   return val.value; 
                 })
-
-                // upload to s3 from client to avoid burdening back end
-                if(this.state.selectedFiles.length > 0){
-                  let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
-                  await uploadHandler(prefix, this.state.selectedFiles)
-                }
 
                 fetch(fetchDomain + '/stores/addService/' + store_id, {
                   method: "POST",
@@ -174,9 +167,14 @@ class AddServiceForm extends React.Component {
                     return response.json();
                   }
                 })
-                .then(function(data){
+                .then(async function(data){
                   // redirect to home page signed in
                   if(data){
+                    // upload to s3 from client to avoid burdening back end
+                  if(this.state.selectedFiles.length > 0){
+                    let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + data.id + '/'
+                    await uploadHandler(prefix, selectedFiles)
+                  }
                     triggerServiceDisplay(data)
                   }
                 })
@@ -221,7 +219,7 @@ class AddServiceForm extends React.Component {
                             <FaDollarSign/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control type="text" 
+                    <Form.Control type="number" 
                     value={values.cost}
                     placeholder="Cost" 
                     name="cost" 
@@ -242,7 +240,7 @@ class AddServiceForm extends React.Component {
                         </InputGroup.Text>
                     </InputGroup.Prepend>
                     <Form.Control 
-                      type="text"
+                      type="number"
                       value={values.duration}
                       placeholder="Duration (in min)" 
                       name="duration" 

@@ -7,7 +7,7 @@ import Col from 'react-bootstrap/Col'
 // } from '../../reduxFolder/actions'
 // import store from '../../reduxFolder/store';
 import LargeCarousel from '../LargeCarousel';
-// import { getPictures } from '../s3'
+import { getPictures } from '../s3'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class ServiceDisplay extends React.Component {
@@ -27,40 +27,46 @@ class ServiceDisplay extends React.Component {
     }
   }
 
-  async componentDidUpdate(prevProps, prevState) {
-    // if (prevState.service !== this.state.service) {
-    //   let picturesFetched = await getPictures('stores/' + this.state.service.store_id + '/services/' + this.state.service.name + '/')
-    //   this.setState({
-    //     pictures: picturesFetched
-    //   })
-    // }
+  async componentDidMount(): Promise<void> {
+    let picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id + '/')
+
+    // should remove when data is stable
+    if(picturesFetched.length == 0){
+      picturesFetched = [{ 
+        url: "/hair.jpg",
+        key: "/hair.jpg"
+      },
+      {
+        url: "/nails.jpg",
+        key: "/nails.jpg"
+      },
+      {
+        url: "/salon.jpg",
+        key: "/salon.jpg"
+      }
+    ]
+    }
 
     // can put this for now so we don't have to upload to s3
-    if(prevState.service !== this.state.service){
-      this.setState({
-        pictures: [
-          { 
-            url: "/hair.jpg",
-            key: "/hair.jpg"
-          },
-          {
-            url: "/nails.jpg",
-            key: "/nails.jpg"
-          },
-          {
-            url: "/salon.jpg",
-            key: "/salon.jpg"
-          }
-        ]
-      })
-    }
-  }
+    // let picturesFetched = [{ 
+    //     url: "/hair.jpg",
+    //     key: "/hair.jpg"
+    //   },
+    //   {
+    //     url: "/nails.jpg",
+    //     key: "/nails.jpg"
+    //   },
+    //   {
+    //     url: "/salon.jpg",
+    //     key: "/salon.jpg"
+    //   }
+    // ]
 
-  async componentDidMount(): Promise<void> {
     if(this.props.location.state && this.props.location.state.service){
       
       this.setState({
-        service: this.props.location.state.service
+        service: this.props.location.state.service,
+        pictures: picturesFetched
       })
     }
     else{
@@ -74,7 +80,8 @@ class ServiceDisplay extends React.Component {
 
       const data = await response.json()
       this.setState({
-        service: data
+        service: data,
+        pictures: picturesFetched
       })
     }
 

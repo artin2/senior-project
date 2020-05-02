@@ -156,14 +156,14 @@ async function getUserStores(req, res, next) {
 async function editStore(req, res, next) {
   let failed = false
   let store = null
-  if (req.body.name && req.body.address && req.body.category && req.body.phone && req.body.services && req.body.owners && req.body.description && req.body.id) {
+  if (req.body.name && req.body.address && req.body.category && req.body.phone && req.body.owners && req.body.description && req.body.id) {
     try {
       // should fix this later so it only does it when the address has changed
       let geocodeResult = await geocoder.geocode({ address: req.body.address })
       let lat = geocodeResult[0].latitude
       let lng = geocodeResult[0].longitude
-      let query = 'UPDATE stores SET name=$1, address=$2, category=$3, phone=$4, services=$5, owners=$6, description=$7, lat=$8, lng=$9 WHERE id=$10 RETURNING *'
-      let values = [req.body.name, req.body.address, req.body.category, req.body.phone, req.body.services, req.body.owners, req.body.description, lat, lng, req.body.id]
+      let query = 'UPDATE stores SET name=$1, address=$2, category=$3, phone=$4, owners=$5, description=$6, lat=$7, lng=$8 WHERE id=$9 RETURNING *'
+      let values = [req.body.name, req.body.address, req.body.category, req.body.phone, req.body.owners, req.body.description, lat, lng, req.body.id]
 
       // connect to the db
       db.client.connect((err, client, done) => {
@@ -178,6 +178,47 @@ async function editStore(req, res, next) {
             if (result && result.rows.length == 1) {
               console.log('Updated store, now moving to update hours if necessary')
               store = result.rows[0];
+              
+              // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7.
+              let newHours = req.body.storeHours
+              // Below is for scoping issues. Res is undefined below
+              let resp = res
+              if (newHours.length > 0) {
+                let storeId = req.body.id
+                  ; (async (req, res) => {
+                    const hourDb = await db.client.connect();
+                    try {
+                      await hourDb.query("BEGIN");
+                      const query = 'UPDATE store_hours SET open_time=$1, close_time=$2 WHERE store_id=$3 and day_of_the_week=$4 RETURNING store_id';
+                      for (let i = 0; i < newHours.length; i++) {
+                        if (newHours[i] != null) {
+                          let storeHoursValues = [newHours[i].open_time, newHours[i].close_time, storeId, i]
+                          await hourDb.query(query, storeHoursValues);
+                        }
+                      }
+                      await hourDb.query("COMMIT");
+                    } catch (e) {
+                      await hourDb.query("ROLLBACK");
+                      console.log('##########Rolling Back#############')
+                      failed = true
+                      throw e;
+                    } finally {
+                      if (!failed) {
+                        helper.querySuccess(resp, store, 'Successfully updated store!');
+                      } else {
+                        helper.queryError(res, "Unable to Update Store!");
+                      }
+                      hourDb.release();
+                    }
+                  })().catch(e => helper.queryError(resp, e));
+              } else {
+                if (!failed) {
+                  // ******this is not working at the moment, need to wait for both queries to finish before sending this message....
+                  helper.querySuccess(res, store, 'Successfully updated store!');
+                } else {
+                  helper.queryError(res, "Unable to Update Store!");
+                }
+              }
             }
             else {
               // there were no results from trying to update the stores table
@@ -191,46 +232,6 @@ async function editStore(req, res, next) {
     }
     catch (err) {
       helper.authError(res, err);
-    }
-    // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7.
-    let newHours = req.body.storeHours
-    // Below is for scoping issues. Res is undefined below
-    let resp = res
-    if (newHours.length > 0) {
-      let storeId = req.body.id
-        ; (async (req, res) => {
-          const hourDb = await db.client.connect();
-          try {
-            await hourDb.query("BEGIN");
-            const query = 'UPDATE store_hours SET open_time=$1, close_time=$2 WHERE store_id=$3 and day_of_the_week=$4 RETURNING store_id';
-            for (let i = 0; i < newHours.length; i++) {
-              if (newHours[i] != null) {
-                let storeHoursValues = [newHours[i].open_time, newHours[i].close_time, storeId, i]
-                await hourDb.query(query, storeHoursValues);
-              }
-            }
-            await hourDb.query("COMMIT");
-          } catch (e) {
-            await hourDb.query("ROLLBACK");
-            console.log('##########Rolling Back#############')
-            failed = true
-            throw e;
-          } finally {
-            if (!failed) {
-              helper.querySuccess(resp, store, 'Successfully updated store!');
-            } else {
-              helper.queryError(res, "Unable to Update Store!");
-            }
-            hourDb.release();
-          }
-        })().catch(e => helper.queryError(resp, e));
-    } else {
-      if (!failed) {
-        // ******this is not working at the moment, need to wait for both queries to finish before sending this message....
-        helper.querySuccess(res, store, 'Successfully updated store!');
-      } else {
-        helper.queryError(res, "Unable to Update Store!");
-      }
     }
   }
   else {
@@ -350,8 +351,8 @@ async function addWorker(req, res, next) {
           // if there is exactly one result, we have a valid potential worker, proceed to inserting them
           if (result && result.rows.length == 1) {
             let timestamp = helper.getFormattedDate();
-            query = 'INSERT INTO workers(first_name, last_name, services, store_id, user_id, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;'
-            let values = [result.rows[0].first_name, result.rows[0].last_name, [0], req.params.store_id, result.rows[0].id, timestamp]
+            query = 'INSERT INTO workers(first_name, last_name, store_id, user_id, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *;'
+            let values = [result.rows[0].first_name, result.rows[0].last_name, req.params.store_id, result.rows[0].id, timestamp]
 
             // try to insert the worker in the workers table
             db.client.query(query, values, (errFirst, resultFirst) => {
@@ -643,20 +644,15 @@ async function editService(req, res, next) {
           if (resultFirst && resultFirst.rows.length == 1) {
             // update each workers services array
             for (var i = 0; i < req.body.workers.length; i++) {
-              query = 'UPDATE workers SET services = array_append(services, $1) WHERE id=$2 RETURNING *'
-              values = [resultFirst.rows[0].id, req.body.workers[i]]
+              query = 'UPDATE workers SET services = services || $1 where NOT services @> $1 and id=$2 RETURNING *'
+              values = [[req.params.service_id], req.body.workers[i]]
               db.client.query(query, values, (errSecond, resultSecond) => {
                 done()
                   if (errSecond) {
                     helper.queryError(res, errSecond);
                   }
-                  // we were not able to update this worker's services
-                  if (!(resultSecond && resultSecond.rows.length == 1)) {
-                    helper.queryError(res, "Could not Update Worker's Services!");
-                  }
-                  else{
-                    helper.querySuccess(res, resultFirst.rows[0], "Successfully Updated Service!")
-                  }
+                  // second query shouldn't have to return a value
+                  helper.querySuccess(res, resultFirst.rows[0], "Successfully Updated Service!")
                 }
               )
             }

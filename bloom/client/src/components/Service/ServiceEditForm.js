@@ -53,11 +53,9 @@ class ServiceEditForm extends React.Component {
       .required("Description is required"), // will make it required soon,
       cost: Yup.number()
       .positive("Cost must be positive")
-      // .integer()
       .required("Cost is required"),
       duration: Yup.number()
       .positive("Duration must be positive")
-      .integer("Duration must be an integer")
       .required("Duration is required"),
       workers: Yup.array()
       .required("Worker is required")
@@ -83,33 +81,6 @@ class ServiceEditForm extends React.Component {
     })
   }
 
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevState.service !== this.state.service) {
-      let picturesFetched = await getPictures('stores/' + this.state.service.store_id + '/services/' + this.state.service.name + '/')
-      this.setState({
-        pictures: picturesFetched
-      })
-    }
-
-    // can put this for now so we don't have to upload to s3
-    // this.setState({
-      // pictures: [
-      //   { 
-      //     url: "/hair.jpg",
-      //     key: "/hair.jpg"
-      //   },
-      //   {
-      //     url: "/nails.jpg",
-      //     key: "/nails.jpg"
-      //   },
-      //   {
-      //     url: "/salon.jpg",
-      //     key: "/salon.jpg"
-      //   }
-      // ]
-    // })
-  }
-
   deleteFileChangeHandler = async (event, setFieldValue, newPictureLength) => {
     if(event.target.checked){
       await this.state.keys.push(event.target.id)
@@ -129,13 +100,17 @@ class ServiceEditForm extends React.Component {
     setFieldValue('pictures', event.target.files)
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    let picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id)
+    console.log(picturesFetched)
+
     if(this.props.location.state && this.props.location.state.service){
-      // console.log(this.props.location.state.service)
+      console.log(this.props.location.state.service)
       let convertedCategoryData = this.props.location.state.service.category.map((str) => ({ value: str.toLowerCase(), label: str }));
       // console.log(convertedCategoryData)
       this.setState({
         service: this.props.location.state.service,
+        pictures: picturesFetched,
         convertedCategory: convertedCategoryData
       })
     }
@@ -162,6 +137,7 @@ class ServiceEditForm extends React.Component {
           let convertedCategoryData = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
           this.setState({
             service: data,
+            pictures: picturesFetched,
             convertedCategory: convertedCategoryData
           })
         }
@@ -238,7 +214,7 @@ class ServiceEditForm extends React.Component {
 
                 // upload new images to s3 from client to avoid burdening back end
                 if(this.state.selectedFiles.length > 0){
-                  let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + values.name + '/'
+                  let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id + '/'
                   await uploadHandler(prefix, this.state.selectedFiles)
                 }
 
@@ -266,7 +242,7 @@ class ServiceEditForm extends React.Component {
                 .then(function(data){
                   // redirect to home page signed in
                   if(data){
-                    triggerServiceDisplay()
+                    triggerServiceDisplay(data)
                   }
                 })
               }}
@@ -308,7 +284,7 @@ class ServiceEditForm extends React.Component {
                             <FaDollarSign/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control type="text" 
+                    <Form.Control type="number" 
                     value={values.cost}
                     placeholder="Cost" 
                     name="cost" 
@@ -329,7 +305,7 @@ class ServiceEditForm extends React.Component {
                         </InputGroup.Text>
                     </InputGroup.Prepend>
                     <Form.Control 
-                      type="text"
+                      type="number"
                       value={values.duration}
                       placeholder="Duration (in min)" 
                       name="duration" 

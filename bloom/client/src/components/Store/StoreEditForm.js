@@ -251,33 +251,6 @@ class StoreEditForm extends React.Component {
     })
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevState.store !== this.state.store) {
-      let picturesFetched = await getPictures('stores/' + this.state.store.id + '/images/')
-      this.setState({
-        pictures: picturesFetched
-      })
-    }
-
-    // can put this for now so we don't have to upload to s3
-    // this.setState({
-      // pictures: [
-      //   {
-      //     url: "/hair.jpg",
-      //     key: "/hair.jpg"
-      //   },
-      //   {
-      //     url: "/nails.jpg",
-      //     key: "/nails.jpg"
-      //   },
-      //   {
-      //     url: "/salon.jpg",
-      //     key: "/salon.jpg"
-      //   }
-      // ]
-    // })
-  }
-
   deleteFileChangeHandler = async (event, setFieldValue, newPictureLength) => {
     if(event.target.checked){
       await this.state.keys.push(event.target.id)
@@ -295,13 +268,14 @@ class StoreEditForm extends React.Component {
     setFieldValue('pictures', event.target.files)
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    let picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/images/')
+
     // if we were given the existing data from calling component use that, else fetch
     // check if categories are empty, if they are then cache/store needs to be updated.
     if (this.props.location.state && this.props.location.state.store) {
-      // console.log(this.props.location.state.store.category)
       let convertedCategory = this.props.location.state.store.category.map((str, indx) => ({ id: indx, name: this.longerVersion(str)}));
-      // console.log(convertedCategory)
+
       fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/storeHours', {
         method: "GET",
         headers: {
@@ -324,7 +298,8 @@ class StoreEditForm extends React.Component {
           selected: convertedCategory,
           address: this.props.location.state.store.address,
           storeHours: data,
-          loading: false
+          loading: false,
+          pictures: picturesFetched
         })
       });
     }
@@ -348,7 +323,6 @@ class StoreEditForm extends React.Component {
       ]).then(allResponses => {
         const response1 = allResponses[0]
         const response2 = allResponses[1]
-        console.log(response1.category)
 
         let convertedCategory = response1.category.map((str, indx) => ({ id: indx, name: this.longerVersion(str)}) );
         this.setState({
@@ -356,7 +330,8 @@ class StoreEditForm extends React.Component {
           selected: convertedCategory,
           address: response1.address,
           storeHours: response2,
-          loading: false
+          loading: false,
+          pictures: picturesFetched
         })
       })
     }
@@ -444,7 +419,7 @@ class StoreEditForm extends React.Component {
                   }
                   else{
                     console.log("should not be here, but going to redirect until this is fixed")
-                    this.triggerStoreDisplayNoResp()
+                    // this.triggerStoreDisplayNoResp()
                   }
                 });
             }}
