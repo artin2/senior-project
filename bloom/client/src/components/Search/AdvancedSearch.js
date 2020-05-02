@@ -1,6 +1,6 @@
 import React from 'react';
 import './AdvancedSearch.css'
-import { Form, Row, Col} from 'react-bootstrap';
+import { Form, Row, Col, Container} from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import { withRouter } from "react-router-dom";
 import { Multiselect } from 'multiselect-react-dropdown';
@@ -211,7 +211,7 @@ class AdvancedSearch extends React.Component {
 
   render() {
     return (
-      <div className="book_window">
+      <Container className="book_window">
       <Form className="formBody rounded" onSubmit={this.handleSubmit}>
         <h3>Book Now</h3>
         <Form.Group controlId="autocomplete">
@@ -258,7 +258,7 @@ class AdvancedSearch extends React.Component {
         </Form.Group>
           <Button disabled={!(this.state.address)} style={{backgroundColor: '#8CAFCB', border: '0px'}} type="submit">Submit</Button>
       </Form>
-      </div>
+      </Container>
     );
   }
 }

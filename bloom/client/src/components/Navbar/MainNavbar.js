@@ -28,7 +28,7 @@ class MainNavbar extends React.Component {
         return <Nav className="left">
           <Link to="/login" className="nav-link">Login</Link>
           <Link to="/signup" className="nav-link">Signup</Link>
-        </Nav>                 
+        </Nav>
       } else {
         console.log(this.props.user)
         if(this.props.user.role != '0'){
@@ -60,7 +60,6 @@ class MainNavbar extends React.Component {
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="left" style={{marginRight: '120px'}}>
-            <Link to="/help" className="nav-link">Help</Link>
             <Link to="/about" className="nav-link">About</Link>
           </Nav>
           <RenderNavBarBasedOnPageAndUser/>

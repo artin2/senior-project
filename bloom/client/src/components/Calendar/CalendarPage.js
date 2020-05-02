@@ -12,6 +12,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { Multiselect } from 'multiselect-react-dropdown';
 import { FiSearch} from 'react-icons/fi';
 import { withRouter } from "react-router"
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const today = new Date();
 
@@ -239,7 +240,7 @@ class Calendar extends React.Component {
 
     getAppointments = () => {
 
-        fetch('http://localhost:8081/stores/' + this.props.match.params.store_id + '/appointments' , {
+        fetch('fetchDomain/stores/' + this.props.match.params.store_id + '/appointments' , {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
@@ -302,7 +303,7 @@ class Calendar extends React.Component {
       }
       else {
 
-          await fetch('http://localhost:8081/stores/' + store_id + "/services", {
+          await fetch('fetchDomain/stores/' + store_id + "/services", {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
@@ -351,11 +352,11 @@ class Calendar extends React.Component {
           workers: worker_instances,
           worker_map: worker_map
         })
-      } 
+      }
       else{
 
 
-        await fetch('http://localhost:8081/stores/' + store_id + '/workers_list', {
+        await fetch('fetchDomain/stores/' + store_id + '/workers_list', {
           method: "GET",
           headers: {
             'Content-type': 'application/json'

@@ -1,7 +1,6 @@
 import React from 'react';
 // import Container from 'react-bootstrap/Container'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
+import {Row, Col, Container, Button} from 'react-bootstrap'
 import AdvancedSearch from '../Search/AdvancedSearch';
 import './Homepage.css';
 import paint from '../../assets/abstract-painting.jpg';
@@ -25,45 +24,10 @@ import Category from './Category.js';
 const calc = (x, y) => [-(y - window.innerHeight / 2) / 20, (x - window.innerWidth / 2) / 80, 1.04]
 const trans = (x, y, s) => `perspective(600px) scale(${s})`
 
-// const animation = () => {
-//
-//     const [props, set] = useSpring(() => (
-//       { xys: [0, 0, 1], config: { mass: 5, tension: 350, friction: 40 }
-//      }))
-//
-//     const [flipped, setFlipped] = useState(false)
-//     const [key, setKey] = useState(0)
-//
-//
-//     const [width, setWidth] = useState(window.innerWidth)
-//       useEffect(() => {
-//         const handleResize = () => {
-//           setWidth(window.innerWidth)
-//         }
-//         window.addEventListener('resize', handleResize)
-//         return () => { window.removeEventListener('resize', handleResize) }
-//       })
-//
-//
-//     const { transform, opacity, display } = useSpring({
-//       opacity: flipped ? 1 : 0,
-//       display: flipped ? '' : 'none',
-//       transform: `perspective(500px) rotateX(${flipped ? 180 : 0}deg)`,
-//       config: { mass: 5, tension: 400, friction: 80 }})
-//
-// }
-
-
-
 
 function useScreenWidth(): number {
 
   const [position, setPosition] = useState({ xys: [0, 0, 1]});
-
-
-  // const [props, set] = useSpring(() => (
-  //       { xys: [0, 0, 1], config: { mass: 5, tension: 350, friction: 40 }
-  // }))
 
   useEffect(() => {
     let mounted = true
@@ -81,8 +45,28 @@ function useScreenWidth(): number {
       window.removeEventListener("mousemove", setFromEvent);
     };
   });
-  // return position;
 
+  return position;
+}
+
+function useScroll() : number {
+  const [scrollPosition, setSrollPosition] = useState(0);
+  const handleScroll = () => {
+      const position = window.pageYOffset;
+      setSrollPosition(position);
+  };
+
+  useEffect(() => {
+      window.addEventListener('scroll', handleScroll);
+      return () => {
+          window.removeEventListener('scroll', handleScroll);
+      };
+  }, []);
+
+return scrollPosition;
+}
+
+function useResizeWidth(): number {
 
   const [width, setWidth] = useState(window.innerWidth)
 
@@ -103,30 +87,8 @@ function useScreenWidth(): number {
 
   })
 
-
-  return position;
+  return width;
 }
-
-// function useMousePosition(listen=true) {
-//   let [ pos, setPos ] = useState({ x: 0, y: 0 })
-//   useEffect(() => {
-//     if (listen) {
-//       let handler = event => {
-//         setPos({ x: event.clientX, y: event.clientY })
-//       }
-//       window.addEventListener('mousemove', handler)
-//       return () => {
-//         window.removeEventListener('mousemove', handler)
-//       }
-//     }
-//   }, [listen])
-//   return pos
-// }
-
-// function MousePosition({ listen, children }) {
-//   let pos = useMousePosition(listen)
-//   return children(pos)
-// }
 
 function ScreenWidth ({ listen, children }) {
   const screenWidth: number = useScreenWidth();
@@ -135,29 +97,19 @@ function ScreenWidth ({ listen, children }) {
 
 };
 
-function useScroll() : number {
-  const [scrollPosition, setSrollPosition] = useState(0);
-  const handleScroll = () => {
-      const position = window.pageYOffset;
-      setSrollPosition(position);
-  };
-
-  useEffect(() => {
-      window.addEventListener('scroll', handleScroll);
-      return () => {
-          window.removeEventListener('scroll', handleScroll);
-      };
-  }, []);
-
-return scrollPosition;
-}
+function ScreenResize ({listen, children }) {
+  const resize: number = useResizeWidth();
+  // console.log(screenWidth);
+  return children(resize);
+};
 
 function ScreenScroll ({ listen, children }) {
   const scroll: number = useScroll();
-  console.log(scroll);
+  // console.log(scroll);
   return children(scroll);
 
 };
+
 
 class Homepage extends React.Component {
   constructor(props) {
@@ -165,17 +117,24 @@ class Homepage extends React.Component {
       this.state = {
         Visible: false
       }
+
       // this.handleMouseEnter = this.handleMouseEnter.bind(this, this.props.handleMouseEnter)
       // this.handleMouseMove = this.handleMouseMove.bind(this, this.props.handleMouseMove)
       // this.handleMouseLeave = this.handleMouseLeave.bind(this, this.props.handleMouseLeave)
 
   }
 
+  goToStore() {
+    this.props.history.push({
+      pathname: '/store/signup'
+    });
+  }
+
   render() {
 
     // console.log(this.state.Visible)
     return (
-      <div className="container">
+      <Container fluid style={{backgroundColor: '#c0cbcf'}}>
         <div>
           <ScreenWidth>
             {(position) =>
@@ -186,29 +145,31 @@ class Homepage extends React.Component {
             }
           </ScreenWidth>
         </div>
-        <div className="search">
-            <Row>
-            <AdvancedSearch/>
+            <Row style={{marginTop: 120, height: 500, marginLeft: '10%'}}>
+            <ScreenResize>
+            {(width) => {
+              if(width > 1000) {
+                return (
+                <AdvancedSearch/>)
+              }
+              else {
+                return null;
+              }
+            }}
+            </ScreenResize>
+            <Col style={{margin:'10%', marginTop: '0%'}}>
+              <Row style={{marginLeft:'10%', marginTop: '2%'}}>
+                <p className="welcome"> Welcome to </p>
+                <p className="bloom"> Bloom </p>
+              </Row>
+              <p className="subtitle"> A platform that helps you find
+              salons, beauty experts and stylists that are located near your house
+              and will soon become your favorite salons. ETC ETC We can change that later. </p>
 
-            <Col>
-
-            <Row>
-            <p className="welcome"> Welcome to </p>
-
-            <p className="bloom"> Bloom </p>
-
-            </Row>
-            <p className="subtitle"> A platform that helps you find
-            salons, beauty experts and stylists that are located near your house
-            and will soon become your favorite salons. ETC ETC We can change that later. </p>
-
-          </Col>
+            </Col>
           </Row>
 
-        </div>
-        <div style={{position: 'absolute', height: '1000px', marginTop: '80px', alignItem: 'center'}}>
-
-          <div className="type_container">
+          <Col className="type_container">
             <VizSensor
              onChange={(isVisible) => {
                this.setState({Visible: isVisible})
@@ -218,7 +179,7 @@ class Homepage extends React.Component {
            <p style={{fontSize: 25, fontFamily: 'Bellota, cursive', fontWeight: 'bold'}}> At Bloom </p>
            </VizSensor>
 
-           <div>
+           <Col>
             {(this.state.Visible) ?
               <Typist
                 className="typist"
@@ -240,40 +201,37 @@ class Homepage extends React.Component {
 
             </Typist>
            : null}
-          </div>
-        </div>
+          </Col>
+        </Col>
 
-            <div className="cards">
-              <Col>
-                <Row>
-                <Category style={{ marginLeft: -105}} img={hair} text={"Hair Salons"}/>
-                <Category img={lipstics} text={"Makeup Artists"}/>
-                <Category img={barber} text={"Barber Shops"}/>
-                </Row>
-                <Row>
-                <Category style={{ marginLeft: -105}} img={nails} text={"Nail Salons"}/>
-                <Category img={facials} text={"Facials"}/>
-                <Category img={massage} text={"Spa"}/>
-                </Row>
-              </Col>
-            </div>
-          </div>
+          <Col style={{marginLeft: '2%', marginTop: '3%'}}>
+            <Row>
+            <Category history={this.props.history} id={"hair"}  img={hair} text={"Hair Salons"}/>
+            <Category history={this.props.history} id={"makeup"} img={lipstics} text={"Makeup Artists"}/>
+            <Category history={this.props.history} id={"barber"} img={barber} text={"Barber Shops"}/>
+            </Row>
+            <Row>
+            <Category history={this.props.history} id={"nails"} img={nails} text={"Nail Salons"}/>
+            <Category history={this.props.history} id={"facials"} img={facials} text={"Facials"}/>
+            <Category history={this.props.history} id={"spa"} img={massage} text={"Spa"}/>
+            </Row>
+          </Col>
 
-          <div className="salon_container" style={{width:'1500px', height: '800px', marginLeft: -200, marginTop: '1400px', backgroundColor: '#bdcddb'}}>
+          <Col style={{ marginTop: '8%', backgroundColor: '#f0ece1'}}>
           <Row>
-          <img src={paint_line} className="paint_line" alt="paint"/>
-          <Col className="salon_text">
+          <Col style={{margin: '5%', marginTop: '10%'}}>
           <p className="header"> Are you a salon owner? </p>
           <p style={{fontSize: 20}}> Join our community by signing up your salon today! Join our community by signing up your salon today. Join our community by signing up your salon today.
           Join our community by signing up your salon today. Join our community by signing up your salon today. </p>
+          <Button onClick={() =>  this.goToStore()} style={{marginTop: '5%', backgroundColor: '#354B74', border: 0}}> Learn More </Button>
           </Col>
           <img src={salon} className="salon" alt="paint"/>
           </Row>
-          </div>
-      </div>
+          </Col>
+
+      </Container>
     );
   }
 }
 
 export default Homepage;
-//

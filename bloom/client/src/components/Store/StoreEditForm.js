@@ -99,9 +99,10 @@ class StoreEditForm extends React.Component {
     });
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
-
     this.onSelect = this.onSelect.bind(this);
     this.onRemove = this.onRemove.bind(this);
+    this.shorterVersion = this.shorterVersion.bind(this);
+    this.longerVersion = this.shorterVersion.bind(this);
   }
 
   onSelect(selectedList, selectedItem) {
@@ -157,6 +158,40 @@ class StoreEditForm extends React.Component {
       return `${h}:${m}pm`;
     }
 
+  }
+
+  shorterVersion(name) {
+
+    if(name == "Spa & Wellness") {
+      return "Spa"
+    }
+    else if(name == "Barbershops") {
+      return "Barber"
+    }
+    else if(name == "Nail Salon") {
+      return "Nails"
+    }
+    else if(name == "Hair Salon") {
+      return "Hair"
+    }
+    return name;
+  }
+
+  longerVersion(name) {
+
+    if(name == "Spa") {
+      return "Spa & Wellness"
+    }
+    else if(name == "Barber") {
+      return "Barbershops"
+    }
+    else if(name == "Nails") {
+      return "Nail Salon"
+    }
+    else if(name == "Hair") {
+      return "Hair Salon"
+    }
+    return name;
   }
 
   handleSelectChange = (event) => {
@@ -244,7 +279,7 @@ class StoreEditForm extends React.Component {
     // check if categories are empty, if they are then cache/store needs to be updated.
     if (this.props.location.state && this.props.location.state.store) {
       // console.log(this.props.location.state.store.category)
-      let convertedCategory = this.props.location.state.store.category.map((str, indx) => ({ id: indx, name: str}));
+      let convertedCategory = this.props.location.state.store.category.map((str, indx) => ({ id: indx, name: this.longerVersion(str)}));
       // console.log(convertedCategory)
       fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/storeHours', {
         method: "GET",
@@ -293,7 +328,7 @@ class StoreEditForm extends React.Component {
         const response2 = allResponses[1]
         console.log(response1.category)
 
-        let convertedCategory = response1.category.map((str, indx) => ({ id: indx, name: str}) );
+        let convertedCategory = response1.category.map((str, indx) => ({ id: indx, name: this.longerVersion(str)}) );
         this.setState({
           store: response1,
           selected: convertedCategory,
@@ -339,10 +374,8 @@ class StoreEditForm extends React.Component {
             }}
             validationSchema={this.yupValidationSchema}
             onSubmit={async (values) => {
-
-
               values.category = this.state.selected.map(function (val) {
-                return val.name;
+                return this.shorterVersion(val.name)
               })
 
               if(values.category.length == 0) {

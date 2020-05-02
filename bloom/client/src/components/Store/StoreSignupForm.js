@@ -46,18 +46,18 @@ class StoreSignupForm extends React.Component {
     }
 
     // options for store categories
-    this.options = [
-      { value: 'nails', label: 'Nails' },
-      { value: 'hair', label: 'Hair' },
-      { value: 'makeup', label: 'Makeup' },
-      { value: 'eyelashes', label: 'Eyelashes' },
-      { value: 'eyelash extensions', label: 'Eyelash Extensions' },
-      { value: 'eyebrows', label: 'Eyebrows' },
-      { value: 'facials', label: 'Facials' },
-      { value: 'skincare', label: 'Skin Care' },
-      { value: 'waxing', label: 'Waxing' },
-      { value: 'mens', label: 'Mens Services' }
-    ];
+    // this.options = [
+    //   { value: 'nails', label: 'Nails' },
+    //   { value: 'hair', label: 'Hair' },
+    //   { value: 'makeup', label: 'Makeup' },
+    //   { value: 'eyelashes', label: 'Eyelashes' },
+    //   { value: 'eyelash extensions', label: 'Eyelash Extensions' },
+    //   { value: 'eyebrows', label: 'Eyebrows' },
+    //   { value: 'facials', label: 'Facials' },
+    //   { value: 'skincare', label: 'Skin Care' },
+    //   { value: 'waxing', label: 'Waxing' },
+    //   { value: 'mens', label: 'Mens Services' }
+    // ];
 
     // RegEx for phone number validation
     this.phoneRegExp = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
@@ -103,6 +103,7 @@ class StoreSignupForm extends React.Component {
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
     this.onSelect = this.onSelect.bind(this);
     this.onRemove = this.onRemove.bind(this);
+    this.shorterVersion = this.shorterVersion.bind(this);
   }
 
   // redirect to the store display page and pass the new store data
@@ -140,6 +141,23 @@ class StoreSignupForm extends React.Component {
       return `${h}:${m}pm`;
     }
 
+  }
+
+  shorterVersion(name) {
+
+    if(name == "Spa & Wellness") {
+      return "Spa"
+    }
+    else if(name == "Barbershops") {
+      return "Barber"
+    }
+    else if(name == "Nail Salon") {
+      return "Nails"
+    }
+    else if(name == "Hair Salon") {
+      return "Hair"
+    }
+    return name;
   }
 
   onSelect(selectedList, selectedItem) {
@@ -212,20 +230,7 @@ class StoreSignupForm extends React.Component {
               onSubmit={(values) => {
 
                 values.category = this.state.selected.map(function (val) {
-                  val = val.name;
-                  if(val == "Spa & Wellness") {
-                    return "Spa"
-                  }
-                  else if(val == "Barbershops") {
-                    return "Barber"
-                  }
-                  else if(val == "Nail Salon") {
-                    return "Nails"
-                  }
-                  else if(val == "Hair Salon") {
-                    return "Hair"
-                  }
-                  return val;
+                  return this.shorterVersion(val.name)
                 })
 
                 if(values.category.length == 0) {
