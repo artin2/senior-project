@@ -17,5 +17,46 @@ function getCategories() {
   {name: "Spa & Wellness"}, {name: "Makeup"}];
 }
 
+function getCategoriesAsPairs() {
+  return [{ value: 'Nails', label: "Nail Salon" },{ value: 'Hair', label: "Hair Salon" },
+  { value: "Facials", label: "Facials" },{ value: "Barbershops", label:"Barbershops"},
+  {value: "Spa", label: "Spa & Wellness" }, {value: "Makeup", label: "Makeup" }];
+}
+
+function shorterVersion(name) {
+  if(name == "Spa & Wellness") {
+    return "Spa"
+  }
+  else if(name == "Barbershops") {
+    return "Barber"
+  }
+  else if(name == "Nail Salon") {
+    return "Nails"
+  }
+  else if(name == "Hair Salon") {
+    return "Hair"
+  }
+  return name;
+}
+
+function longerVersion(name) {
+  if(name == "Spa") {
+    return "Spa & Wellness"
+  }
+  else if(name == "Barber") {
+    return "Barbershops"
+  }
+  else if(name == "Nails") {
+    return "Nail Salon"
+  }
+  else if(name == "Hair") {
+    return "Hair Salon"
+  }
+  return name;
+}
+
  exports.queryString = queryString;
- exports. getCategories = getCategories;
+ exports.getCategories = getCategories;
+ exports.shorterVersion = shorterVersion;
+ exports.longerVersion = longerVersion;
+ exports.getCategoriesAsPairs = getCategoriesAsPairs;

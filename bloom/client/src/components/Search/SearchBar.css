@@ -5,14 +5,6 @@
   font-weight: bold;
 }
 
-.chips {
-   display: flex;
-   flex-wrap: wrap;
- }
- .chip {
-   margin: 2;
- }
-
  .full-width {
   width: 100%; 
  }

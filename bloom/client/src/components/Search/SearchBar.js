@@ -1,17 +1,10 @@
 import React from 'react';
-import Container from 'react-bootstrap/Container'
-import { Form, Row, InputGroup, Button, Navbar } from 'react-bootstrap';
+import { Form, InputGroup, Button } from 'react-bootstrap';
 import Col from 'react-bootstrap/Col'
 import './SearchBar.css'
-import { Multiselect } from 'multiselect-react-dropdown';
 import {withRouter} from 'react-router'
-// import Chip from '@material-ui/core/Chip';
-// import Select from '@material-ui/core/Select';
-// import MenuItem from '@material-ui/core/MenuItem';
-// import Input from '@material-ui/core/Input';
 import { FiSearch } from 'react-icons/fi';
 import Select from 'react-select'
-const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const helper = require('./helper.js');
 
@@ -23,111 +16,19 @@ class SearchBar extends React.Component {
         lat: '',
         lng: ''
       },
-      category: helper.getCategories(),
-      nails: false,
-      hair: false,
-      facials: false,
-      barber: false,
-      spa: false,
-      makeup: false,
-      selected: [],
+      categories: helper.getCategoriesAsPairs(),
+      selectedCategory: '',
       address: '',
-      distance: 1,
-
+      distance: 15,
     }
 
     this.autocomplete = null
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.onSelect = this.onSelect.bind(this);
-    this.onRemove = this.onRemove.bind(this);
   }
 
   handleSelectChange = (selectedCategory) => {
     this.setState({ selectedCategory });
-  }
-
-
-  onSelect(selectedList, selectedItem) {
-
-    this.setState({
-      selected: selectedList
-    })
-
-    selectedItem = selectedItem.name;
-
-    if(selectedItem == "Nail Salon"){
-      this.setState({
-        nails: true
-      })
-    }
-    else if(selectedItem == "Hair Salon"){
-      this.setState({
-        hair: true
-      })
-    }
-    else if(selectedItem == "Facials"){
-      this.setState({
-        facials: true
-      })
-    }
-    else if(selectedItem == "Spa & Wellness"){
-      this.setState({
-        spa: true
-      })
-    }
-    else if(selectedItem == "Makeup"){
-      this.setState({
-        makeup: true
-      })
-    }
-    else{
-      if(selectedItem == "Barbershops"){
-        this.setState({
-          barber: true
-        })
-      }
-    }
-  }
-
-  onRemove(selectedList, removedItem, event) {
-
-    this.setState({
-      selected: selectedList
-    })
-
-    removedItem = removedItem.name;
-
-    if(removedItem == "Nail Salon"){
-      this.setState({
-        nails: false
-      })
-    }
-    else if(removedItem == "Hair Salon"){
-      this.setState({
-        hair: false
-      })
-    }
-    else if(removedItem == "Facials"){
-      this.setState({
-        facials: false
-      })
-    }
-    else if(removedItem == "Spa & Wellness"){
-      this.setState({
-        spa: false
-      })
-    }
-    else if(removedItem == "Makeup"){
-      this.setState({
-        makeup: false
-      })
-    }
-    else if(removedItem == "Barbershops"){
-      this.setState({
-        barber: false
-      })
-    }
   }
 
   handleSubmit() {
@@ -135,9 +36,13 @@ class SearchBar extends React.Component {
     const formState = (({ address, distance, nails, hair, spa, facials, barber, makeup }) => ({ address, distance, nails, hair, spa, facials, barber, makeup }))(this.state);
     let query = queryString(formState)
     console.log("query is: ", query)
+    console.log("address is: ", this.state.address)
     this.props.history.push({
       pathname: "/search",
-      search: query
+      search: query,
+      state: {
+        address: this.state.address
+      }
     });
   }
 
@@ -162,6 +67,12 @@ class SearchBar extends React.Component {
     this.autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'), { })
 
     this.autocomplete.addListener("place_changed", this.handlePlaceSelect)
+    if(this.props.location.state && this.props.location.state.address) {
+      console.log("exists address", this.props.location.state.address)
+      this.setState({
+        address: this.props.location.state.address
+      })
+    }
   }
 
   render() {
@@ -187,17 +98,12 @@ class SearchBar extends React.Component {
             </Col>
             <Col xs={12} md={3}>
               <Form.Group className="full-width">
-              <Multiselect
-                options={this.state.category}
-                avoidHighlightFirstOption={true}
-                onSelect={this.onSelect}
-                onRemove={this.onRemove}
-                placeholder="Category"
-                closeIcon="cancel"
-                displayValue="name"
-                style={{multiselectContainer: {marginLeft: '2%', width: '65%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: 250, width: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
-                />
-
+              <Select
+                className="full-width"
+                value={this.state.selectedCategory}
+                onChange={this.handleSelectChange}
+                options={this.state.categories}
+              />
               </Form.Group>
             </Col>
           </Form.Row>
