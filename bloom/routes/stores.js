@@ -987,6 +987,41 @@ async function insertAppointments(req, res, group_id) {
 };
 
 
+async function getStoreInfo(store_id) {
+  const client = await db.client.connect()
+  try {
+    await client.query('BEGIN')
+    try {
+      res = await client.query('SELECT * FROM stores WHERE id=' + store_id)
+      await client.query('COMMIT')
+    } catch (err) {
+      await client.query('ROLLBACK')
+      throw err
+    }
+  } finally {
+    client.release()
+  }
+  return res.rows[0]
+};
+
+async function getWorkerInfo(worker_id) {
+  const client = await db.client.connect()
+  try {
+    await client.query('BEGIN')
+    try {
+      res = await client.query('SELECT * FROM workers WHERE id=' + worker_id)
+      await client.query('COMMIT')
+    } catch (err) {
+      await client.query('ROLLBACK')
+      throw err
+    }
+  } finally {
+    client.release()
+  }
+  return res.rows[0]
+};
+
+
 
 module.exports = {
   getStore: getStore,
@@ -1006,5 +1041,7 @@ module.exports = {
   getAppointmentsByMonth: getAppointmentsByMonth,
   getAllAppointments: getAllAppointments,
   addAppointment: addAppointment,
-  getIndividualWorkerHours: getIndividualWorkerHours
+  getIndividualWorkerHours: getIndividualWorkerHours,
+  getStoreInfo: getStoreInfo,
+  getWorkerInfo: getWorkerInfo
 };

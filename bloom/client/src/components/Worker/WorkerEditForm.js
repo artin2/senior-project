@@ -188,7 +188,7 @@ class WorkerEditForm extends React.Component {
       .then(data => {
         if(data){
           this.setState({
-            worker: this.props.location.state.worker
+            worker: data
           })
         }
       });

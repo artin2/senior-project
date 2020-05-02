@@ -70,12 +70,12 @@ function App() {
 
             <Route path="/stores/addService/:store_id" component={redirectWithoutAuth(AddServiceForm)}/>
             <Route path="/stores/:store_id/services/:service_id/edit" component={redirectWithoutAuth(ServiceEditForm)}/>
-            <Route path="/stores/:store_id/services/:service_id" component={redirectWithoutAuth(ServiceDisplay)}/>
+            <Route path="/stores/:store_id/services/:service_id" component={ServiceDisplay}/>
             <Route path="/stores/:store_id/services" component={redirectWithoutAuth(ServiceDashboard)}/>
 
             <Route path="/stores/addWorker/:store_id" component={redirectWithoutAuth(AddWorkerForm)}/>
             <Route path="/stores/:store_id/workers/:worker_id/edit" component={redirectWithoutAuth(WorkerEditForm)}/>
-            <Route path="/stores/:store_id/workers/:worker_id" component={redirectWithoutAuth(WorkerDisplay)}/>
+            <Route path="/stores/:store_id/workers/:worker_id" component={WorkerDisplay}/>
             <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
             <Route path="/stores/:store_id" component={StoreDisplay}/>
 

@@ -17,7 +17,6 @@ async function login(req, res) {
               if(passwordMatch != false) {
                 try {
                   let tokenGen = await auth.generateToken(res, result.rows[0]);
-                  console.log("JUST GENERATED TOKEN, BACK IN USER.JS:", tokenGen)
                   let resultUser = result.rows[0]
                   delete resultUser.password
 

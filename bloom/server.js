@@ -42,7 +42,7 @@ const withAuth = function(req, res, next) {
         res.status(401).send('Unauthorized: Invalid token');
       } else {
         req.email = decoded.email;
-        console.log("verified, email is: ", decoded.email)  //why is this printing undefined?
+        // console.log("verified, email is: ", decoded.email)  //why is this printing undefined?
         next();
       }
     });
@@ -70,6 +70,32 @@ app.get('/checkToken', withAuth, function(req, res) {
   console.log("hit the check token route")
   //if it gets in here, that means withAuth passed and your token is valid
   res.sendStatus(200);
+});
+
+app.post('/checkTokenAndPermissions', withAuth, async(req, res, next) => {
+  console.log("hit the check token with permissions route")
+  try{
+    let store = await stores.getStoreInfo(req.body.store_id)
+  
+    if(store.owners.includes(req.body.user_id)){
+      res.sendStatus(200)
+    }
+    else if(req.body.worker_id){
+      let worker = await stores.getWorkerInfo(req.body.worker_id)
+      
+      if(worker.user_id == req.body.user_id){
+        res.sendStatus(200)
+      }
+      else{
+        res.status(401).send('Unauthorized: You are not allowed access!');
+      }
+    }
+    else{
+      res.status(401).send('Unauthorized: You are not allowed access!');
+    }
+  }catch{
+    res.status(401).send('Unable to verify!');
+  }
 });
 
 

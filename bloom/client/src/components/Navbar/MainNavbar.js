@@ -5,7 +5,6 @@ import './MainNavbar.css'
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom'
 import SearchBar from '../Search/SearchBar'
-// import BasicSearch from '../Search/BasicSearch';
 
 class MainNavbar extends React.Component {
   constructor(props) {
@@ -14,7 +13,6 @@ class MainNavbar extends React.Component {
 
   render() {
     let storeDisplay = null
-    console.log(this.props.user);
 
     const RenderNavBarBasedOnPageAndUser = (props) => {
       let location = useLocation();
@@ -24,13 +22,11 @@ class MainNavbar extends React.Component {
           </Nav>
       }
       if(this.props.user == null || (Object.keys(this.props.user).length === 0 && this.props.user.constructor === Object)) {
-        console.log(this.props.user)
         return <Nav className="left">
           <Link to="/login" className="nav-link">Login</Link>
           <Link to="/signup" className="nav-link">Signup</Link>
         </Nav>
       } else {
-        console.log(this.props.user)
         if(this.props.user.role != '0'){
           storeDisplay = <NavDropdown title="Manage Stores" id="basic-nav-dropdown">
             <NavDropdown.Item href={"/users/" + this.props.user.id + "/stores"}>Dashboard</NavDropdown.Item>
@@ -48,7 +44,7 @@ class MainNavbar extends React.Component {
           <NavDropdown.Item href={"/users/" + this.props.user.id}>View</NavDropdown.Item>
             <NavDropdown.Item href={"/users/edit/" + this.props.user.id}>Edit</NavDropdown.Item>
           </NavDropdown>
-          <Link to={"/users/" + 'this.props.user.id' + '/appointments'} className="nav-link">My Appointments</Link>
+          <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My Appointments</Link>
           <Link style={{position: 'absolute', right: 60}} to="/logout" className="nav-link">Logout</Link>
         </Nav>
       }

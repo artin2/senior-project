@@ -23,7 +23,6 @@ async function verifyHash(dbPw, userPw) {
 }
 
 const generateToken = (res, user) => {
-  console.log("GENERATING TOKEN!")
   let id = user["id"] 
   let first_name = user["first_name"]
   let last_name = user["last_name"]
@@ -33,7 +32,6 @@ const generateToken = (res, user) => {
   const token = jwt.sign({ id, first_name, last_name }, process.env.JWT_SECRET, {
     expiresIn: process.env.DB_ENV === 'dev' ? '1d' : '7d',
   });
-  console.log("TOKEN GENERATED!, Setting in response")
   const date = new Date();
   date.setDate(date.getDate() + expiration)
   
@@ -44,16 +42,12 @@ const generateToken = (res, user) => {
     domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN_PROD : process.env.DOMAIN_DEV
   });
 
-  console.log("SET TOKEN COOKIE IN RESPONSE, HERE IS RESPONSE:", res)
-
   res.cookie('user', user, {
     expires: date,
     secure: false, // set to true if your using https
     httpOnly: false,
     domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN_PROD : process.env.DOMAIN_DEV
   })
-
-  console.log("SET USER COOKIE IN RESPONSE, HERE IS RESPONSE:", res)
 
   return token
 };
