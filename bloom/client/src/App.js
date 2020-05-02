@@ -52,7 +52,6 @@ function App() {
         <div className="App-body">
           <Switch>
             <Route exact path="/" component={Homepage} />
-            <Route exact path="/help" component={StaticPage} />
             <Route exact path="/about" component={StaticPage} />
             <Route path="/search" component={SearchDisplay} />
 
