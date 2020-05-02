@@ -400,7 +400,7 @@ async function addWorker(req, res, next) {
                               // Below is for scoping issues. Res is undefined below
                               let resp = res
                               let failed = false
-                              let worker_id = req.body.id
+                              let worker_id = resultFirst.rows[0].id
                                 ; (async (req, res) => {
                                   const hourDb = await db.client.connect();
                                   try {
@@ -478,7 +478,7 @@ async function editWorker(req, res, next) {
       await auth.verifyToken(req, res, next);
 
       let query = 'UPDATE workers SET first_name=$1, last_name=$2, services=$3 WHERE id=$4 RETURNING *'
-      let values = [req.body.first_name, req.body.last_name, req.body.services, req.params.id]
+      let values = [req.body.first_name, req.body.last_name, req.body.services, req.body.id]
 
       db.client.connect((err, client, done) => {
         // update the store worker
@@ -490,7 +490,7 @@ async function editWorker(req, res, next) {
 
             // we were successfuly able to update the worker
             if (result && result.rows.length == 1) {
-              worker = results.rows[0]
+              worker = result.rows[0]
             }
             else {
               helper.queryError(res, "Could not Edit Store Worker!");
@@ -704,6 +704,7 @@ async function getWorkers(req, res, next) {
           helper.querySuccess(res, result.rows, 'Sucessfully got workers!');
         }
         else {
+          // right now this is not working with the view worker page (because of calendar child component? not sure tho)
           helper.queryError(res, "Could not find Worker!");
         }
       });

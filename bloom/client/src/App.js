@@ -31,7 +31,6 @@ import ServiceDashboard from './components/Service/ServiceDashboard';
 import ServiceDisplay from './components/Service/ServiceDisplay';
 import ServiceEditForm from './components/Service/ServiceEditForm';
 import AppointmentDisplay from './components/Appointments/AppointmentDisplay';
-import Alert from './components/Flash/Alert';
 import {
   userLogout
 } from './reduxFolder/actions/user'
@@ -50,7 +49,6 @@ function App() {
     <div className="App">
       <Router>
         <MainNavbar/>
-        <Alert/>
         <div className="App-body">
           <Switch>
             <Route exact path="/" component={Homepage} />

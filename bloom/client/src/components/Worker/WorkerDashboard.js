@@ -20,15 +20,21 @@ class WorkerDashboard extends React.Component {
     }
   }
 
-  triggerWorkerEditForm(id) {
+  triggerWorkerEditForm(workerPassed) {
     this.props.history.push({
-      pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + id + '/edit'
+      pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + workerPassed.id + '/edit',
+      state: {
+        worker: workerPassed
+      }
     })
   }
 
-  triggerWorkerDisplay(id) {
+  triggerWorkerDisplay(workerPassed) {
     this.props.history.push({
-      pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + id
+      pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + workerPassed.id,
+      state: {
+        worker: workerPassed
+      }
     })
   }
 
@@ -77,8 +83,8 @@ class WorkerDashboard extends React.Component {
       workers = <div>
                   {this.state.workers.map(worker => (
                     <Col key={"worker-" + worker.id}>
-                      <Button onClick={() => this.triggerWorkerDisplay(worker.id)}>Show Worker</Button>
-                      <Button onClick={() => this.triggerWorkerEditForm(worker.id)}>Edit Worker</Button>
+                      <Button onClick={() => this.triggerWorkerDisplay(worker)}>Show Worker</Button>
+                      <Button onClick={() => this.triggerWorkerEditForm(worker)}>Edit Worker</Button>
                     </Col>
                   ))}
                 </div>

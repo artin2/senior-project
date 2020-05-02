@@ -43,20 +43,35 @@ class WorkerEditForm extends React.Component {
         0: "Brazilian Blowout",
         1: "Manicure"
       },
-      storeHours: [],
-      workerHours: [],
-      receivedServices: null,
+      storeHours: [
+        { day_of_the_week: 0, start_time: 0, end_time: 0}, 
+        { day_of_the_week: 1, start_time: 0, end_time: 0},
+        { day_of_the_week: 2, start_time: 0, end_time: 0},
+        { day_of_the_week: 3, start_time: 0, end_time: 0},
+        { day_of_the_week: 4, start_time: 0, end_time: 0},
+        { day_of_the_week: 5, start_time: 0, end_time: 0},
+        { day_of_the_week: 6, start_time: 0, end_time: 0}
+      ],
+      workerHours: [
+        { day_of_the_week: 0, start_time: 0, end_time: 0}, 
+        { day_of_the_week: 1, start_time: 0, end_time: 0},
+        { day_of_the_week: 2, start_time: 0, end_time: 0},
+        { day_of_the_week: 3, start_time: 0, end_time: 0},
+        { day_of_the_week: 4, start_time: 0, end_time: 0},
+        { day_of_the_week: 5, start_time: 0, end_time: 0},
+        { day_of_the_week: 6, start_time: 0, end_time: 0}
+      ],
       loading: true,
       newHours: [],
       weekIsWorking: [true, true, true, true, true, true, true]
     };
 
     // Schema for yup
-    this.yupValidationSchema = Yup.object().shape({
-      services: Yup.string()
-        .required("Service is required")
-      // .nullable()
-    });
+    // this.yupValidationSchema = Yup.object().shape({
+    //   services: Yup.string()
+    //     .required("Service is required")
+    //   // .nullable()
+    // });
 
     this.triggerWorkerDisplay = this.triggerWorkerDisplay.bind(this);
   }
@@ -147,13 +162,59 @@ class WorkerEditForm extends React.Component {
   };
 
   componentDidMount() {
-    this.setState({
-      worker: this.props.worker,
-      receivedServices: this.props.receivedServices,
-      selectedOption: this.props.selectedOption,
-      storeHours: this.props.storeHours,
-      workerHours: this.props.workerHours,
-      loading: false
+    if(this.props.location.state && this.props.location.state.worker){
+      this.setState({
+        worker: this.props.location.state.worker
+      })
+    }
+    else{
+      // first we fetch the service itself
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id, {
+        method: "GET",
+        headers: {
+            'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(function(response){
+        if(response.status!==200){
+          // throw an error alert
+          store.dispatch(addAlert(response))
+        }
+        else{
+          return response.json();
+        }
+      })
+      .then(data => {
+        if(data){
+          this.setState({
+            worker: this.props.location.state.worker
+          })
+        }
+      });
+    }
+
+    Promise.all([
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id + '/hours', {
+        method: "GET",
+        headers: {
+          'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      }).then(value => value.json()),
+      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/storeHours", {
+        method: "GET",
+        headers: {
+          'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      }).then(value => value.json())
+    ]).then(allResponses => {
+      this.setState({
+        storeHours: allResponses[1],
+        workerHours: allResponses[0],
+        loading: false
+      })
     })
   }
 
@@ -191,7 +252,7 @@ class WorkerEditForm extends React.Component {
             <Formik
               enableReinitialize
               initialValues={{
-                services: this.state.selectedOption,
+                services: this.state.worker.services,
                 id: this.state.worker.id,
                 store_id: this.state.worker.store_id,
                 user_id: this.state.worker.user_id,
@@ -203,9 +264,6 @@ class WorkerEditForm extends React.Component {
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-                values.services = values.services.map(function (val) {
-                  return val.value;
-                })
 
                 let store_id = this.props.match.params.store_id
                 let worker_id = this.props.match.params.worker_id
@@ -217,9 +275,10 @@ class WorkerEditForm extends React.Component {
                     return {start_time: null, end_time: null}
                   }
                 })
-                if(JSON.stringify(values.services)==JSON.stringify(this.state.receivedServices)) {
-                  values.noChange = true
-                }
+                // not sure if we need this, commenting it out for now
+                // if(JSON.stringify(values.services)==JSON.stringify(this.state.receivedServices)) {
+                //   values.noChange = true
+                // }
 
                 fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id, {
                   method: "POST",
@@ -240,7 +299,8 @@ class WorkerEditForm extends React.Component {
                   })
                   .then(data => {
                     if (data) {
-                      this.props.updateWorker(this.state.worker, this.state.newHours, values.services)
+                      // this.props.updateWorker(this.state.worker, this.state.newHours, values.services)
+                      triggerWorkerDisplay(data)
                     }
                   });
               }}
@@ -254,21 +314,6 @@ class WorkerEditForm extends React.Component {
                 setFieldValue }) => (
                   <Form>
                     <h3>Worker Edit</h3>
-
-                    <Form.Group controlId="formServices">
-                      <Select
-                        value={values.services}
-                        onChange={option => setFieldValue("services", option)}
-                        name="services"
-                        options={this.state.options}
-                        isMulti={true}
-                        placeholder={"Services"}
-                        className={touched.services && errors.services ? "error" : null}
-                      />
-                      {touched.services && errors.services ? (
-                        <div className="error-message">{errors.services}</div>
-                      ) : null}
-                    </Form.Group>
 
                     {/* Later make this work with store hours*/}
                     <h4>Worker Hours</h4>
