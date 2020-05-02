@@ -217,7 +217,7 @@ class Homepage extends React.Component {
             </Row>
           </Col>
 
-          <Col style={{ marginTop: '8%', backgroundColor: '#f0ece1'}}>
+          <Col style={{ marginTop: '8%', backgroundColor: '#e8e3d8'}}>
           <Row>
           <Col style={{margin: '5%', marginTop: '10%'}}>
           <p className="header"> Are you a salon owner? </p>
