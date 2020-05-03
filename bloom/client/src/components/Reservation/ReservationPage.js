@@ -8,6 +8,8 @@ import DateSelection from './DateSelection'
 import { css } from '@emotion/core'
 import GridLoader from 'react-spinners/GridLoader'
 import BookingPage from './BookingPage';
+import RedirectToLogin from './RedirectToLogin'
+import Cookies from 'js-cookie';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const override = css`
@@ -28,7 +30,8 @@ class ReservationPage extends React.Component {
       loading: true,
       workers: [],
       workersSchedules: [],
-      storeHours: []
+      storeHours: [],
+      appointments: "original value"
     };
   }
 
@@ -133,6 +136,12 @@ class ReservationPage extends React.Component {
     ]).then(allResponses => {
       const response1 = allResponses[0]
       const response2 = allResponses[1]
+      if(this.props.location.currentStep && this.props.location.appointments) {
+        this.setState({
+          appointments: this.props.appointments,
+          currentStep: this.props.currentStep
+        })
+      }
       this.setState({
         services: response1,
         storeName: response2.name,
@@ -144,6 +153,16 @@ class ReservationPage extends React.Component {
     this.prefetchSchedules()
   }
 
+  static getDerivedStateFromProps(nextProps, preState) {
+    if(nextProps.location.appointments && nextProps.location.appointments !== preState.appointments) {
+      return {
+        appointments: nextProps.location.appointments,
+        currentStep: nextProps.location.currentStep
+      }
+    } else {
+      return null
+    }
+  }
 
 
   render() {
@@ -168,7 +187,11 @@ class ReservationPage extends React.Component {
         } else if(this.state.currentStep == 2) {
           return <DateSelection time={this.state.time}  store_id={this.props.match.params.store_id} selectedServices={this.state.selectedServices} storeHours={this.state.storeHours} workersSchedules={this.state.workersSchedules} handleSubmit={this.handleSubmit} updateAppointments={this.updateAppointments}/>
         } else {
-          return <BookingPage appointments={this.state.appointments} store_id={this.props.match.params.store_id} history={this.props.history}/>
+          if(Cookies.get('user')){
+            return <BookingPage appointments={this.state.appointments} store_id={this.props.match.params.store_id} history={this.props.history}/>
+          } else {
+            return <RedirectToLogin appointments={this.state.appointments} store_id={this.props.match.params.store_id} history={this.props.history}/>
+          }
         }
       }
     }

@@ -243,15 +243,19 @@ class AppointmentDisplay extends React.Component {
           </Col>
         </Row>
       } else {
-        return <Card>
+        return <Row className="justify-content-center mt-5">
+        <Col xs={11} lg={8}>
+          <Card className="w-70 h-60">
           <Card.Header as="h4">My Appointments</Card.Header>
             <Card.Body>
               <Card.Text as="div">
                 <h5>Whoops, looks like you need to book an appointment with us first. </h5>
-                <Image src="https://s3.amazonaws.com/thumbnails.thecrimson.com/photos/2018/11/15/001152_1334195.jpg.1500x998_q95_crop-smart_upscale.jpg"/>
+                <Image className="h-100 w-100" src="https://s3.amazonaws.com/thumbnails.thecrimson.com/photos/2018/11/15/001152_1334195.jpg.1500x998_q95_crop-smart_upscale.jpg"/>
               </Card.Text>
             </Card.Body>
         </Card>
+        </Col>
+        </Row>
       }
     }
 

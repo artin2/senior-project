@@ -1,4 +1,4 @@
-import {userLoginSuccess, userLoginFailure, editUserSuccess} from './actions/user';
+import {userLoginSuccess, userLoginFailure, userSignupSuccess, userSignupFailure, editUserSuccess} from './actions/user';
 // import {addServiceSuccess} from './actions/service';
 // import {getWorkerOptionsSuccess, addWorker} from './actions/worker';
 import {failure} from './actions/index'
@@ -14,20 +14,25 @@ export function signup(values){
       headers: {
         'Content-type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify(values)
     })
     .then(function(response){
       dispatch(addAlert(response))  // seems this alert is not persisting...
 
       if(response.status!==200){
-        dispatch(failure(response))
+        dispatch(userSignupFailure(response))
       }
       else{
-        // redirect to home page signed in
-        // NOTE: do we want them to be signed in after login? if so we can change this...
-        window.location.href='/'
+        return response.json()
       }
     })
+    .then(data => {
+      if(data){
+        dispatch(userSignupSuccess(data.user));
+        return data;
+      }
+    });
   }
 }
 

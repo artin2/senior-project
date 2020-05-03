@@ -105,6 +105,7 @@ class DateSelection extends React.Component {
   }
 
   componentDidMount() {
+    console.log("startdate is: ", this.state.startDate)
     fetch(fetchDomain + '/stores/' + this.props.store_id + '/appointments/month/' + (parseInt(this.state.startDate.getMonth()) + 1), {
       method: "GET",
       headers: {
@@ -122,9 +123,10 @@ class DateSelection extends React.Component {
       })
       .then(data => {
         let parsedData = data.map(appointment => {
-          appointment.date = new Date(appointment.date)
+          appointment.date = new Date(appointment.date + ' UTC')
           return appointment
         })
+        console.log("received these appointments: ", parsedData)
         this.setState({
           appointments: parsedData,
           loading: false
@@ -156,19 +158,28 @@ class DateSelection extends React.Component {
         let currScheduleCurrTime = currTime
         let currScheduleCurrWorkerIndex = 0
         let currScheduleServiceIndex = 0
+        // console.log("current time is: ", this.convertMinsToHrsMins(currTime))
         // Start building our schedule
         while (scheduleStillWorks && !foundSchedule) {
           let available = true
           let currScheduleCurrService = this.props.selectedServices[currScheduleServiceIndex]
           let currScheduleCurrWorker = currDaySchedules[currScheduleCurrWorkerIndex].worker_id
+          // console.log("checking if appointment is in worker's hours: ")
+          // console.log("currworker works from: ", currDaySchedules[currScheduleCurrWorkerIndex].start_time, "-",  currDaySchedules[currScheduleCurrWorkerIndex].end_time)
+          // console.log("trying to match with appointment from: ", this.convertMinsToHrsMins(currScheduleCurrTime), "-", this.convertMinsToHrsMins(currScheduleCurrTime + currScheduleCurrService.duration))
           // Check if appointment is within worker's hours
           if (currDaySchedules[currScheduleCurrWorkerIndex].start_time > currScheduleCurrTime || currDaySchedules[currScheduleCurrWorkerIndex].end_time < (currScheduleCurrTime + currScheduleCurrService.duration)) {
             available = false
           } else {
-            let currWorkerAppointments = this.state.appointments.filter(appointment => appointment.worker_id == currScheduleCurrWorker && appointment.date.setHours(0, 0, 0, 0) == this.state.currDate.setHours(0, 0, 0, 0))
+            let currWorkerAppointments = this.state.appointments.filter((appointment) => {
+              return appointment.worker_id == currScheduleCurrWorker && appointment.date.setHours(0, 0, 0, 0) == this.state.currDate.setHours(0, 0, 0, 0)
+            })
+            // console.log("Within bounds, checking for conflicts. ")
             // Check for conflicts via worker's existing appointments for the day
+            // console.log("currWorkers appointments: ", currWorkerAppointments)
             for (let m = 0; m < currWorkerAppointments.length; m++) {
               if ((currScheduleCurrTime >= currWorkerAppointments[m].start_time && currScheduleCurrTime <= currWorkerAppointments[m].end_time) || (currScheduleCurrTime + currScheduleCurrService.duration >= currWorkerAppointments[m].start_time && currScheduleCurrTime + currScheduleCurrService.duration <= currWorkerAppointments[m].end_time)) {
+                // console.log("conflict found with because of slot from: ", this.convertMinsToHrsMins(currWorkerAppointments[m].start_time), "-", this.convertMinsToHrsMins(currWorkerAppointments[m].end_time))
                 // Worker is unavailable
                 available = false
                 break
@@ -235,6 +246,7 @@ class DateSelection extends React.Component {
       <Card
         text='dark'
         className='mt-0 py-3'
+        style={{overflow: 'visible'}}
       >
         <div id="date-selection-form">
           <h3>Select Appointment Time</h3>
@@ -247,6 +259,11 @@ class DateSelection extends React.Component {
                     selected={this.state.currDate}
                     onChange={this.handleDateChange}
                     minDate={new Date()}
+                    popperModifiers={{
+                      flip: {
+                          behavior: ["bottom"] // don't allow it to flip to be above
+                      }
+                    }}
                   />
                 </div>
               </Col>
