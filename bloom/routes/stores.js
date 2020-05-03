@@ -99,7 +99,7 @@ async function getStores(req, res, next) {
           }
 
           // we were able to get search results
-          if (result && result.rows.length > 0) {
+          if (result) {
             console.log("====", result.rows)
             helper.querySuccess(res, result.rows, "Successfully got Search Results!");
           }
@@ -947,6 +947,8 @@ async function addAppointment(req, res, next) {
           if (result) {
             if(result.rows.length == 1) {
               insertAppointments(req, res, result.rows[0].group_id + 1)
+            } else {
+              insertAppointments(req, res, 0)
             }
           }
           else {
@@ -985,6 +987,7 @@ async function insertAppointments(req, res, group_id) {
           }
           await hourDb.query("COMMIT");
         } catch (e) {
+          console.log("error occured: ", e)
           await hourDb.query("ROLLBACK");
           failed = true
           throw e;

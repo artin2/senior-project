@@ -17,13 +17,17 @@ class MapContainer extends Component {
   }
 
   displayMarkers() { 
-    return this.props.stores.map((store, index) => { 
-      return <Marker key={"store-" + index} id={index} position={{ 
-                     lat: store.lat, 
-                     lng: store.lng }} 
-                     onClick={this.onMarkerClick}
-                     name={store.name} /> 
-    }) 
+    if(this.props.stores) {
+      return this.props.stores.map((store, index) => { 
+        return <Marker key={"store-" + index} id={index} position={{ 
+                       lat: store.lat, 
+                       lng: store.lng }} 
+                       onClick={this.onMarkerClick}
+                       name={store.name} /> 
+      }) 
+    } else {
+      return null
+    }
   } 
 
   onMarkerClick = (props, marker, e) =>
@@ -57,6 +61,14 @@ class MapContainer extends Component {
   }
 
   render() {
+
+  const DisplayInfoWindowContents = (props) => {
+    if(this.props.stores) {
+      return <h4 className="mb-0">{this.props.stores[this.state.activeMarkerIndex].name}</h4>
+    } else {
+      return null
+    }
+  }
     return (
       <Map
         google={this.props.google}
@@ -70,7 +82,7 @@ class MapContainer extends Component {
         visible={this.state.showingInfoWindow}
         onClose={this.onClose}
         >
-          <p>{this.props.stores[this.state.activeMarkerIndex].name}</p>
+          <DisplayInfoWindowContents/>
         </InfoWindow>
       </Map>
     );

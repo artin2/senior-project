@@ -128,7 +128,7 @@ class SearchDisplay extends React.Component {
               <SearchDisplayLoaderMobile className={'d-block d-xl-none'}/>
             </Col>
           </Row>
-      } else {
+      } else if(this.state.stores.length > 0) {
         return(<div>
           <h3 className="text-left"> {this.state.stores.length} results </h3>
           <Row className="mx-0 justify-content-center search-cards-row">
@@ -136,19 +136,21 @@ class SearchDisplay extends React.Component {
           </Row>
         </div>
         )
+      } else {
+        return <Row>
+            <Col xs="12">
+              <h5>No results!</h5>
+            </Col>
+          </Row>
       }
     }
 
-    const DisplayMapWithLoading = (props) => {
-      if(this.state.loading) {
-        return <p>Loading...</p>
-      } else {
+    const DisplayMapDynamic = (props) => {
         return <MapContainer google={window.google}
         stores={this.state.stores}
         center={this.state.center}
         zoom={this.state.zoom}
         mapStyles={this.state.mapStyles} />
-      }
     }
 
     return (
@@ -159,7 +161,7 @@ class SearchDisplay extends React.Component {
           </Col>
           <Col id="map" xs={12} xl={6}>
             <div className="position-fixed h-100 w-50 d-none d-xl-block">
-              <DisplayMapWithLoading/>
+              <DisplayMapDynamic/>
             </div>
           </Col>
         </Row>
