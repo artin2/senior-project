@@ -1,0 +1,76 @@
+import React from 'react';
+import './LoginForm.css'
+import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import paint from '../../assets/abstract-painting.jpg';
+import LoginForm from './LoginForm'
+import SignupForm from './SignupForm'
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import {login} from '../../reduxFolder/redux.js'
+import { useLocation } from 'react-router-dom'
+import { Image } from 'react-bootstrap';
+// import ReactDOM from 'react-dom';
+// import { useGoogleLogin } from 'react-google-login';
+// import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+
+class Registration extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: '',
+      password: '',
+      message: {},
+      displayLogin: props.location.pathname == "/login"
+    };
+
+    this.toggleLogin = this.toggleLogin.bind(this);
+  }
+
+  componentDidUpdate(prevProps, prevState)  {
+    // means we updated redux store with the user and have successfully logged in
+    if (prevProps.user !== this.props.user) {
+      if(this.props.appointments) {
+        this.props.history.push({
+          pathname: '/book/' + this.props.store_id,
+          appointments: this.props.appointments,
+          currentStep: 3
+        })
+      } else {
+        this.props.history.push({
+          pathname: '/'
+        })
+      }
+      
+    }
+  }
+
+  toggleLogin(newValue) {
+    this.setState({
+      displayLogin: newValue
+    })
+  }
+
+  render() {
+    const RenderLoginOrSignup = (props) => {
+      if(this.state.displayLogin) {
+        return <LoginForm title="Login" history={this.props.history} toggleLogin={this.toggleLogin}/>
+      } else {
+        return <SignupForm history={this.props.history} toggleLogin={this.toggleLogin}/>
+      }
+    }
+    return (
+      <Container fluid>
+        <Image src={paint} alt="paint" style={{top: 0, left: 0, position: 'absolute', width:'100%', filter: 'grayscale(0.4)'}}/>
+        <Row className="justify-content-center mt-5">
+          <Col xs={8} sm={7} md={6} lg={5}>
+            <RenderLoginOrSignup/>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+}
+
+export default Registration;

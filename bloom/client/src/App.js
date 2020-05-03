@@ -4,7 +4,7 @@ import {
   Switch,
   Route
 } from "react-router-dom";
-import LoginForm from './components/User/LoginForm';
+import Registration from './components/User/Registration';
 import SignupForm from './components/User/SignupForm';
 import MainNavbar from './components/Navbar/MainNavbar';
 import Homepage from './components/Home/Homepage';
@@ -55,9 +55,9 @@ function App() {
             <Route exact path="/about" component={StaticPage} />
             <Route path="/search" component={SearchDisplay} />
 
-            <Route exact path="/login" component={redirectWithAuth(LoginForm)} />
+            <Route exact path="/login" component={redirectWithAuth(Registration)} />
             <Route exact path="/logout" component={handleLogout}/>
-            <Route exact path="/signup" component={SignupForm} />
+            <Route exact path="/signup" component={Registration} />
             <Route path="/users/edit/:user_id" component={redirectWithoutAuth(EditProfileForm)}/>
             <Route path="/users/:user_id/stores" component={redirectWithoutAuth(UserStoresDashboard)}/>
             <Route path="/users/:user_id/appointments" component={redirectWithoutAuth(UserAppointments)}/>

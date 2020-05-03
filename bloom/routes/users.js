@@ -71,7 +71,7 @@ async function signup(req, res) {
 
     db.client.connect((err, client, done) => {
       // try to add user to user table
-      db.client.query(query, values, (err, result) => {
+      db.client.query(query, values, async (err, result) => {
         done()
           if (err) {
             helper.queryError(res, err);
@@ -83,7 +83,9 @@ async function signup(req, res) {
               // for some reason the cookie is not being attatched to the response...
               // cookie is successfuly generated for sure tho..
               // await auth.generateToken(res, result.rows[0]);
-              helper.querySuccess(res, result.rows[0], "Successfully Created User!");
+              let tokenGen = await auth.generateToken(res, result.rows[0]);
+              delete result.rows[0].password
+              helper.querySuccess(res, {user: result.rows[0], token: tokenGen}, "Successfully Created User!");
             } 
             catch (err) {
               helper.queryError(res, err);

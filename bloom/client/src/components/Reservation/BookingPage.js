@@ -19,7 +19,7 @@ const override = css`
   margin: 0 auto;
 `;
 
-class DateSelection extends React.Component {
+class BookingPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -253,4 +253,4 @@ class DateSelection extends React.Component {
   }
 }
 
-export default DateSelection;
+export default BookingPage;

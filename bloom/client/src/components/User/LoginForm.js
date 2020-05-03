@@ -58,9 +58,18 @@ class LoginForm extends React.Component {
   componentDidUpdate(prevProps, prevState)  {
     // means we updated redux store with the user and have successfully logged in
     if (prevProps.user !== this.props.user) {
-      this.props.history.push({
-        pathname: '/'
-      })
+      if(this.props.appointments) {
+        this.props.history.push({
+          pathname: '/book/' + this.props.store_id,
+          appointments: this.props.appointments,
+          currentStep: 3
+        })
+      } else {
+        this.props.history.push({
+          pathname: '/'
+        })
+      }
+      
     }
   }
 
@@ -71,14 +80,8 @@ class LoginForm extends React.Component {
   }
 
   render() {
-    return (
-      <Container fluid>
-      <img src={paint} alt="paint" style={{top: 0, left: 0, position: 'absolute', height: '100%', width:'100%', filter: 'grayscale(0.4)'}}/>
-
-        <Row className="justify-content-center">
-          <Col xs={8} sm={7} md={6} lg={5}>
-            <Form className="formBody rounded container" style={{marginTop: 80}}>
-              <h3>Login</h3>
+    return ( <Form className="formBody rounded">
+              <h3>{this.props.title}</h3>
               <Form.Group style={{marginTop: 40, width: '65%', marginLeft: '17%'}}>
                 <InputGroup>
                   <InputGroup.Prepend >
@@ -124,12 +127,9 @@ class LoginForm extends React.Component {
                     icon={<TiSocialFacebookCircular size={45} style={{paddingRight:"15px"}}/>}
                     callback={successFacebook}
                     />
-                  <p> Don't have a Bloom account yet? <Link to="/signup" style={{color: 'black'}}><b> Sign Up. </b></Link></p>
+                  <p> Don't have a Bloom account yet? <Button className="toggle-button" onClick={() => this.props.toggleLogin(false)}> Sign Up. </Button></p>
               </Col>
             </Form>
-          </Col>
-        </Row>
-      </Container>
     );
   }
 }

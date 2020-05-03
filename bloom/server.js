@@ -195,7 +195,7 @@ app.post('/stores/:store_id/appointments/new', withAuth, async(req, res, next) =
   await stores.addAppointment(req, res, next);
 })
 
-app.get('/stores/:store_id/appointments/month/:month', withAuth, async(req, res, next) => {
+app.get('/stores/:store_id/appointments/month/:month', async(req, res, next) => {
   console.log("hit the getAppointmentsByMonth route")
   await stores.getAppointmentsByMonth(req, res, next);
 })
