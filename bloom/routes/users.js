@@ -10,13 +10,15 @@ async function login(req, res) {
     db.client.connect((err, client, done) => {
       db.client.query(query, values, async (err, result) => {
         done()
-          if (result && result.rows.length == 1) {
+
+          if (result && result.rows.length == 1 && result.rows[0]["provider"] == req.body.provider) {
             try {
-              let passwordMatch = await auth.verifyHash(result.rows[0]["password"], req.body.password);
+              let passwordMatch = (!req.body.provider) ? await auth.verifyHash(result.rows[0]["password"], req.body.password) : true
 
               if(passwordMatch != false) {
                 try {
-                  let tokenGen = await auth.generateToken(res, result.rows[0]);
+                  let tokenGen = await auth.generateToken(res, result.rows[0])
+
                   let resultUser = result.rows[0]
                   delete resultUser.password
 
@@ -87,12 +89,13 @@ async function signup(req, res) {
 
     // try to generate password hash
     try {
-      hash = await auth.generateHash(req.body.password);
+      hash = (!req.body.provider) ? await auth.generateHash(req.body.password) : '';
+
     } catch (err) {
       helper.queryError(res, "Could not Create Password Hash");
     }
-    let query = 'INSERT INTO users(email, first_name, last_name, password, role, created_at, phone) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;'
-    let values = [req.body.email, req.body.first_name, req.body.last_name, hash, req.body.role, timestamp, req.body.phone]
+    let query = 'INSERT INTO users(email, first_name, last_name, password, role, created_at, phone, provider) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;'
+    let values = [req.body.email, req.body.first_name, req.body.last_name, hash, req.body.role, timestamp, req.body.phone, req.body.provider]
 
     db.client.connect((err, client, done) => {
       // try to add user to user table
@@ -108,7 +111,7 @@ async function signup(req, res) {
               // for some reason the cookie is not being attatched to the response...
               // cookie is successfuly generated for sure tho..
               // await auth.generateToken(res, result.rows[0]);
-              let tokenGen = await auth.generateToken(res, result.rows[0]);
+              let tokenGen = await auth.generateToken(res, result.rows[0]) 
               delete result.rows[0].password
               helper.querySuccess(res, {user: result.rows[0], token: tokenGen}, "Successfully Created User!");
             }
@@ -171,7 +174,7 @@ async function edit(req, res, next) {
                   const expiration = process.env.DB_ENV === 'dev' ? 1 : 7;
                   const date = new Date();
                   date.setDate(date.getDate() + expiration)
-    
+
                   // update the cookie for this user
                   res.cookie('user', user, {
                     expires: date,
@@ -219,7 +222,7 @@ async function edit(req, res, next) {
           }
         }
       );
-      
+
       if (err) {
         helper.dbConnError(res, err);
       }

@@ -31,7 +31,10 @@ class SearchCard extends React.Component {
               <Card.Body >
                 <div>
                   <Card.Title onClick={() => this.props.onClickFunctionStore(this.props.store.id)} style={{cursor: 'pointer'}} >{this.props.store.name}</Card.Title>
+                  <Card.Text className="mb-3">{this.props.store.address}</Card.Text>
+                  <Card.Text className="mb-3">Call {this.props.store.phone}</Card.Text>
                   <Card.Text className="mb-3">{this.props.store.description}</Card.Text>
+
 
                 </div>
                 <Button style={{backgroundColor: '#8CAFCA', border: 0}} onClick={() => this.props.onClickFunctionBook(this.props.store.id)}>Book Now</Button>

@@ -11,9 +11,9 @@ class Category extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      stores: [],
+      stores : [],
       address: '',
-      distance: 15,
+      distance: 10,
       redirect: false,
       center: {
         lat: '',
@@ -128,12 +128,9 @@ class Category extends React.Component {
       .then(data => {
         if(data){
           let stateRep = this.state
-          stateRep.stores = data
+          stateRep.stores = data.stores
           stateRep.redirect = true
-          // stateRep.center = {
-          //   lat: "34.277639",
-          //   lng: "-118.3741806"
-          // }
+
 
           this.props.history.push({
             pathname: '/search',

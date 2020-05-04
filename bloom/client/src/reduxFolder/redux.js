@@ -5,9 +5,11 @@ import {failure} from './actions/index'
 import {addAlert} from './actions/alert';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
-// USER FUNCTIONS 
+// USER FUNCTIONS
 
 export function signup(values){
+
+  console.log(values)
   return dispatch => {
     fetch(fetchDomain + '/signUp' , {
       method: "POST",
@@ -36,7 +38,7 @@ export function signup(values){
   }
 }
 
-export function login(email, password, auth_token) {
+export function login(values) {
   return dispatch => {
     fetch(fetchDomain + '/login' , {
       headers: {
@@ -44,10 +46,8 @@ export function login(email, password, auth_token) {
       },
       credentials: 'include',
       method: "POST",
-      body: JSON.stringify({
-        "email": email,
-        "password": password
-      })
+      body: JSON.stringify(values)
+      
     })
     .then(function(response){
       dispatch(addAlert(response))
@@ -80,7 +80,7 @@ export function editUser(values){
     })
     .then(function(response){
       dispatch(addAlert(response))
-      
+
       if(response.status!==200){
         dispatch(failure(response))
       }
