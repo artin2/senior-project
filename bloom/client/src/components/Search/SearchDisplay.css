@@ -10,6 +10,13 @@
    width: 100vw;
    height: 100vh;
  }
+
+ .search-filters {
+  position: fixed;
+  width: 50%;
+  z-index: 999;
+  overflow: visible;
+}
  
  /* Smartphones (portrait and landscape) ----------- */
 @media only screen 

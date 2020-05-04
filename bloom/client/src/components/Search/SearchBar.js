@@ -78,8 +78,8 @@ class SearchBar extends React.Component {
   render() {
     return (
         <Form inline className="full-width">
-          <Form.Row className="px-1 full-width">
-            <Col xs={12} md={6} className="form-horizontal">
+          <Form.Row className="px-1 full-width justify-content-center">
+            <Col xs={12} lg={5} xl={4} className="form-horizontal">
               <Form.Group className="full-width" controlId="autocomplete">
                 <InputGroup className="not-auto">
                   <Form.Control
@@ -96,10 +96,11 @@ class SearchBar extends React.Component {
                 </InputGroup>
               </Form.Group>
             </Col>
-            <Col xs={12} md={3}>
+            <Col xs={12} lg={3} xl={2}>
               <Form.Group className="full-width">
               <Select
                 className="full-width"
+                placeholder="Category"
                 value={this.state.selectedCategory}
                 onChange={this.handleSelectChange}
                 options={this.state.categories}
