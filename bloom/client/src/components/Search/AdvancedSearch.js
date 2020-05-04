@@ -190,7 +190,7 @@ class AdvancedSearch extends React.Component {
     .then(data => {
       if(data){
         let stateRep = this.state
-        stateRep.stores = data
+        stateRep.stores = data.stores
         stateRep.redirect = true
         // stateRep.center = {
         //   lat: "34.277639",

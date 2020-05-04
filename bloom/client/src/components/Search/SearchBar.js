@@ -17,9 +17,17 @@ class SearchBar extends React.Component {
         lng: ''
       },
       categories: helper.getCategoriesAsPairs(),
-      selectedCategory: '',
+      selectedCategory: "",
       address: '',
+      distanceSelect: "",
       distance: 15,
+      nails: false,	
+      hair: false,	
+      facials: false,	
+      barber: false,	
+      spa: false,	
+      makeup: false,
+      searchRadiusList: [{value: 1, label: '1 mile'}, {value: 5, label: '5 miles'}, {value: 10, label: '10 miles'}, {value: 25, label: '25 miles'}, {value: 50, label: '50 miles'}]
     }
 
     this.autocomplete = null
@@ -28,7 +36,79 @@ class SearchBar extends React.Component {
   }
 
   handleSelectChange = (selectedCategory) => {
+    // there must be a better way to do this
+    if(selectedCategory.value == "Nails") {
+      this.setState({ 
+        nails: true,
+        hair: false,	
+        facials: false,	
+        barber: false,	
+        spa: false,	
+        makeup: false,
+      })
+    } else if (selectedCategory.value == "Hair") {
+      this.setState({ 
+        nails: false,
+        hair: true,	
+        facials: false,	
+        barber: false,	
+        spa: false,	
+        makeup: false,
+      })
+    } else if (selectedCategory.value == "Facials") {
+      this.setState({ 
+        nails: false,
+        hair: false,	
+        facials: true,	
+        barber: false,	
+        spa: false,	
+        makeup: false,
+      })
+    } else if (selectedCategory.value == "Barbershops") {
+      this.setState({ 
+        nails: false,
+        hair: false,	
+        facials: false,	
+        barber: true,	
+        spa: false,	
+        makeup: false,
+      })
+    } else if (selectedCategory.value == "Spa") {
+      this.setState({ 
+        nails: false,
+        hair: false,	
+        facials: false,	
+        barber: false,	
+        spa: true,	
+        makeup: false,
+      })
+    } else if (selectedCategory.value == "Makeup") {
+      this.setState({ 
+        nails: false,
+        hair: false,	
+        facials: false,	
+        barber: false,	
+        spa: false,	
+        makeup: true,
+      })
+    } else {
+      this.setState({ 
+        nails: true,
+        hair: true,	
+        facials: true,	
+        barber: true,	
+        spa: true,	
+        makeup: true,
+      })
+    }
     this.setState({ selectedCategory });
+  }
+
+  handleSearchRadiusChange = (distanceSelect) => {
+    this.setState({ 
+      distanceSelect: distanceSelect,
+      distance: distanceSelect.value
+    });
   }
 
   handleSubmit() {
@@ -78,8 +158,8 @@ class SearchBar extends React.Component {
   render() {
     return (
         <Form inline className="full-width">
-          <Form.Row className="px-1 full-width">
-            <Col xs={12} md={6} className="form-horizontal">
+          <Form.Row className="px-1 full-width justify-content-center">
+            <Col xs={12} lg={5} xl={4} className="form-horizontal">
               <Form.Group className="full-width" controlId="autocomplete">
                 <InputGroup className="not-auto">
                   <Form.Control
@@ -87,6 +167,7 @@ class SearchBar extends React.Component {
                     type="text"
                     placeholder="Try 'New Haven, CT'"
                     autoComplete="new-password"
+                    defaultValue={this.state.address}
                   />
                   <InputGroup.Append>
                     <Button variant="secondary" onClick={this.handleSubmit} disabled={!this.state.address}>
@@ -96,13 +177,25 @@ class SearchBar extends React.Component {
                 </InputGroup>
               </Form.Group>
             </Col>
-            <Col xs={12} md={3}>
+            <Col xs={12} lg={3} xl={2}>
               <Form.Group className="full-width">
               <Select
                 className="full-width"
+                placeholder="Category"
                 value={this.state.selectedCategory}
                 onChange={this.handleSelectChange}
                 options={this.state.categories}
+              />
+              </Form.Group>
+            </Col>
+            <Col xs={12} lg={3} xl={2}>
+              <Form.Group className="full-width">
+              <Select
+                className="full-width"
+                placeholder="Search Radius"
+                value={this.state.distanceSelect}
+                onChange={this.handleSearchRadiusChange}
+                options={this.state.searchRadiusList}
               />
               </Form.Group>
             </Col>

@@ -1,11 +1,12 @@
 import React from 'react';
-import { Row } from 'react-bootstrap';
+import { Row, Card, Nav, Form } from 'react-bootstrap';
 import Col from 'react-bootstrap/Col'
 import SearchCard from './SearchCard'
 import './SearchDisplay.css'
 import MapContainer from '../Map/MapContainer'
 import SearchDisplayLoader from './SearchDisplayLoader'
 import SearchDisplayLoaderMobile from './SearchDisplayLoaderMobile'
+import Select from 'react-select'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 
@@ -124,8 +125,8 @@ class SearchDisplay extends React.Component {
             </Col>
           </Row>
       } else if(this.state.stores.length > 0) {
-        return(<div>
-          <h3 className="text-left"> {this.state.stores.length} results </h3>
+        return( <div>
+          <h3 className="text-left mb-0"> {this.state.stores.length} results </h3>	
           <Row className="mx-0 justify-content-center search-cards-row">
             <RenderStoreCards/>
           </Row>
@@ -149,8 +150,7 @@ class SearchDisplay extends React.Component {
     }
 
     return (
-      <div>
-        <Row className="restrict-viewport mx-0">
+<       Row className="restrict-viewport mx-0">
           <Col xs={12} xl={6} className="px-5 my-3 h-100">
             <DisplayWithLoading/>
           </Col>
@@ -160,8 +160,6 @@ class SearchDisplay extends React.Component {
             </div>
           </Col>
         </Row>
-      </div>
-
     );
   }
 }

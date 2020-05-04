@@ -18,7 +18,7 @@ function getCategories() {
 }
 
 function getCategoriesAsPairs() {
-  return [{ value: 'Nails', label: "Nail Salon" },{ value: 'Hair', label: "Hair Salon" },
+  return [{value: 'All', label: 'All'}, { value: 'Nails', label: "Nail Salon" },{ value: 'Hair', label: "Hair Salon" },
   { value: "Facials", label: "Facials" },{ value: "Barbershops", label:"Barbershops"},
   {value: "Spa", label: "Spa & Wellness" }, {value: "Makeup", label: "Makeup" }];
 }
