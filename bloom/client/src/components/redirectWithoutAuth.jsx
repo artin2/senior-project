@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import store from '../reduxFolder/store';
+
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 export default function redirectWithoutAuth(ComponentToProtect) {
@@ -52,10 +54,20 @@ export default function redirectWithoutAuth(ComponentToProtect) {
               // verified user is logged in and has a valid token
               // if they are trying to access private data, make sure it is the correct user
               if(this.props.match.params.user_id){
-                if (JSON.parse(Cookies.get('user').substring(2)).id == this.props.match.params.user_id) {
-                  this.setState({
-                    loading: false
-                  })
+                let user = store.getState().userReducer.user
+                if (user.id == this.props.match.params.user_id) {
+                  // if they are trying to access stores when they don't own any
+                  if(window.location.href.split("/users/" + this.props.match.params.user_id + '/stores').length > 1 && user.role != 1){
+                    this.setState({
+                      loading:false,
+                      redirect: true
+                    })
+                  }
+                  else{
+                    this.setState({
+                      loading: false
+                    })
+                  }
                 }
                 else{
                   this.setState({

@@ -100,15 +100,15 @@ async function getStores(req, res, next) {
           }
 
           // we were able to get search results
-          if (result && result.rows.length > 0) {
+          if (result) {
             for (let i = 0; i < result.rows.length; i++) {
               let pictures = await s3.getImagesLocal('stores/' + result.rows[i].id + '/images/')
               result.rows[i].pictures = pictures
             }
-            helper.querySuccess(res, result.rows, "Successfully got Search Results!");
+            helper.querySuccess(res, {stores: result.rows, center: {lat: lat, lng: lng}}, "Successfully got Search Results!");
           }
           else {
-            helper.queryError(res, "No Search Results!");
+            helper.queryError(res, "Some sort of search error!");
           }
         });
       if (err) {
@@ -691,7 +691,7 @@ async function getStoreItems(req, res, next, table) {
           }
 
           // we were successfuly able to get the store items
-          if (result && result.rows.length > 0) {
+          if (result) {
             helper.querySuccess(res, result.rows, "Successfully got Store Items!");
           }
           else {
