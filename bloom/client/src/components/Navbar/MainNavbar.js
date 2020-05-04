@@ -41,7 +41,9 @@ class MainNavbar extends React.Component {
         return <Nav>
           {storeDisplay}
           <Link to={"/users/" + this.props.user.id} title="Profile" className="nav-link">Profile</Link>
-          <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My Appointments</Link>
+          {this.props.user.role == '0' ? null :
+            <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My Appointments</Link>
+          }
           <Link style={{position: 'absolute', right: 60}} to="/logout" className="nav-link">Logout</Link>
         </Nav>
       }

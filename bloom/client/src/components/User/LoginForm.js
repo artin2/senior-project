@@ -19,32 +19,14 @@ import {login} from '../../reduxFolder/redux.js'
 // import { useGoogleLogin } from 'react-google-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 
-
-const successGoogle = (response) => {
-  console.log("Google Success: ", response.accessToken);
-}
-
-const failureGoogle = (response) => {
-  console.log("Google Failure:", response.error);
-}
-
-const successFacebook = (response) => {
-  console.log("Facebook Success:", response.accessToken);
-}
-
-const failureFacebook = (response) => {
-  if(response.status){
-    console.log("Facebook Failure");
-  }
-}
-
 class LoginForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       email: '',
       password: '',
-      message: {}
+      message: {},
+      auth: ''
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -53,6 +35,38 @@ class LoginForm extends React.Component {
 
   handleChange(event) {
     this.setState({[event.target.id]: event.target.value});
+  }
+
+
+  successGoogle = (response) => {
+    console.log(response)
+    console.log("Google Success: ", response.accessToken);
+    this.setState({
+      auth: {
+        party: "Google",
+        token: response.accessToken
+      }
+    });
+  }
+
+  failureGoogle = (response) => {
+    console.log("Google Failure:", response.error);
+  }
+
+  fsuccessFacebook = (response) => {
+    console.log("Facebook Success:", response.accessToken);
+    this.setState({
+      auth: {
+        party: "Google",
+        token: response.accessToken
+      }
+    });
+  }
+
+  failureFacebook = (response) => {
+    if(response.status){
+      console.log("Facebook Failure");
+    }
   }
 
   componentDidUpdate(prevProps, prevState)  {
@@ -69,14 +83,14 @@ class LoginForm extends React.Component {
           pathname: '/'
         })
       }
-      
+
     }
   }
 
   handleSubmit(event) {
     //there might be a CORS issue with the backend, this doesn't work without preventDefault..
     event.preventDefault();
-    this.props.loginUser(this.state.email, this.state.password, "")
+    this.props.loginUser(this.state.email, this.state.password, this.state.auth)
   }
 
   render() {
@@ -109,8 +123,8 @@ class LoginForm extends React.Component {
                   <GoogleLogin
                     clientId={process.env.REACT_APP_GOOGLE_ID}
                     buttonText="Login with Google"
-                    onSuccess={successGoogle}
-                    onFailure={failureGoogle}
+                    onSuccess={this.successGoogle}
+                    onFailure={this.failureGoogle}
                     cookiePolicy={'single_host_origin'}
                     render={renderProps => (
                       <button onClick={renderProps.onClick} style={{ width: '100%', backgroundColor:"#db4a39", color: 'white', paddingRight: '30px',
@@ -121,13 +135,13 @@ class LoginForm extends React.Component {
                   <FacebookLogin
                     appId={process.env.REACT_APP_FACEBOOK_ID} //APP ID NOT CREATED YET
                     fields="name,email,picture"
-                    onFailure={failureFacebook}
+                    onFailure={this.failureFacebook}
                     xfbml={true}
                     cssClass="facebookButton"
                     icon={<TiSocialFacebookCircular size={45} style={{paddingRight:"15px"}}/>}
-                    callback={successFacebook}
+                    callback={this.successFacebook}
                     />
-                  <p> Don't have a Bloom account yet? <Button className="toggle-button" onClick={() => this.props.toggleLogin(false)}> Sign Up. </Button></p>
+                  <p> Don't have a Bloom account yet? <Link  onClick={() => this.props.toggleLogin(false)}> Sign Up. </Link></p>
               </Col>
             </Form>
     );

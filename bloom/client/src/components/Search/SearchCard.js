@@ -13,6 +13,7 @@ class SearchCard extends React.Component {
   }
 
   render() {
+    console.log(this.props.store)
     return (
       <Col xs={12} className="my-3 px-0 h-100">
         <Card style={{height: '100%'}}>
@@ -31,6 +32,7 @@ class SearchCard extends React.Component {
                 <div>
                   <Card.Title onClick={() => this.props.onClickFunctionStore(this.props.store.id)} style={{cursor: 'pointer'}} >{this.props.store.name}</Card.Title>
                   <Card.Text className="mb-3">{this.props.store.description}</Card.Text>
+
                 </div>
                 <Button style={{backgroundColor: '#8CAFCA', border: 0}} onClick={() => this.props.onClickFunctionBook(this.props.store.id)}>Book Now</Button>
               </Card.Body>

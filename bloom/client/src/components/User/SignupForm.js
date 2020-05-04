@@ -66,7 +66,7 @@ class SignupForm extends React.Component {
           pathname: '/'
         })
       }
-      
+
     }
   }
 
@@ -218,7 +218,7 @@ class SignupForm extends React.Component {
               ): null}
             </Form.Group>
             <Button className="signup" onClick={handleSubmit}>Sign Up</Button>
-            <p> Already have a Bloom account? <Button className="toggle-button" onClick={() => this.props.toggleLogin(true)}> Log in. </Button></p>
+            <p> Already have a Bloom account? <Link onClick={() => this.props.toggleLogin(true)}> Log in. </Link></p>
           </Form>
         )}
         </Formik>
