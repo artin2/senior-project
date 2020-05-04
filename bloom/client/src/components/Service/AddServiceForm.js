@@ -10,28 +10,29 @@ import { FaDollarSign, FaHandshake, FaHourglassHalf, FaPen } from 'react-icons/f
 import { Formik } from 'formik';
 import Select from 'react-select';
 import * as Yup from 'yup';
+import { Multiselect } from 'multiselect-react-dropdown';
 import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import { uploadHandler } from '../s3';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
+const helper = require('../Search/helper.js');
 
 class AddServiceForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      category: [],
+      categoryError: false,
+      selected: [],
+      workerError: false,
       name: '', // assuming this is a unique value for file upload
       cost: '',
       duration: '',
       description: '',
       workers: [],
-      category: [],
       store_id: '',
-      categoryOptions: [
-        { value: 'nails', label: 'Nails' },
-        { value: 'hair', label: 'Hair' }
-      ],
       workerOptions: [],
       selectedOption: null,
       selectedFiles: []
@@ -52,18 +53,22 @@ class AddServiceForm extends React.Component {
       duration: Yup.number()
       .positive("Duration must be positive")
       .required("Duration is required"),
-      workers: Yup.array()
-      .required("Worker is required")
-      .nullable(),
-      category: Yup.array()
-      .required("Category is required")
-      .nullable(),
+      // workers: Yup.array()
+      // .required("Worker is required")
+      // .nullable(),
+      // category: Yup.array()
+      // .required("Category is required")
+      // .nullable(),
       pictureCount: Yup.number()
       .required("Pictures are required")
       .min(1, "Must have at least one picture")
     });
 
     this.triggerServiceDisplay = this.triggerServiceDisplay.bind(this);
+    this.onSelectCategory = this.onSelectCategory.bind(this);
+    this.onRemoveCategory = this.onRemoveCategory.bind(this);
+    this.onSelectWorker = this.onSelectWorker.bind(this);
+    this.onRemoveWorker = this.onRemoveWorker.bind(this);
   }
 
   componentDidMount() {
@@ -89,6 +94,32 @@ class AddServiceForm extends React.Component {
         let convertedWorkers = data.map((worker) => ({ value: worker.id, label: worker.first_name + " " + worker.last_name }));
         this.setState({
           workerOptions: convertedWorkers
+        })
+      }
+    });
+    fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/categories" , {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    .then(function(response){
+      if(response.status!==200){
+        // throw an error alert
+        store.dispatch(addAlert(response))
+      }
+      else{
+        return response.json();
+      }
+    })
+    .then(data => {
+      if(data){
+
+        let convertedCategory = data[0].category.map((category, indx) => ({ value: indx, label: helper.longerVersion(category)}));
+        console.log(convertedCategory)
+        this.setState({
+          category: convertedCategory
         })
       }
     });
@@ -118,8 +149,48 @@ class AddServiceForm extends React.Component {
     setFieldValue('pictureCount', event.target.files.length)
     this.setState({ selectedFiles: event.target.files })
   }
-    
+
+  onSelectCategory(selectedList, selectedItem) {
+
+    this.setState({
+      selected: selectedList,
+      workerError: false
+    })
+  }
+
+  onSelectWorker(selectedList, selectedItem) {
+
+    this.setState({
+      workers: selectedList,
+      workerError: false
+    })
+  }
+
+  onRemoveCategory(selectedList, removedItem, event) {
+
+    this.setState({
+      selected: selectedList
+    })
+
+  }
+
+  onRemoveWorker(selectedList, removedItem, event) {
+
+    this.setState({
+      workers: selectedList
+    })
+
+  }
+
+  handleChange = (event) => {
+    this.setState({
+      [event.target.name]: event.target.value,
+
+    })
+  }
+
   render() {
+
     return (
       <Container fluid>
         <Row className="justify-content-center">
@@ -127,10 +198,10 @@ class AddServiceForm extends React.Component {
             <Formik
               enableReinitialize
               initialValues={{
-                name: '',
-                cost: '',
-                duration: '',
-                description: '',
+                name: this.state.name,
+                cost: this.state.cost,
+                duration: this.state.duration,
+                description: this.state.description,
                 pictures: [],
                 workers: [],
                 category: [],
@@ -142,14 +213,38 @@ class AddServiceForm extends React.Component {
                 let store_id = this.props.match.params.store_id
                 let selectedFiles = this.state.selectedFiles
                 let triggerServiceDisplay = this.triggerServiceDisplay
+                let shorterVersion = helper.shorterVersion;
 
-                values.category = values.category.map(function(val){ 
-                  return val.label; 
+
+                values.category = this.state.selected.map(function (val) {
+                  return shorterVersion(val.label)
                 })
 
-                values.workers = values.workers.map(function(val){ 
-                  return val.value; 
+                if(values.category.length == 0) {
+
+                  this.setState({
+                    categoryError: true
+                  })
+
+                }
+
+                // console.log(this.state.workers)
+                values.workers = this.state.workers.map(function(val){
+                  return val.value;
                 })
+
+
+                if(values.workers.length == 0) {
+
+                  this.setState({
+                    workerError: true
+                  })
+
+                }
+
+                if(values.category.length == 0 || values.workers.length == 0) {
+                  return;
+                }
 
                 fetch(fetchDomain + '/stores/addService/' + store_id, {
                   method: "POST",
@@ -168,6 +263,7 @@ class AddServiceForm extends React.Component {
                   }
                 })
                 .then(async function(data){
+
                   // redirect to home page signed in
                   if(data){
                     // upload to s3 from client to avoid burdening back end
@@ -199,11 +295,11 @@ class AddServiceForm extends React.Component {
                             <FaHandshake/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control type="text" 
-                      value={values.name} 
-                      placeholder="Name of Service" 
-                      name="name" 
-                      onChange={handleChange} 
+                    <Form.Control type="text"
+                      value={values.name}
+                      placeholder="Name of Service"
+                      name="name"
+                      onChange={this.handleChange}
                       onBlur={handleBlur}
                       className={touched.name && errors.name ? "error" : null}/>
                   </InputGroup>
@@ -219,11 +315,11 @@ class AddServiceForm extends React.Component {
                             <FaDollarSign/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control type="number" 
+                    <Form.Control type="number"
                     value={values.cost}
-                    placeholder="Cost" 
-                    name="cost" 
-                    onChange={handleChange}
+                    placeholder="Cost"
+                    name="cost"
+                    onChange={this.handleChange}
                     onBlur={handleBlur}
                     className={touched.cost && errors.cost ? "error" : null}/>
                   </InputGroup>
@@ -239,12 +335,12 @@ class AddServiceForm extends React.Component {
                             <FaHourglassHalf/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control 
+                    <Form.Control
                       type="number"
                       value={values.duration}
-                      placeholder="Duration (in min)" 
-                      name="duration" 
-                      onChange={handleChange} 
+                      placeholder="Duration (in min)"
+                      name="duration"
+                      onChange={this.handleChange}
                       onBlur={handleBlur}
                       className={touched.duration && errors.duration ? "error" : null}/>
                   </InputGroup>
@@ -260,13 +356,13 @@ class AddServiceForm extends React.Component {
                           <FaPen/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control 
+                    <Form.Control
                       type="textarea"
                       rows={3}
                       value={values.description}
-                      placeholder="Description" 
-                      name="description" 
-                      onChange={handleChange} 
+                      placeholder="Description"
+                      name="description"
+                      onChange={this.handleChange}
                       onBlur={handleBlur}
                       className={touched.description && errors.description ? "error" : null}/>
                   </InputGroup>
@@ -276,37 +372,43 @@ class AddServiceForm extends React.Component {
                 </Form.Group>
 
                 <Form.Group controlId="formWorkers">
-                  <Select
-                    value={values.workers}
-                    onChange={option => setFieldValue("workers", option)}
-                    name="workers"
-                    options={this.state.workerOptions}
-                    isMulti={true}
-                    placeholder={"Assigned Workers"}
-                    className={touched.workers && errors.workers ? "error" : null}
-                  />
-                  {touched.workers && errors.workers ? (
-                    <div className="error-message">{errors.workers}</div>
-                  ): null}
+
+                <Multiselect
+                  options={this.state.workerOptions}
+                  onSelect={this.onSelectWorker}
+                  onRemove={this.onRemove}
+                  placeholder="Assigned Workers"
+                  closeIcon="cancel"
+                  displayValue="label"
+                  avoidHighlightFirstOption={true}
+                  style={{multiselectContainer: { width: '100%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
+                />
+                {(this.state.workerError) ? (
+                  <div className="error-message">At least 1 worker is required</div>
+                ) : null}
+
                 </Form.Group>
 
                 <Form.Group controlId="formCategory">
-                  <Select
-                    value={values.category}
-                    onChange={option => setFieldValue("category", option)}
-                    name="category"
-                    options={this.state.categoryOptions}
-                    isMulti={true}
-                    placeholder={"Category"}
-                    className={touched.category && errors.category ? "error" : null}
+                  <Multiselect
+                    options={this.state.category}
+                    onSelect={this.onSelectCategory}
+                    onRemove={this.onRemove}
+                    singleSelect={true}
+                    placeholder="Category"
+                    closeIcon="cancel"
+                    displayValue="label"
+                    avoidHighlightFirstOption={true}
+                    style={{multiselectContainer: { width: '100%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35, color: 'white'}, inputField: {color: 'black'}, searchBox: { minWidth: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
                   />
-                  {touched.category && errors.category ? (
-                    <div className="error-message">{errors.category}</div>
-                  ): null}
+                  {(this.state.categoryError) ? (
+                    <div className="error-message">Category is required</div>
+                  ) : null}
+
                 </Form.Group>
 
                 <Form.Group controlId="formPictureCount">
-                  <input 
+                  <input
                     onChange={event => this.fileChangedHandler(event, setFieldValue)}
                     type="file"
                     multiple

@@ -46,19 +46,6 @@ class StoreSignupForm extends React.Component {
       address: []
     }
 
-    // options for store categories
-    // this.options = [
-    //   { value: 'nails', label: 'Nails' },
-    //   { value: 'hair', label: 'Hair' },
-    //   { value: 'makeup', label: 'Makeup' },
-    //   { value: 'eyelashes', label: 'Eyelashes' },
-    //   { value: 'eyelash extensions', label: 'Eyelash Extensions' },
-    //   { value: 'eyebrows', label: 'Eyebrows' },
-    //   { value: 'facials', label: 'Facials' },
-    //   { value: 'skincare', label: 'Skin Care' },
-    //   { value: 'waxing', label: 'Waxing' },
-    //   { value: 'mens', label: 'Mens Services' }
-    // ];
 
     // RegEx for phone number validation
     this.phoneRegExp = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
@@ -377,7 +364,7 @@ class StoreSignupForm extends React.Component {
                         <div className="error-message">{errors.address}</div>
                       ) : null}
                     </Form.Group>
-                    
+
                     <Form.Group controlId="formCategory">
                       <Multiselect
                         options={this.state.category}

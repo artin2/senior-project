@@ -68,6 +68,8 @@ async function getStores(req, res, next) {
       categoryQueryArray = categories
     }
 
+    // console.log(categoryQueryArray)
+
     // convert the category array to a string literal array that postgres can understand
     var categoryQuery = '\'{';
     for (var i = 0; i < categoryQueryArray.length; i++) {
@@ -105,6 +107,7 @@ async function getStores(req, res, next) {
               let pictures = await s3.getImagesLocal('stores/' + result.rows[i].id + '/images/')
               result.rows[i].pictures = pictures
             }
+
             helper.querySuccess(res, result.rows, "Successfully got Search Results!");
           }
           else {
@@ -178,7 +181,7 @@ async function editStore(req, res, next) {
             if (result && result.rows.length == 1) {
               console.log('Updated store, now moving to update hours if necessary')
               store = result.rows[0];
-              
+
               // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7.
               let newHours = req.body.storeHours
               // Below is for scoping issues. Res is undefined below
@@ -365,7 +368,7 @@ async function addWorker(req, res, next) {
                   // now we have to update the user row to make their role worker
                   // note, may want to update query to this...
                   // query = 'UPDATE users SET role = array_append(role, 1) WHERE id=$2 RETURNING *'
-                  query = 'UPDATE users SET role=1 WHERE email=$1 RETURNING *'
+                  query = 'UPDATE users SET role=2 WHERE email=$1 RETURNING *'
                   values = [req.body.email]
                   db.client.query(query, values, (errSecond, resultSecond) => {
                       if (errSecond) {
@@ -634,12 +637,12 @@ async function editService(req, res, next) {
     db.client.connect((err, client, done) => {
       let query = 'UPDATE services SET name=$1, cost=$2, workers=$3, category=$4, description=$5, duration=$6 WHERE id=$7 RETURNING *'
       let values = [req.body.name, req.body.cost, req.body.workers, req.body.category, req.body.description, req.body.duration, req.params.service_id]
-  
+
       db.client.query(query, values, (errFirst, resultFirst) => {
           if (errFirst) {
             helper.queryError(res, errFirst);
           }
-  
+
           // we were able to update the service
           if (resultFirst && resultFirst.rows.length == 1) {
             // update each workers services array
@@ -662,7 +665,7 @@ async function editService(req, res, next) {
           }
         }
       );
-  
+
       if (err) {
         helper.dbConnError(res, err);
       }
@@ -695,7 +698,7 @@ async function getStoreItems(req, res, next, table) {
             helper.querySuccess(res, result.rows, "Successfully got Store Items!");
           }
           else {
-            helper.queryError(res, "No Store Items");
+            helper.querySuccess(res, [], "No Store Items");
           }
         });
       if (err) {
@@ -706,7 +709,7 @@ async function getStoreItems(req, res, next, table) {
   catch(err){
     helper.queryError(res, "Some sort of error!");
   }
-  
+
 };
 
 async function getStoreItem(req, res, next, table) {
@@ -836,7 +839,7 @@ async function getIndividualWorkerHours(req, res, next) {
         helper.dbConnError(res, err);
       }
     });
-  } 
+  }
   catch (err) {
     helper.queryError(res, "Some sort of error!!");
   }
@@ -867,6 +870,40 @@ async function getStoreHours(req, res, next) {
     }
   });
 };
+
+
+async function getCategories(req, res, next) {
+  try{
+    // add join to get worker ids from store id
+    let query = 'SELECT category FROM stores WHERE id = $1'
+    let values = [req.params.store_id]
+
+    db.client.connect((err, client, done) => {
+      // try to get the store item based on id
+      db.client.query(query, values, (err, result) => {
+        done()
+          if (err) {
+            helper.queryError(res, err);
+          }
+
+          // we were successfuly able to get the store item
+          if (result && result.rows.length > 0) {
+            helper.querySuccess(res, result.rows, 'Successfully got categories!');
+          }
+          else {
+            helper.queryError(res, "Could not find any categories!");
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch(err){
+    helper.queryError(res, "Some sort of error!");
+  }
+};
+
 
 //Appointments
 async function getAppointmentsByMonth(req, res, next) {
@@ -901,9 +938,9 @@ async function getAppointmentsByMonth(req, res, next) {
 
 async function getAllAppointments(req, res, next) {
   try {
-    console.log("---------getting apps")
+    // console.log("---------getting apps")
     // query for store appointments
-    let query = 'SELECT worker_id, date, start_time, end_time, service_id, title, price, date FROM appointments WHERE store_id = $1'
+    let query = 'SELECT worker_id, date, start_time, end_time, service_id, price, date FROM appointments WHERE store_id = $1'
     let values = [req.params.store_id]
     db.client.connect((err, client, done) => {
       // try to get the store appointments based on month
@@ -917,7 +954,7 @@ async function getAllAppointments(req, res, next) {
             helper.querySuccess(res, result.rows, 'Successfully got store appointments!');
           }
           else {
-            helper.queryError(res, new Error("Could not find store appointments!"));
+            helper.querySuccess(res, [], "Could not find store appointments!");
           }
         });
       if (err) {
@@ -1066,5 +1103,6 @@ module.exports = {
   addAppointment: addAppointment,
   getIndividualWorkerHours: getIndividualWorkerHours,
   getStoreInfo: getStoreInfo,
-  getWorkerInfo: getWorkerInfo
+  getWorkerInfo: getWorkerInfo,
+  getCategories: getCategories
 };

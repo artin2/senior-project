@@ -76,7 +76,7 @@ app.post('/checkTokenAndPermissions', withAuth, async(req, res, next) => {
   console.log("hit the check token with permissions route")
   try{
     let store = await stores.getStoreInfo(req.body.store_id)
-  
+
     if(store.owners.includes(req.body.user_id)){
       res.sendStatus(200)
     }
@@ -159,9 +159,6 @@ app.get('/stores/:store_id/workers', async (req, res, next) => {
   await stores.getStoreItems(req, res, next, "workers");
 });
 
-app.get('/stores/:store_id/workers_list', async (req, res, next) => {
-  await stores.getWorkers(req, res, next);
-});
 
 app.get('/stores/:store_id/workers/:worker_id/hours', async (req, res, next) => {
   console.log("hit the getIndividualWorkerHours route")
@@ -169,6 +166,10 @@ app.get('/stores/:store_id/workers/:worker_id/hours', async (req, res, next) => 
 });
 
 //stores
+app.get('/stores/:store_id/categories', async (req, res, next) => {
+  await stores.getCategories(req, res, next);
+});
+
 app.get('/stores/:store_id', async (req, res, next) => {
   console.log("hit the getStore")
   await stores.getStore(req, res, next);

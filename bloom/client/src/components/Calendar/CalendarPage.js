@@ -184,6 +184,7 @@ class Calendar extends React.Component {
   constructor(props) {
     super(props);
        this.state = {
+
          services: [],
          workers: [],
          worker_map: {},
@@ -238,9 +239,9 @@ class Calendar extends React.Component {
        this.onSearch = this.onSearch.bind(this);
   }
 
-    getAppointments = () => {
+    getAppointments = (store_id) => {
 
-        fetch('fetchDomain/stores/' + this.props.match.params.store_id + '/appointments' , {
+        fetch(fetchDomain + '/stores/' + store_id + '/appointments' , {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
@@ -257,11 +258,9 @@ class Calendar extends React.Component {
               let startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), appointment.start_time, 0);
               let endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), appointment.end_time, 0);
 
-              console.log(startDate)
-
               appointments.push({
                 id: indx,
-                title: appointment.title,
+                title: appointment.worker + " with " + this.state.worker_map[appointment.worker_id],
                 workers: [this.state.worker_map[appointment.worker_id]],
                 services: [this.state.service_map[appointment.service_id]],
                 price: appointment.price,
@@ -280,18 +279,25 @@ class Calendar extends React.Component {
     }
 
     async componentDidMount() {
-      let store_id = this.props.match.params.store_id
+
+      let store_id = (this.props.match.params.store_id) ? (this.props.match.params.store_id) : this.props.store_id;
       let workers = []
       let services = []
       let new_workers = []
       let new_services = []
 
+      console.log(store_id)
+
+      if(this.props.role) {
+        this.getAppointments(store_id);
+        return;
+      }
       //fetching  workers and services
-      if(this.props.location.state && this.props.location.state.services) {
+      if(this.props.location.state && this.props.location.state.store.services) {
         let service_map = {}
         let service_instances = []
 
-        this.props.location.state.services.map((service, indx) => {
+        this.props.location.state.store.services.map((service, indx) => {
           service_instances.push({id: indx, text: service.name})
           service_map[service.id] = service.name
         })
@@ -303,7 +309,7 @@ class Calendar extends React.Component {
       }
       else {
 
-          await fetch('fetchDomain/stores/' + store_id + "/services", {
+          await fetch(fetchDomain + '/stores/' + store_id + "/services", {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
@@ -311,19 +317,19 @@ class Calendar extends React.Component {
           credentials: 'include'
         }).then(function (response) {
             if (response.status !== 200) {
-              // throw an error alert
-              console.log("error")
+              throw("error")
             }
             else {
               return response.json();
             }
           })
           .then(async data => {
+
             if (data) {
               services = data;
               let service_instances = []
               let service_map = {}
-              console.log("here!!", services);
+              // console.log("here!!", services);
 
               services.map((service, indx) => {
                     service_instances.push({id: indx, text: service.name})
@@ -341,28 +347,14 @@ class Calendar extends React.Component {
 
       }
 
-      if(this.props.location.state && this.props.location.state.workers){
-        let worker_instances = []
-        let worker_map = {}
-        this.props.location.state.workers.map((worker, indx) => {
-            worker_instances.push({id: indx, text: worker.first_name + ' ' + worker.last_name})
-            worker_map[worker.id] = worker.first_name + ' ' + worker.last_name
-        })
-        this.setState({
-          workers: worker_instances,
-          worker_map: worker_map
-        })
-      }
-      else{
-
-
-        await fetch('fetchDomain/stores/' + store_id + '/workers_list', {
+      await fetch(fetchDomain + '/stores/' + store_id + '/workers', {
           method: "GET",
           headers: {
             'Content-type': 'application/json'
           },
           credentials: 'include'
-        }).then(function (response) {
+        })
+        .then(async function (response) {
             if (response.status !== 200) {
               // throw an error alert
               console.log("error")
@@ -374,7 +366,7 @@ class Calendar extends React.Component {
           .then(async data => {
             if (data) {
               workers = data;
-              console.log("here", workers);
+
               let worker_instances = []
               let worker_map = {}
               workers.map((worker, indx) => {
@@ -386,9 +378,7 @@ class Calendar extends React.Component {
                 worker_map: worker_map
               })
             }
-          });
-
-      }
+          })
 
       new_services = this.state.resources[0]
       new_services.instances = this.state.services;
@@ -399,7 +389,7 @@ class Calendar extends React.Component {
         resources: [new_services, new_workers]
       })
 
-      this.getAppointments();
+      this.getAppointments(store_id);
 
     }
 
@@ -479,38 +469,41 @@ class Calendar extends React.Component {
 
   render() {
 
-    console.log(this.state.selectedAppointments);
+    // console.log(this.state.selectedAppointments);
+    let name = (this.props.role) ? this.props.role : "your";
+    name = name.charAt(0).toUpperCase() + name.slice(1);
     return (
       <Container fluid>
         <Row className="justify-content-center">
           <Col>
-            <p className="title"> Manage Your Appointments </p>
-            <Row style={{marginBottom: 50, marginLeft: '22%', position: 'relative'}}>
-            <Multiselect
-              // isObject={false}
-              options={this.state.resources[0]["instances"]}
-              // selectedValues={this.state.selected}
-              onSelect={this.onSelectService}
-              onRemove={this.onRemoveService}
-              placeholder="Service"
-              closeIcon="cancel"
-              displayValue="text"
-              style={{multiselectContainer: {marginLeft: '2%', width: '35%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: 250, width: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
-              />
-            <Multiselect
-                // isObject={false}
-                options={this.state.resources[1]["instances"]}
-                // selectedValues={this.state.selected}
-                onSelect={this.onSelectWorker}
-                onRemove={this.onRemoveWorker}
-                placeholder="Workers"
-                closeIcon="cancel"
-                displayValue="text"
-                style={{multiselectContainer: {marginLeft: '2%', width: '35%'},  optionContainer:{ zIndex: 10000000}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: 250, width: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
-              />
-              <FiSearch onClick={this.onSearch} size={35} style={{cursor: "pointer", marginLeft: 10, paddingRight:"10px"}}/>
-            </Row>
+            <p className="title"> Manage {name} Appointments </p>
+            {(!this.props.role) ? (
+              <Row style={{marginBottom: 50, marginLeft: '22%', position: 'relative'}}>
+                <Multiselect
 
+                  options={this.state.resources[0]["instances"]}
+                  avoidHighlightFirstOption={true}
+                  onSelect={this.onSelectService}
+                  onRemove={this.onRemoveService}
+                  placeholder="Service"
+                  closeIcon="cancel"
+                  displayValue="text"
+                  style={{multiselectContainer: {marginLeft: '2%', width: '35%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: 250, width: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
+                  />
+                <Multiselect
+
+                    options={this.state.resources[1]["instances"]}
+                    avoidHighlightFirstOption={true}
+                    onSelect={this.onSelectWorker}
+                    onRemove={this.onRemoveWorker}
+                    placeholder="Workers"
+                    closeIcon="cancel"
+                    displayValue="text"
+                    style={{multiselectContainer: {marginLeft: '2%', width: '35%'},  optionContainer:{ zIndex: 10000000}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: 250, width: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
+                  />
+                  <FiSearch onClick={this.onSearch} size={35} style={{cursor: "pointer", marginLeft: 10, paddingRight:"10px"}}/>
+              </Row>
+            ) : null}
            <Paper className="react-calendar">
           <Scheduler
             data={this.state.selectedAppointments}

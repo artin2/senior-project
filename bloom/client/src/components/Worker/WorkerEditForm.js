@@ -29,22 +29,14 @@ class WorkerEditForm extends React.Component {
       worker: {
         id: 0,
         store_id: 0,
-        services: [],
         user_id: 0,
         created_at: "",
         first_name: "",
         last_name: ""
       },
-      options: [
-        { value: 0, label: 'Brazilian Blowout' },
-        { value: 1, label: 'Manicure' },
-      ],
-      serviceMapping: {
-        0: "Brazilian Blowout",
-        1: "Manicure"
-      },
+
       storeHours: [
-        { day_of_the_week: 0, start_time: 0, end_time: 0}, 
+        { day_of_the_week: 0, start_time: 0, end_time: 0},
         { day_of_the_week: 1, start_time: 0, end_time: 0},
         { day_of_the_week: 2, start_time: 0, end_time: 0},
         { day_of_the_week: 3, start_time: 0, end_time: 0},
@@ -53,7 +45,7 @@ class WorkerEditForm extends React.Component {
         { day_of_the_week: 6, start_time: 0, end_time: 0}
       ],
       workerHours: [
-        { day_of_the_week: 0, start_time: 0, end_time: 0}, 
+        { day_of_the_week: 0, start_time: 0, end_time: 0},
         { day_of_the_week: 1, start_time: 0, end_time: 0},
         { day_of_the_week: 2, start_time: 0, end_time: 0},
         { day_of_the_week: 3, start_time: 0, end_time: 0},
@@ -66,18 +58,15 @@ class WorkerEditForm extends React.Component {
       weekIsWorking: [true, true, true, true, true, true, true]
     };
 
-    // Schema for yup
-    // this.yupValidationSchema = Yup.object().shape({
-    //   services: Yup.string()
-    //     .required("Service is required")
-    //   // .nullable()
-    // });
-
     this.triggerWorkerDisplay = this.triggerWorkerDisplay.bind(this);
   }
 
   // redirect to the store display page and pass the new store data
   triggerWorkerDisplay(returnedWorker) {
+
+    let store_id = this.props.match.params.store_id ? this.props.match.params.store_id : this.props.store_id;
+    let worker_id = this.props.match.params.worker_id ? this.props.match.params.worker_id : this.props.worker_id;
+
     this.props.history.push({
       pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id,
       state: {
@@ -162,14 +151,21 @@ class WorkerEditForm extends React.Component {
   };
 
   componentDidMount() {
+
+    let store_id = this.props.match.params.store_id ? this.props.match.params.store_id : this.props.store_id;
+    let worker_id = this.props.match.params.worker_id ? this.props.match.params.worker_id : this.props.worker_id;
+
     if(this.props.location.state && this.props.location.state.worker){
       this.setState({
         worker: this.props.location.state.worker
       })
     }
     else{
+
+      console.log(store_id)
+
       // first we fetch the service itself
-      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id, {
+      fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id, {
         method: "GET",
         headers: {
             'Content-type': 'application/json'
@@ -195,14 +191,14 @@ class WorkerEditForm extends React.Component {
     }
 
     Promise.all([
-      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id + '/hours', {
+      fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id + '/hours', {
         method: "GET",
         headers: {
           'Content-type': 'application/json'
         },
         credentials: 'include'
       }).then(value => value.json()),
-      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/storeHours", {
+      fetch(fetchDomain + '/stores/' + store_id + "/storeHours", {
         method: "GET",
         headers: {
           'Content-type': 'application/json'
@@ -252,7 +248,6 @@ class WorkerEditForm extends React.Component {
             <Formik
               enableReinitialize
               initialValues={{
-                services: this.state.worker.services,
                 id: this.state.worker.id,
                 store_id: this.state.worker.store_id,
                 user_id: this.state.worker.user_id,
@@ -265,8 +260,8 @@ class WorkerEditForm extends React.Component {
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
 
-                let store_id = this.props.match.params.store_id
-                let worker_id = this.props.match.params.worker_id
+                let store_id = this.props.match.params.store_id ? this.props.match.params.store_id : this.props.store_id;
+                let worker_id = this.props.match.params.worker_id ? this.props.match.params.worker_id : this.props.worker_id;
                 let triggerWorkerDisplay = this.triggerWorkerDisplay;
                 values.newHours.map((day, index) => {
                   if(this.state.weekIsWorking[index]){
@@ -275,10 +270,7 @@ class WorkerEditForm extends React.Component {
                     return {start_time: null, end_time: null}
                   }
                 })
-                // not sure if we need this, commenting it out for now
-                // if(JSON.stringify(values.services)==JSON.stringify(this.state.receivedServices)) {
-                //   values.noChange = true
-                // }
+
 
                 fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id, {
                   method: "POST",
@@ -299,7 +291,7 @@ class WorkerEditForm extends React.Component {
                   })
                   .then(data => {
                     if (data) {
-                      // this.props.updateWorker(this.state.worker, this.state.newHours, values.services)
+
                       triggerWorkerDisplay(data)
                     }
                   });

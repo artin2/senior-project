@@ -28,10 +28,7 @@ class AddWorkerForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      options: [
-        { value: 0, label: 'Brazilian Blowout' },
-        { value: 1, label: 'Manicure' },
-      ],
+      email: '',
       workerHours: [],
       storeHours: [],
       weekIsWorking: [true, true, true, true, true, true, true],
@@ -75,7 +72,15 @@ class AddWorkerForm extends React.Component {
 
   }
 
+  handleChange = (event) => {
+
+    this.setState({
+      email: event.target.value
+    })
+  }
+
   handleSelectChange = (event) => {
+
     var days = ['formHoursMonday', 'formHoursTuesday', 'formHoursWednesday', 'formHoursThursday', 'formHoursFriday', 'formHoursSaturday', 'formHoursSunday']
     var day = days.indexOf(event.target.id)
     var old_start_time = 0
@@ -145,7 +150,7 @@ class AddWorkerForm extends React.Component {
         if (data) {
           let receivedWorkerHours = data.map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
           this.setState({
-            storeHours: data, 
+            storeHours: data,
             workerHours: receivedWorkerHours,
             loading: false
           })
@@ -180,13 +185,12 @@ class AddWorkerForm extends React.Component {
             />
           </Col>
         </Row>
-      } else { 
+      } else {
         return <Row className="justify-content-center">
           <Col xs={8} sm={7} md={6} lg={5}>
             <Formik
               initialValues={{
-                email: '',
-                services: '',
+                email: this.state.email,
                 workerHours: []
               }}
               validationSchema={this.yupValidationSchema}
@@ -195,9 +199,6 @@ class AddWorkerForm extends React.Component {
                 let triggerWorkerDisplay = this.triggerWorkerDisplay
 
                 values.workerHours = this.state.workerHours
-                values.services = values.services.map(function (val) {
-                  return val.value;
-                })
 
                 fetch(fetchDomain + '/stores/addWorker/' + store_id, {
                   method: "POST",
@@ -222,6 +223,7 @@ class AddWorkerForm extends React.Component {
                     }
                   })
               }}
+
             >
               {({ values,
                 errors,
@@ -231,7 +233,7 @@ class AddWorkerForm extends React.Component {
                 handleSubmit,
                 setFieldValue }) => (
                   <Form className="formBody rounded">
-                    <h3>Add Worker</h3>
+                    <h2>Add Worker</h2>
 
                     <Form.Group controlId="formEmail">
                       <InputGroup>
@@ -245,32 +247,19 @@ class AddWorkerForm extends React.Component {
                           value={values.email}
                           placeholder="Email"
                           name="email"
-                          onChange={handleChange}
+                          autoFocus
+                          onChange={this.handleChange}
                           onBlur={handleBlur}
-                          className={touched.email && errors.email ? "error" : null} />
+                          className={touched.email && errors.email ? "error" : null}
+                        />
                       </InputGroup>
                       {touched.email && errors.email ? (
                         <div className="error-message">{errors.email}</div>
                       ) : null}
                     </Form.Group>
 
-                    <Form.Group controlId="formServices">
-                      <Select
-                        value={values.services}
-                        onChange={option => setFieldValue("services", option)}
-                        name="services"
-                        options={this.state.options}
-                        isMulti={true}
-                        placeholder={"Services"}
-                        className={touched.services && errors.services ? "error" : null}
-                      />
-                      {touched.services && errors.services ? (
-                        <div className="error-message">{errors.services}</div>
-                      ) : null}
-                    </Form.Group>
-
                     {/* Later make this work with store hours*/}
-                    <h4>Worker Hours</h4>
+                    <h4 style={{marginTop: 25}}>Worker Hours</h4>
 
                     <Form.Group controlId="formHoursMonday">
                       <Form.Row className="text-left">
@@ -469,7 +458,7 @@ class AddWorkerForm extends React.Component {
             </Formik>
           </Col>
         </Row>
-      } 
+      }
     }
 
     return (

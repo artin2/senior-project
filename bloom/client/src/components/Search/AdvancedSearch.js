@@ -244,7 +244,7 @@ class AdvancedSearch extends React.Component {
             options={this.state.category}
             onSelect={this.onSelect}
             onRemove={this.onRemove}
-            placeholder="Category"
+            placeholder="Pick a Category"
             closeIcon="cancel"
             displayValue="name"
             avoidHighlightFirstOption={true}

@@ -27,7 +27,7 @@ class WorkerDisplay extends React.Component {
         services: [],
         user_id: 0,
         created_at: "",
-        first_name: [],
+        first_name: "",
         last_name: ""
       },
       serviceMapping: {
@@ -93,7 +93,7 @@ class WorkerDisplay extends React.Component {
 
   componentDidMount() {
     if (this.props.location && this.props.location.state && this.props.location.state.worker) {
-      let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
+      // let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
       Promise.all([
         fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id + '/hours', {
           method: "GET",
@@ -154,7 +154,7 @@ class WorkerDisplay extends React.Component {
         let convertedServices = allResponses[0].services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
         let receivedWorkerHours = allResponses[1].map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
 
-        // If worker hours are not complete, we default them to store hours. Worker hours should be complete though. 
+        // If worker hours are not complete, we default them to store hours. Worker hours should be complete though.
         if (allResponses[2] && allResponses[2].length == 7) {
           receivedWorkerHours = allResponses[2]
         } else {
@@ -190,7 +190,7 @@ class WorkerDisplay extends React.Component {
 
     const RenderProfileContent = () => {
       if(this.state.choice == 0) {
-        return <Calendar/>
+        return <Calendar role={this.state.worker.first_name + "'s"} />
       } else if(this.state.choice == 1) {
         return <WorkerEditForm worker={this.state.worker} receivedServices={this.state.receivedServices} selectedOption={this.state.selectedOption} storeHours={this.state.storeHours} workerHours={this.state.workerHours} updateWorker={this.updateWorker}/>
       } else {
@@ -266,7 +266,7 @@ class WorkerDisplay extends React.Component {
             <RenderProfileContent/>
           </div>
         </Col>
-          
+
       </Row>
       }
     }
@@ -284,7 +284,7 @@ class WorkerDisplay extends React.Component {
           </Col>
         </Row> */}
         <DisplayWithLoading/>
-        
+
       </Container>
     );
   }

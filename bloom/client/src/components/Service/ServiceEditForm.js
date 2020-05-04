@@ -10,17 +10,25 @@ import { FaDollarSign, FaHandshake, FaHourglassHalf, FaPen } from 'react-icons/f
 import { Formik } from 'formik';
 import Select from 'react-select';
 import * as Yup from 'yup';
+import { Multiselect } from 'multiselect-react-dropdown';
 import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import { getPictures, deleteHandler, uploadHandler } from '../s3'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
+const helper = require('../Search/helper.js');
 
 class ServiceEditForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+
+      category: [],
+      categoryError: false,
+      selected: [],
+      workers: [],
+      workerError: false,
       service: {
         id: "",
         name: "",
@@ -30,13 +38,9 @@ class ServiceEditForm extends React.Component {
         category: "",
         description: ""
       },
-      categoryOptions: [
-        { value: 'nails', label: 'Nails' },
-        { value: 'hair', label: 'Hair' }
-      ],
-      convertedCategory: [],
       workerOptions: [],
-      selectedOption: null,
+      preselectedWorkers: [],
+      preselectedCategories: [],
       pictures: [],
       keys: [],
       selectedFiles: []
@@ -60,15 +64,20 @@ class ServiceEditForm extends React.Component {
       workers: Yup.array()
       .required("Worker is required")
       .nullable(),
-      category: Yup.array()
-      .required("Category is required")
-      .nullable(),
+      // category: Yup.array()
+      // .required("Category is required")
+      // .nullable(),
       pictureCount: Yup.number()
       .required("Pictures are required")
       .min(1, "Must have at least one picture")
     });
 
     this.triggerServiceDisplay = this.triggerServiceDisplay.bind(this);
+    this.onSelectCategory = this.onSelectCategory.bind(this);
+    this.onRemoveCategory = this.onRemoveCategory.bind(this);
+    this.onSelectWorker = this.onSelectWorker.bind(this);
+    this.onRemoveWorker = this.onRemoveWorker.bind(this);
+
   }
 
   // redirect to the service display page and pass the new store data
@@ -105,13 +114,10 @@ class ServiceEditForm extends React.Component {
     console.log(picturesFetched)
 
     if(this.props.location.state && this.props.location.state.service){
-      console.log(this.props.location.state.service)
-      let convertedCategoryData = this.props.location.state.service.category.map((str) => ({ value: str.toLowerCase(), label: str }));
-      // console.log(convertedCategoryData)
+
       this.setState({
         service: this.props.location.state.service,
         pictures: picturesFetched,
-        convertedCategory: convertedCategoryData
       })
     }
     else{
@@ -134,49 +140,119 @@ class ServiceEditForm extends React.Component {
       })
       .then(data => {
         if(data){
-          let convertedCategoryData = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
           this.setState({
             service: data,
             pictures: picturesFetched,
-            convertedCategory: convertedCategoryData
           })
         }
       });
-
-
-
-      // // then we get the worker data to display for user
-      // // need to get store category, fetch?
-      // // refactor later to make it a get request
-      // // maybe have to refactor the whole table to keep track of names...?
-      // fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/workers" , {
-      //   method: "POST",
-      //   headers: {
-      //       'Content-type': 'application/json'
-      //   },
-      //   credentials: 'include',
-      //   body: JSON.stringify(values)
-      // })
-      // .then(function(response){
-      //   console.log(response)
-      //   if(response.status!==200){
-      //     // should throw an error here
-      //     console.log("Error!", response.status)
-      //     // throw new Error(response.status)
-      //     // window.location.href='/'
-      //   }
-      //   else{
-      //     return response.json();
-      //   }
-      // })
-      // .then(data => {
-      //   console.log("Limited store data from server:", data)
-      //   let convertedWorkers = data.map((worker) => ({ value: worker.id, label: worker.first_name + " " + worker.last_name }));
-      //   this.setState({
-      //     workerOptions: convertedWorkers
-      //   })
-      // });
     }
+
+    fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/categories" , {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    .then(function(response){
+      if(response.status!==200){
+        // throw an error alert
+        store.dispatch(addAlert(response))
+      }
+      else{
+        return response.json();
+      }
+    })
+    .then(data => {
+      if(data){
+
+        let convertedCategory = []
+        let preselectedCategories = []
+
+        data[0].category.map((category, indx) => {
+
+          convertedCategory.push({ value: indx, label: helper.longerVersion(category)})
+          if(this.state.service.category == category) {
+            preselectedCategories.push({ value: indx, label: helper.longerVersion(category)})
+          }
+
+        });
+
+        this.setState({
+          category: convertedCategory,
+          selected: preselectedCategories
+        })
+      }
+    });
+
+    fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/workers" , {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include',
+    })
+    .then(function(response){
+      console.log(response)
+      if(response.status!==200){
+
+        console.log("Error!", response.status)
+      }
+      else{
+        return response.json();
+      }
+    })
+    .then(data => {
+
+      let convertedWorkers = []
+      let preselectedWorkers = []
+      data.map((worker) => {
+        convertedWorkers.push({ value: worker.id, label: worker.first_name + " " + worker.last_name})
+        if(this.state.service.workers.includes(worker.id)) {
+          preselectedWorkers.push({value: worker.id, label: worker.first_name + " " + worker.last_name})
+        }
+
+      });
+
+      this.setState({
+        workerOptions: convertedWorkers,
+        workers: preselectedWorkers
+      })
+    });
+
+  }
+
+  onSelectCategory(selectedList, selectedItem) {
+
+    this.setState({
+      selected: selectedList,
+      workerError: false
+    })
+  }
+
+  onSelectWorker(selectedList, selectedItem) {
+
+    this.setState({
+      workers: selectedList,
+      workerError: false
+    })
+  }
+
+  onRemoveCategory(selectedList, removedItem, event) {
+
+    this.setState({
+      selected: selectedList
+    })
+
+  }
+
+  onRemoveWorker(selectedList, removedItem, event) {
+
+    this.setState({
+      workers: selectedList
+    })
+
   }
 
   render() {
@@ -194,7 +270,7 @@ class ServiceEditForm extends React.Component {
                 pictures: [],
                 pictureCount: this.state.pictures.length - this.state.keys.length,
                 workers: this.state.service.workers,
-                category: this.state.convertedCategory,
+                category: this.state.category,
                 store_id: this.props.match.params.store_id
               }}
               validationSchema={this.yupValidationSchema}
@@ -203,9 +279,38 @@ class ServiceEditForm extends React.Component {
                 let service_id = this.props.match.params.service_id
                 let triggerServiceDisplay = this.triggerServiceDisplay
 
-                values.category = values.category.map(function(val){ 
-                  return val.label; 
+                let shorterVersion = helper.shorterVersion;
+
+
+                values.category = this.state.selected.map(function (val) {
+                  return shorterVersion(val.label)
                 })
+
+                if(values.category.length == 0) {
+
+                  this.setState({
+                    categoryError: true
+                  })
+
+                }
+
+                // console.log(this.state.workers)
+                values.workers = this.state.workers.map(function(val){
+                  return val.value;
+                })
+
+
+                if(values.workers.length == 0) {
+
+                  this.setState({
+                    workerError: true
+                  })
+
+                }
+
+                if(values.category.length == 0 || values.workers.length == 0) {
+                  return;
+                }
 
                 // remove files from s3
                 if(this.state.keys.length > 0){
@@ -219,8 +324,8 @@ class ServiceEditForm extends React.Component {
                 }
 
                 // need to figure out this...
-                // values.workers = values.workers.map(function(val){ 
-                //   return val.value; 
+                // values.workers = values.workers.map(function(val){
+                //   return val.value;
                 // })
 
                 fetch(fetchDomain + '/stores/' + store_id + "/services/" + service_id, {
@@ -264,11 +369,11 @@ class ServiceEditForm extends React.Component {
                             <FaHandshake/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control type="text" 
-                      value={values.name} 
-                      placeholder="Name of Service" 
-                      name="name" 
-                      onChange={handleChange} 
+                    <Form.Control type="text"
+                      value={values.name}
+                      placeholder="Name of Service"
+                      name="name"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       className={touched.name && errors.name ? "error" : null}/>
                   </InputGroup>
@@ -284,10 +389,10 @@ class ServiceEditForm extends React.Component {
                             <FaDollarSign/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control type="number" 
+                    <Form.Control type="number"
                     value={values.cost}
-                    placeholder="Cost" 
-                    name="cost" 
+                    placeholder="Cost"
+                    name="cost"
                     onChange={handleChange}
                     onBlur={handleBlur}
                     className={touched.cost && errors.cost ? "error" : null}/>
@@ -304,12 +409,12 @@ class ServiceEditForm extends React.Component {
                             <FaHourglassHalf/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control 
+                    <Form.Control
                       type="number"
                       value={values.duration}
-                      placeholder="Duration (in min)" 
-                      name="duration" 
-                      onChange={handleChange} 
+                      placeholder="Duration (in min)"
+                      name="duration"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       className={touched.duration && errors.duration ? "error" : null}/>
                   </InputGroup>
@@ -325,13 +430,13 @@ class ServiceEditForm extends React.Component {
                           <FaPen/>
                         </InputGroup.Text>
                     </InputGroup.Prepend>
-                    <Form.Control 
+                    <Form.Control
                       type="textarea"
                       rows={3}
                       value={values.description}
-                      placeholder="Description" 
-                      name="description" 
-                      onChange={handleChange} 
+                      placeholder="Description"
+                      name="description"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       className={touched.description && errors.description ? "error" : null}/>
                   </InputGroup>
@@ -340,34 +445,39 @@ class ServiceEditForm extends React.Component {
                   ): null}
                 </Form.Group>
 
-                {/* <Form.Group controlId="formWorkers">
-                  <Select
-                    value={values.workers}
-                    onChange={option => setFieldValue("workers", option)}
-                    name="workers"
-                    options={this.state.workerOptions}
-                    isMulti={true}
-                    placeholder={"Assigned Workers"}
-                    className={touched.workers && errors.workers ? "error" : null}
-                  />
-                  {touched.workers && errors.workers ? (
-                    <div className="error-message">{errors.workers}</div>
-                  ): null}
-                </Form.Group> */}
+               <Form.Group controlId="formWorkers">
+                <Multiselect
+                  selectedValues={this.state.workers}
+                  options={this.state.workerOptions}
+                  onSelect={this.onSelectWorker}
+                  onRemove={this.onRemove}
+                  placeholder="Assigned Workers"
+                  closeIcon="cancel"
+                  displayValue="label"
+                  avoidHighlightFirstOption={true}
+                  style={{multiselectContainer: { width: '100%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
+                />
+                {(this.state.workerError) ? (
+                  <div className="error-message">At least 1 worker is required</div>
+                ) : null}
+                </Form.Group>
 
                 <Form.Group controlId="formCategory">
-                  <Select
-                    value={values.category}
-                    onChange={option => setFieldValue("category", option)}
-                    name="category"
-                    options={this.state.categoryOptions}
-                    isMulti={true}
-                    placeholder={"Category"}
-                    className={touched.category && errors.category ? "error" : null}
+                  <Multiselect
+                    selectedValues={this.state.selected}
+                    options={this.state.category}
+                    onSelect={this.onSelectCategory}
+                    onRemove={this.onRemove}
+                    singleSelect={true}
+                    placeholder="Category"
+                    closeIcon="cancel"
+                    displayValue="label"
+                    avoidHighlightFirstOption={true}
+                    style={{multiselectContainer: { width: '100%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35, color: 'white'}, inputField: {color: 'black'}, searchBox: { minWidth: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
                   />
-                  {touched.category && errors.category ? (
-                    <div className="error-message">{errors.category}</div>
-                  ): null}
+                  {(this.state.categoryError) ? (
+                    <div className="error-message">Category is required</div>
+                  ) : null}
                 </Form.Group>
 
                 <Form.Group controlId="pictureCount">
@@ -388,7 +498,7 @@ class ServiceEditForm extends React.Component {
                 <Form.Group controlId="pictures">
                   <Form.Label>Add Images</Form.Label>
                   <br/>
-                  <input 
+                  <input
                     onChange={event => this.fileChangedHandler(event, setFieldValue, values.pictures)}
                     type="file"
                     multiple

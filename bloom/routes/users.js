@@ -20,8 +20,33 @@ async function login(req, res) {
                   let resultUser = result.rows[0]
                   delete resultUser.password
 
-                  helper.querySuccess(res, { user: resultUser, token: tokenGen }, "Successfully Logged In!");
-                } 
+                  // console.log(resultUser)
+
+                  if(result.rows[0]["role"] == 2) {
+
+                    query = 'SELECT id, store_id, services from workers WHERE user_id=$1'
+                    values = [result.rows[0]["id"]]
+                    await db.client.query(query, values, async (workerErr, workerRes) => {
+                        if (workerErr) {
+                          helper.queryError(res, workerErr);
+                        }
+                        else if (workerRes && workerRes.rows.length == 1) {
+                          resultUser["worker_id"] = workerRes.rows[0]["id"]
+                          resultUser["store_id"] = workerRes.rows[0]["store_id"]
+                          resultUser["services"] = workerRes.rows[0]["services"]
+
+                          helper.querySuccess(res, { user: resultUser, token: tokenGen }, "Successfully Logged In!");
+
+                        }
+                        // console.log(resultUser)
+
+                    })
+                  }
+                  else {
+                    helper.querySuccess(res, { user: resultUser, token: tokenGen }, "Successfully Logged In!");
+                  }
+
+                }
                 catch (err) {
                   helper.queryError(res, err);
                 }
@@ -48,7 +73,7 @@ async function login(req, res) {
         helper.dbConnError(res, err);
       }
     });
-  } 
+  }
   else {
     res.send('Missing a Parameter');
     res.status(400);
@@ -76,8 +101,8 @@ async function signup(req, res) {
           if (err) {
             helper.queryError(res, err);
           }
-          
-          // if we were able to add the user successfuly 
+
+          // if we were able to add the user successfuly
           if (result && result.rows.length == 1) {
             try {
               // for some reason the cookie is not being attatched to the response...
@@ -86,7 +111,7 @@ async function signup(req, res) {
               let tokenGen = await auth.generateToken(res, result.rows[0]);
               delete result.rows[0].password
               helper.querySuccess(res, {user: result.rows[0], token: tokenGen}, "Successfully Created User!");
-            } 
+            }
             catch (err) {
               helper.queryError(res, err);
             }
@@ -100,7 +125,7 @@ async function signup(req, res) {
         helper.dbConnError(res, err);
       }
     });
-  } 
+  }
   else {
     res.send('Missing a Parameter');
     res.status(400);

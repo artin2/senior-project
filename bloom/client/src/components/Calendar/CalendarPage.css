@@ -3,7 +3,7 @@
 
 .react-calendar {
 
-  width: 1400px !important;
+  width: 100% !important;
   max-width: 1500px !important;
   background-color: purple;
   margin-top: 20px;

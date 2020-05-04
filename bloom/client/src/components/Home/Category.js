@@ -13,7 +13,7 @@ class Category extends React.Component {
     this.state = {
       stores: [],
       address: '',
-      distance: 1,
+      distance: 15,
       redirect: false,
       center: {
         lat: '',
