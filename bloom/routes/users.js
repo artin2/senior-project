@@ -148,30 +148,78 @@ async function edit(req, res, next) {
     db.client.connect((err, client, done) => {
       // query to update the user
       db.client.query(query, values, (err, result) => {
-        done()
-          if (err) {
-            helper.queryError(res, err);
+          // if the user is a worker, update the dependant worker information
+          if(req.body.role == '2'){
+            if (err) {
+              helper.queryError(res, err);
+            }
+
+            // if we were able to successfuly update the user
+            if (result && result.rows.length) {
+              query = "UPDATE workers SET first_name=$1, last_name=$2 WHERE user_id=$3 RETURNING *"
+              values = [req.body.first_name, req.body.last_name, req.body.id]
+
+              db.client.query(query, values, (errLast, resultLast) => {
+                done()
+                if (errLast) {
+                  helper.queryError(res, errLast);
+                }
+
+                if (resultLast && resultLast.rows.length) {
+                  let user = result.rows[0]
+                  delete user.password
+                  const expiration = process.env.DB_ENV === 'dev' ? 1 : 7;
+                  const date = new Date();
+                  date.setDate(date.getDate() + expiration)
+    
+                  // update the cookie for this user
+                  res.cookie('user', user, {
+                    expires: date,
+                    secure: false, // set to true if your using https
+                    httpOnly: false,
+                    domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN_PROD : process.env.DEV
+                  })
+                  helper.querySuccess(res, user, "Successfully Updated User!");
+                }
+                else{
+                  helper.queryError(res, "Could not update worker table!")
+                }
+              })
+            }
+            else{
+              helper.queryError(res, "Could not update user table!")
+            }
           }
+          else{
+            done()
+            if (err) {
+              helper.queryError(res, err);
+            }
 
-          // if we were able to successfuly update the user
-          if (result && result.rows.length) {
-            let user = result.rows[0]
-            delete user.password
-            const expiration = process.env.DB_ENV === 'dev' ? 1 : 7;
-            const date = new Date();
-            date.setDate(date.getDate() + expiration)
+            // if we were able to successfuly update the user
+            if (result && result.rows.length) {
+              let user = result.rows[0]
+              delete user.password
+              const expiration = process.env.DB_ENV === 'dev' ? 1 : 7;
+              const date = new Date();
+              date.setDate(date.getDate() + expiration)
 
-            // update the cookie for this user
-            res.cookie('user', user, {
-              expires: date,
-              secure: false, // set to true if your using https
-              httpOnly: false,
-              domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN_PROD : process.env.DEV
-            })
-            helper.querySuccess(res, user, "Successfully Updated User!");
+              // update the cookie for this user
+              res.cookie('user', user, {
+                expires: date,
+                secure: false, // set to true if your using https
+                httpOnly: false,
+                domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN_PROD : process.env.DEV
+              })
+              helper.querySuccess(res, user, "Successfully Updated User!");
+            }
+            else{
+              helper.queryError(res, "Could not update user!")
+            }
           }
         }
       );
+      
       if (err) {
         helper.dbConnError(res, err);
       }

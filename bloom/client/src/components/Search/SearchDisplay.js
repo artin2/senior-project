@@ -67,8 +67,6 @@ class SearchDisplay extends React.Component {
         return null
       }
     }
-
-
   }
 
   componentDidUpdate(prevProps) {
@@ -90,7 +88,7 @@ class SearchDisplay extends React.Component {
       .then(function (response) {
         if (response.status !== 200) {
           // should throw an error here
-          console.log("ERROR!")
+          console.log("ERROR!", response)
         }
         else {
           return response.json();
@@ -99,11 +97,8 @@ class SearchDisplay extends React.Component {
       .then(data => {
         if (data) {
           this.setState({
-            stores: data,
-            center: {
-              lat: data[0].lat,
-              lng: data[0].lng,
-            },
+            stores: data.stores,
+            center: data.center,
             loading: false,
             ownUpdate: update
           })

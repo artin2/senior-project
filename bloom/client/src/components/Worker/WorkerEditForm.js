@@ -244,7 +244,7 @@ class WorkerEditForm extends React.Component {
         </Row>
       } else {
         return <Row className="justify-content-center">
-          <Col>
+          <Col xs={8} sm={7} md={6} lg={5}>
             <Formik
               enableReinitialize
               initialValues={{
@@ -304,7 +304,7 @@ class WorkerEditForm extends React.Component {
                 handleBlur,
                 handleSubmit,
                 setFieldValue }) => (
-                  <Form>
+                  <Form className="formBody rounded">
                     <h3>Worker Edit</h3>
 
                     {/* Later make this work with store hours*/}

@@ -17,7 +17,7 @@ class MapContainer extends Component {
   }
 
   displayMarkers() { 
-    if(this.props.stores) {
+    if(this.props.stores && this.props.stores.length > 0) {
       return this.props.stores.map((store, index) => { 
         return <Marker key={"store-" + index} id={index} position={{ 
                        lat: store.lat, 
