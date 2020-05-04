@@ -82,30 +82,35 @@ class LoginForm extends React.Component {
   render() {
     return ( <Form className="formBody rounded">
               <h3>{this.props.title}</h3>
-              <Form.Group style={{marginTop: 40, width: '65%', marginLeft: '17%'}}>
-                <InputGroup>
-                  <InputGroup.Prepend >
-                      <InputGroup.Text>
-                          <FaEnvelope/>
-                      </InputGroup.Text>
-                  </InputGroup.Prepend>
-                  <Form.Control id="email" type="email" placeholder="Email" onChange={this.handleChange}/>
-                </InputGroup>
-              </Form.Group>
+              <Form.Row className="justify-content-center">
+              <Col xs={12} sm={10} md={9} lg={8}>
+                <Form.Group>
+                  <InputGroup>
+                    <InputGroup.Prepend >
+                        <InputGroup.Text>
+                            <FaEnvelope/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control id="email" type="email" placeholder="Email" onChange={this.handleChange}/>
+                  </InputGroup>
+                </Form.Group>
 
-              <Form.Group style={{width: '65%', marginLeft: '17%'}}>
-                <InputGroup>
-                  <InputGroup.Prepend>
-                      <InputGroup.Text>
-                          <FaLock/>
-                      </InputGroup.Text>
-                  </InputGroup.Prepend>
-                  <Form.Control id="password" type="password" placeholder="Password" onChange={this.handleChange}/>
-                </InputGroup>
-              </Form.Group>
-              <Col xs={8} sm={8} md={8} lg={8} style={{marginLeft: '17%'}}>
-                <Button  className="login" type="submit" variant="primary" onClick={this.handleSubmit}>Login</Button>
-                  <p><b> OR </b></p>
+                <Form.Group>
+                  <InputGroup>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>
+                            <FaLock/>
+                        </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control id="password" type="password" placeholder="Password" onChange={this.handleChange}/>
+                  </InputGroup>
+                </Form.Group>
+                </Col>
+                </Form.Row>
+              <Form.Row className="justify-content-center">
+              <Col xs={11} sm={8} md={7} lg={6}>
+                <Button  className="login my-1" type="submit" variant="primary" onClick={this.handleSubmit}>Login</Button>
+                  <p className="my-1"> OR </p>
                   <GoogleLogin
                     clientId={process.env.REACT_APP_GOOGLE_ID}
                     buttonText="Login with Google"
@@ -113,8 +118,8 @@ class LoginForm extends React.Component {
                     onFailure={failureGoogle}
                     cookiePolicy={'single_host_origin'}
                     render={renderProps => (
-                      <button onClick={renderProps.onClick} style={{ width: '100%', backgroundColor:"#db4a39", color: 'white', paddingRight: '30px',
-                    marginBottom: '10px', height: '48px', fontSize: '14px'}}> <TiSocialGooglePlus  size={45} style={{paddingRight:"15px"}}/>Login with Google</button>
+                      <button onClick={renderProps.onClick} className="my-1" style={{ width: '100%', backgroundColor:"#db4a39", color: 'white', paddingRight: '30px',
+                      height: '48px', fontSize: '14px'}}> <TiSocialGooglePlus  size={45} style={{paddingRight:"15px"}}/>Login with Google</button>
                     )}
                   />
 
@@ -123,12 +128,13 @@ class LoginForm extends React.Component {
                     fields="name,email,picture"
                     onFailure={failureFacebook}
                     xfbml={true}
-                    cssClass="facebookButton"
+                    cssClass="facebookButton my-1"
                     icon={<TiSocialFacebookCircular size={45} style={{paddingRight:"15px"}}/>}
                     callback={successFacebook}
                     />
-                  <p> Don't have a Bloom account yet? <Button className="toggle-button" onClick={() => this.props.toggleLogin(false)}> Sign Up. </Button></p>
+                  <p className="my-1"> Don't have a Bloom account yet? <Button className="toggle-button" onClick={() => this.props.toggleLogin(false)}> Sign Up. </Button></p>
               </Col>
+              </Form.Row>
             </Form>
     );
   }

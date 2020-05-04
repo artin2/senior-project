@@ -62,9 +62,9 @@ class Registration extends React.Component {
     }
     return (
       <Container fluid>
-        <Image src={paint} alt="paint" style={{top: 0, left: 0, position: 'absolute', width:'100%', filter: 'grayscale(0.4)'}}/>
+        <Image src={paint} fluid alt="paint" style={{top: 0, left: 0, position: 'absolute', height: '100vh', width:'100%', filter: 'grayscale(0.4)'}}/>
         <Row className="justify-content-center mt-5">
-          <Col xs={8} sm={7} md={6} lg={5}>
+          <Col xs={11} sm={9} md={6} lg={5}>
             <RenderLoginOrSignup/>
           </Col>
         </Row>
