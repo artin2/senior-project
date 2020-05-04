@@ -130,29 +130,12 @@ class SearchDisplay extends React.Component {
             </Col>
           </Row>
       } else if(this.state.stores.length > 0) {
-        return(<>
-          <Card className="search-filters p-3">
-          <Nav className="full-width">
-            <Row className="full-width">
-              <Col xs={12} md={9} className="text-left m-0">
-              <h3 className="nav-link"> {this.state.stores.length}&nbsp;results </h3>
-              </Col>
-              <Col xs={12} md={3}>
-                            
-            <Select
-              className="nav-link"
-              placeholder="Filter By:"
-            />
-              </Col>
-            </Row>
-
-          </Nav>
-          </Card>
-          
-          <Row className="px-5 my-3 justify-content-center search-cards-row">
+        return( <div>
+          <h3 className="text-left mb-0"> {this.state.stores.length} results </h3>	
+          <Row className="mx-0 justify-content-center search-cards-row">
             <RenderStoreCards/>
           </Row>
-        </>
+        </div>
         )
       } else {
         return <Row>
@@ -172,11 +155,11 @@ class SearchDisplay extends React.Component {
     }
 
     return (
-        <Row className="restrict-viewport mx-0">
-          <Col id="left-col" xs={12} xl={6} className="w-100 px-0" style={{height: '2000px'}}>
+<       Row className="restrict-viewport mx-0">
+          <Col xs={12} xl={6} className="px-5 my-3 h-100">
             <DisplayWithLoading/>
           </Col>
-          <Col id="map" xs={12} xl={6} className="px-0">
+          <Col id="map" xs={12} xl={6}>
             <div className="position-fixed h-100 w-50 d-none d-xl-block">
               <DisplayMapDynamic/>
             </div>
