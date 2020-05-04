@@ -93,7 +93,7 @@ class WorkerDisplay extends React.Component {
 
   componentDidMount() {
     if (this.props.location && this.props.location.state && this.props.location.state.worker) {
-      let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
+      // let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
       Promise.all([
         fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id + '/hours', {
           method: "GET",

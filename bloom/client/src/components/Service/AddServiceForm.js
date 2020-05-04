@@ -171,8 +171,8 @@ class AddServiceForm extends React.Component {
                   // redirect to home page signed in
                   if(data){
                     // upload to s3 from client to avoid burdening back end
-                  if(this.state.selectedFiles.length > 0){
-                    let prefix = 'stores/' + this.props.match.params.store_id + '/services/' + data.id + '/'
+                  if(selectedFiles.length > 0){
+                    let prefix = 'stores/' + data.store_id + '/services/' + data.id + '/'
                     await uploadHandler(prefix, selectedFiles)
                   }
                     triggerServiceDisplay(data)
