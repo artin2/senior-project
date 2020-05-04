@@ -25,7 +25,7 @@ class MainNavbar extends React.Component {
               <Link to="/signup" className="nav-link">Signup</Link>
             </Nav>
         } else {
-          return <Nav className="left">
+          return <Nav className="full-width justify-content-end">
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/login" className="nav-link">Login</Link>
             <Link to="/signup" className="nav-link">Signup</Link>
@@ -37,29 +37,36 @@ class MainNavbar extends React.Component {
             <NavDropdown.Item href={"/users/" + this.props.user.id + "/stores"}>Dashboard</NavDropdown.Item>
             {/* <NavDropdown.Item href="/stores/:store_id/services">Services</NavDropdown.Item> */}
             <NavDropdown.Divider />
-            <NavDropdown.Item href="/store/signup">Create Store</NavDropdown.Item>
+            <NavDropdown.Item href="/store/signup">Create&nbsp;Store</NavDropdown.Item>
           </NavDropdown>
         }
         else{
-          storeDisplay = <Link to="/store/signup" className="nav-link">Create Store</Link>
+          storeDisplay = <Link to="/store/signup" className="nav-link">Create&nbsp;Store</Link>
         }
         if(location.pathname == '/search') {
           return <Nav className="full-width">
             <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My&nbsp;Appointments</Link>
             <SearchBar className="nav-link"/>
-            <Link to="/about" className="nav-link">About</Link>
-            <Link to="/logout" className="nav-link">Logout</Link>
-          </Nav>
-        } else {
-          return <Nav>
-            {storeDisplay}
             <NavDropdown title="Profile" id="basic-nav-dropdown">
             <NavDropdown.Item href={"/users/" + this.props.user.id}>View</NavDropdown.Item>
               <NavDropdown.Item href={"/users/edit/" + this.props.user.id}>Edit</NavDropdown.Item>
             </NavDropdown>
-            <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My Appointments</Link>
-            <Link style={{position: 'absolute', right: 60}} to="/logout" className="nav-link">Logout</Link>
+            <Link to="/logout" className="nav-link">Logout</Link>
           </Nav>
+        } else {
+          return <><Nav>
+            {storeDisplay}
+            <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My&nbsp;Appointments</Link>
+          </Nav>
+          <Nav className="full-width justify-content-end">
+          <Link to="/about" className="nav-link">About</Link>
+          <NavDropdown title="Profile" id="basic-nav-dropdown">
+            <NavDropdown.Item href={"/users/" + this.props.user.id}>View</NavDropdown.Item>
+              <NavDropdown.Item href={"/users/edit/" + this.props.user.id}>Edit</NavDropdown.Item>
+            </NavDropdown>
+          <Link to="/logout" className="nav-link">Logout</Link>
+          </Nav> 
+          </>
         }
       }
     }
