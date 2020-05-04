@@ -45,38 +45,42 @@ class MainNavbar extends React.Component {
         }
         if(location.pathname == '/search') {
           return <Nav className="full-width">
-            <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My&nbsp;Appointments</Link>
+            {this.props.user.role == '0' ? null :
+              <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My Appointments</Link>
+            }
             <SearchBar className="nav-link"/>
             <Link to={"/users/" + this.props.user.id} title="Profile" className="nav-link">Profile</Link>
             <Link to="/logout" className="nav-link">Logout</Link>
           </Nav>
         } else {
-          return <><Nav>
+          return  <><Nav>
             {storeDisplay}
-            <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My&nbsp;Appointments</Link>
+            {this.props.user.role == '0' ? null :
+              <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My Appointments</Link>
+            }
           </Nav>
           <Nav className="full-width justify-content-end">
-          <Link to="/about" className="nav-link">About</Link>
-          <Link to={"/users/" + this.props.user.id} title="Profile" className="nav-link">Profile</Link>
-          {this.props.user.role == '0' ? null :
-            <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My Appointments</Link>
-          }
-          <Link style={{position: 'absolute', right: 60}} to="/logout" className="nav-link">Logout</Link>
-        </Nav>
+            <Link to="/about" className="nav-link">About</Link>
+           <Link to={"/users/" + this.props.user.id} title="Profile" className="nav-link">Profile</Link>
+           <Link to="/logout" className="nav-link">Logout</Link>
+          </Nav>
+        </>
       }
     }
+  }
 
     return (
       <Navbar collapseOnSelect expand="lg" bg="light" variant="light" fixed="top">
-        <Link to="/" className="navbar-brand" style={{fontFamily: 'Megrim, cursive', fontSize: '35px'}}>Bloom</Link>
-        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-        <Navbar.Collapse id="responsive-navbar-nav">
+      <Link to="/" className="navbar-brand" style={{fontFamily: 'Megrim, cursive', fontSize: '35px'}}>Bloom</Link>
+           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+           <Navbar.Collapse id="responsive-navbar-nav">
           <RenderNavBarBasedOnPageAndUser/>
         </Navbar.Collapse>
       </Navbar>
     );
   }
 }
+
 
 const mapStateToProps = state => ({
   user: state.userReducer.user
