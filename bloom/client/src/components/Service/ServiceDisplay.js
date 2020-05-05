@@ -2,6 +2,8 @@ import React from 'react';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+import Cookies from 'js-cookie';
+import { FaEdit, FaHourglassHalf, FaDollarSign } from 'react-icons/fa';
 // import {
 //   addAlert
 // } from '../../reduxFolder/actions'
@@ -23,7 +25,8 @@ class ServiceDisplay extends React.Component {
         category: "",
         description: ""
       },
-      pictures: []
+      pictures: [],
+      store: {owners:[]}
     }
   }
 
@@ -85,20 +88,67 @@ class ServiceDisplay extends React.Component {
       })
     }
 
+    let response2 = await fetch(fetchDomain + '/stores/' + this.props.match.params.store_id, {
+      method: "GET",
+      headers: {
+          'Content-type': 'application/json'
+      },
+      credentials: 'include'
+    })
+
+    const data2 = await response2.json()
+    this.setState({
+      store: data2
+    })
+
     return Promise.resolve()
   }
 
+  triggerServiceEdit() {
+    this.props.history.push({
+      pathname: '/stores/' + this.props.match.params.store_id + "/services/" + this.props.match.params.service_id + '/edit',
+      state: {
+        service: this.state.service
+      }
+    })
+  }
+
   render() {
+    let editButton;
+    if(Cookies.get('user') && this.state.store.owners.indexOf(JSON.parse(Cookies.get('user').substring(2)).id) > -1){
+      editButton = <FaEdit className="edit mb-3" style={{marginTop: "40px"}} size={25} onClick={() => this.triggerServiceEdit()}/>
+    }
+
     return (
       <Container fluid>
         <Row className="justify-content-center">
-          <Col>
-            <h1>{this.state.service.name}</h1>
-            <p>{this.state.service.description}</p>
-          </Col>
-
-          <Col xs={10} sm={9} md={8} lg={7}>
+          <Col md={6}>
             <LargeCarousel className="carousel" pictures={this.state.pictures}/>
+          </Col>
+          <Col md={5}>
+            <Row className={"justify-content-center"}>
+              <p className="name">{this.state.service.name}</p>
+              {editButton}
+            </Row>
+            <Row className={"justify-content-center"} style={{marginTop: "75px"}}>
+              <p className="address-large">{this.state.service.description}</p>
+            </Row>
+            <Row className={"justify-content-center"}>
+              <Col md={1}>
+                <FaDollarSign/>
+              </Col>
+              <Col md={1}>
+                <p className={"address-small"}>{this.state.service.cost}</p>
+              </Col>
+            </Row>
+            <Row className={"justify-content-center"}>
+              <Col md={1}>
+                <FaHourglassHalf/>
+              </Col>
+              <Col md={1}>
+                <p className={"address-small"}>{this.state.service.duration}</p>
+              </Col>
+            </Row>
           </Col>
         </Row>
       </Container>
