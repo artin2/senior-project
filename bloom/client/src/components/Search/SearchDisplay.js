@@ -126,7 +126,7 @@ class SearchDisplay extends React.Component {
           </Row>
       } else if(this.state.stores.length > 0) {
         return( <div>
-          <h3 className="text-left mb-0"> {this.state.stores.length} results </h3>	
+          <h3 className="text-left mb-0"> {this.state.stores.length} results </h3>
           <Row className="mx-0 justify-content-center search-cards-row">
             <RenderStoreCards/>
           </Row>

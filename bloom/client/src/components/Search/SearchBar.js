@@ -192,7 +192,7 @@ class SearchBar extends React.Component {
               <Form.Group className="full-width">
               <Select
                 className="full-width"
-                placeholder="Search Radius"
+                placeholder="Distance"
                 value={this.state.distanceSelect}
                 onChange={this.handleSearchRadiusChange}
                 options={this.state.searchRadiusList}

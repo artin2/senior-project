@@ -113,10 +113,10 @@ class StoreSignupForm extends React.Component {
   }
 
   // redirect to the store display page and pass the new store data
-  triggerStoreDisplay(returnedStore) {
+  triggerStoreDisplay(returnedStore, user_id) {
 
     this.props.history.push({
-      pathname: '/stores/' + returnedStore.id,
+      pathname: '/users/' + user_id + '/stores',
       state: {
         store: returnedStore
       }
@@ -286,7 +286,7 @@ class StoreSignupForm extends React.Component {
                       }
                       this.props.updateRole(1)
                       this.props.addStore(data)
-                      triggerStoreDisplay(data)
+                      triggerStoreDisplay(data, values.owner_id)
                     }
                   });
               }}

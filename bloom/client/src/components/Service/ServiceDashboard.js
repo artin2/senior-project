@@ -17,7 +17,7 @@ import './Services.css';
 import { FaEdit } from 'react-icons/fa';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
-const colors = ['#f0d1d9', '#f7e5e4', '#d6ced3'];
+const colors = ['#d2d4cf', '#d2d4cf', '#d2d4cf'];
 
 class ServiceDashboard extends React.Component {
   constructor(props) {
@@ -124,13 +124,13 @@ class ServiceDashboard extends React.Component {
     if(this.state.services.length > 0){
       services = <Col>
                     <p className="services_title">My Services </p>
-                    <Button className="buttons" onClick={() => this.triggerAddService()}>Add Service</Button>
+                    <Button className="buttons" style={{backgroundColor: "#3E4E69", color: 'white'}} onClick={() => this.triggerAddService()}>Add Service</Button>
                     {/* <Button className="buttons" onClick={() => this.triggerServiceEditForm()}>Edit Services</Button> */}
                     <div className="service_container">
                       {this.state.services.map((service, indx) => (
                         <Col key={"service-" + service.id}>
 
-                          <div className="service_card">
+
 
                           {/* {((service.id % 2) == 0) ? (
                             <div className="service_img">
@@ -162,7 +162,7 @@ class ServiceDashboard extends React.Component {
                                 </div>
                               </Row>
                             </Col>
-                            </div>
+
 
                             {/* {((service.id % 2) != 0) ? (
                               <div className="service_img">
@@ -180,7 +180,7 @@ class ServiceDashboard extends React.Component {
     else{
       services = <div>
                   <p className="noResults">No Services!</p>
-                  <Button onClick={() => this.triggerAddService()}>Add Service</Button>
+                  <Button style={{backgroundColor: "#3E4E69", color: 'white'}} onClick={() => this.triggerAddService()}>Add Service</Button>
                 </div>
     }
     return (

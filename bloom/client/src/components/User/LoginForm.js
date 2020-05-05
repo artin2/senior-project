@@ -26,7 +26,7 @@ class LoginForm extends React.Component {
       email: '',
       password: '',
       message: {},
-      auth: ''
+      provider: null
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -42,25 +42,27 @@ class LoginForm extends React.Component {
     console.log(response)
     console.log("Google Success: ", response.accessToken);
     this.setState({
-      auth: {
-        party: "Google",
-        token: response.accessToken
-      }
+      provider: "Google",
+      email: response.profileObj.email,
+      password: response.accessToken
     });
+    this.props.loginUser(this.state)
   }
 
   failureGoogle = (response) => {
     console.log("Google Failure:", response.error);
   }
 
-  fsuccessFacebook = (response) => {
+  successFacebook = (response) => {
     console.log("Facebook Success:", response.accessToken);
     this.setState({
-      auth: {
-        party: "Google",
-        token: response.accessToken
-      }
+      provider: "Facebook",
+      email: response.email,
+      password: response.accessToken
+
     });
+
+    this.props.loginUser(this.state)
   }
 
   failureFacebook = (response) => {
@@ -90,7 +92,7 @@ class LoginForm extends React.Component {
   handleSubmit(event) {
     //there might be a CORS issue with the backend, this doesn't work without preventDefault..
     event.preventDefault();
-    this.props.loginUser(this.state.email, this.state.password, this.state.auth)
+    this.props.loginUser(this.state)
   }
 
   render() {

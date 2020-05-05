@@ -15,6 +15,9 @@ import * as Yup from 'yup';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import {signup} from '../../reduxFolder/redux.js'
+import GoogleLogin from 'react-google-login';
+import FacebookLogin from 'react-facebook-login';
+import {TiSocialFacebookCircular, TiSocialGooglePlus} from 'react-icons/ti';
 
 class SignupForm extends React.Component {
   constructor(props) {
@@ -49,7 +52,55 @@ class SignupForm extends React.Component {
   }
 
   handleSubmit = (values) => {
+
     this.props.signUpUser(values)
+  }
+
+  successGoogle = (response) => {
+    // console.log(response.profileObj)
+    // console.log("Google Success: ", response.accessToken);
+    this.setState({
+      provider: "Google",
+      password: response.accessToken,
+      email: response.profileObj.email,
+      first_name: response.profileObj.givenName,
+      last_name: response.profileObj.familyName,
+      role: '0',
+      phone: ''
+    });
+
+    this.props.signUpUser(this.state)
+  }
+
+  failureGoogle = (response) => {
+    console.log("Google Failure:", response.error);
+  }
+
+  successFacebook = (response) => {
+
+    console.log("Facebook Success:", response.accessToken);
+    let name = response.name.split(" ");;
+
+    this.setState({
+
+      provider: "Facebook",
+      password: response.accessToken,
+      email: response.email,
+      first_name: name[0],
+      last_name: name[1],
+      role: '0',
+      phone: ''
+
+    });
+
+    this.props.signUpUser(this.state)
+
+  }
+
+  failureFacebook = (response) => {
+    if(response.status){
+      console.log("Facebook Failure");
+    }
   }
 
   componentDidUpdate(prevProps, prevState)  {
@@ -79,21 +130,24 @@ class SignupForm extends React.Component {
             role: '0',
             phone: '',
             password: '',
-            password_confirmation: ''
+            password_confirmation: '',
+            provider: null
           }}
           validationSchema={this.yupValidationSchema}
           onSubmit={this.handleSubmit}
         >
+
         {( {values,
             errors,
             touched,
             handleChange,
             handleBlur,
             handleSubmit}) => (
-          <Form className="formBody rounded">
+          <Form className="formBody rounded" style={{ width: '150%', marginLeft: '-20%'}}>
             <h3>Sign Up</h3>
-            <Form.Row className="justify-content-center">
-              <Col xs={12} sm={10} md={9} lg={8}>
+
+            <Row >
+              <Col xs={12} sm={10} md={5} lg={6}>
                 <Form.Group controlId="formFirstName">
                   <InputGroup>
                     <InputGroup.Prepend>
@@ -218,16 +272,40 @@ class SignupForm extends React.Component {
                     <div className="error-message">{errors.password_confirmation}</div>
                   ): null}
                 </Form.Group>
-                </Col>
-                </Form.Row>
-                <Form.Row className="justify-content-center">
-              <Col xs={11} sm={8} md={7} lg={6}>
+
                 <Button className="signup mb-1" onClick={handleSubmit}>Sign Up</Button>
+                </Col>
+
+                <Col xs={12} sm={10} md={7} lg={6} style={{marginTop: '8%'}}>
+                <p > OR </p>
+                <GoogleLogin
+                  clientId={process.env.REACT_APP_GOOGLE_ID}
+                  buttonText="Login with Google"
+                  onSuccess={this.successGoogle}
+                  onFailure={this.failureGoogle}
+                  cookiePolicy={'single_host_origin'}
+                  render={renderProps => (
+                    <button onClick={renderProps.onClick} className="my-1" style={{ width: '100%', backgroundColor:"#db4a39", color: 'white', paddingRight: '30px',
+                  height: '48px', fontSize: '14px'}}> <TiSocialGooglePlus  size={45} style={{paddingRight:"15px"}}/>Login with Google</button>
+                )}
+              />
+
+              <FacebookLogin
+                appId={process.env.REACT_APP_FACEBOOK_ID} //APP ID NOT CREATED YET
+                fields="name,email,picture"
+                onFailure={this.failureFacebook}
+                xfbml={true}
+                cssClass="facebookButton my-1"
+                icon={<TiSocialFacebookCircular size={45} style={{paddingRight:"15px"}}/>}
+                callback={this.successFacebook}
+                />
                 <p className="my-1"> Already have a Bloom account? <Link onClick={() => this.props.toggleLogin(true)}> Log in. </Link></p>
                 </Col>
-                </Form.Row>
-          </Form>
+
+                </Row>
+              </Form>
         )}
+
         </Formik>
 );
 

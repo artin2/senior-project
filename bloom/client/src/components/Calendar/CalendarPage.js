@@ -239,6 +239,15 @@ class Calendar extends React.Component {
        this.onSearch = this.onSearch.bind(this);
   }
 
+    timeConvert = (n) => {
+      var num = n;
+      var hours = (num / 60);
+      var rhours = Math.floor(hours);
+      var minutes = (hours - rhours) * 60;
+      var rminutes = Math.round(minutes);
+      return [rhours, rminutes];
+    }
+
     getAppointments = (store_id) => {
 
         fetch(fetchDomain + '/stores/' + store_id + '/appointments' , {
@@ -255,18 +264,21 @@ class Calendar extends React.Component {
           data.map((appointment, indx) => {
 
               let date = new Date(appointment.date);
-              let startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), appointment.start_time, 0);
-              let endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), appointment.end_time, 0);
+              let startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), this.timeConvert(appointment.start_time)[0], this.timeConvert(appointment.start_time)[1]);
+              let endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), this.timeConvert(appointment.end_time)[0], this.timeConvert(appointment.end_time)[1]);
+
 
               appointments.push({
                 id: indx,
-                title: appointment.worker + " with " + this.state.worker_map[appointment.worker_id],
+                title: this.state.service_map[appointment.service_id] + " with " + this.state.worker_map[appointment.worker_id],
                 workers: [this.state.worker_map[appointment.worker_id]],
                 services: [this.state.service_map[appointment.service_id]],
                 price: appointment.price,
                 startDate: startDate,
                 endDate: endDate
               })
+
+              console.log(appointments)
 
               this.setState({
                 appointments: appointments,
@@ -288,27 +300,11 @@ class Calendar extends React.Component {
 
       console.log(store_id)
 
-      if(this.props.role) {
-        this.getAppointments(store_id);
-        return;
-      }
+      // if(this.props.role) {
+      //   this.getAppointments(store_id);
+      //   return;
+      // }
       //fetching  workers and services
-      if(this.props.location.state && this.props.location.state.store.services) {
-        let service_map = {}
-        let service_instances = []
-
-        this.props.location.state.store.services.map((service, indx) => {
-          service_instances.push({id: indx, text: service.name})
-          service_map[service.id] = service.name
-        })
-
-        this.setState({
-          services: this.props.location.state.store.services,
-          service_map: service_map
-        })
-      }
-      else {
-
           await fetch(fetchDomain + '/stores/' + store_id + "/services", {
           method: "GET",
           headers: {
@@ -327,9 +323,10 @@ class Calendar extends React.Component {
 
             if (data) {
               services = data;
+
               let service_instances = []
               let service_map = {}
-              // console.log("here!!", services);
+              console.log("here!!", services);
 
               services.map((service, indx) => {
                     service_instances.push({id: indx, text: service.name})
@@ -337,15 +334,16 @@ class Calendar extends React.Component {
               })
 
               this.setState({
-                  services: services,
+                  services: service_instances,
                   service_map: service_map
               })
 
+              // console.log(this.state)
               // return new_services;
             }
           });
 
-      }
+
 
       await fetch(fetchDomain + '/stores/' + store_id + '/workers', {
           method: "GET",
@@ -389,6 +387,7 @@ class Calendar extends React.Component {
         resources: [new_services, new_workers]
       })
 
+      // console.log(this.state)
       this.getAppointments(store_id);
 
     }
@@ -427,13 +426,19 @@ class Calendar extends React.Component {
 
       this.state.selectedWorkers.map(worker => {
 
-        if(appointment.workers.includes(worker.id)) {
+        if(appointment.workers.includes(worker.text)) {
           includeWorker = true;
         }
+
+        // console.log(worker)
+
       })
+
+      // console.log(includeWorker, appointment)
+
       this.state.selectedServices.map(service => {
 
-        if(appointment.services.includes(service.id)) {
+        if(appointment.services.includes(service.text)) {
           includeService = true;
         }
       })
@@ -442,7 +447,9 @@ class Calendar extends React.Component {
         newSelected.push(appointment);
       }
     })
+    console.log(newSelected)
     this.setState({ selectedAppointments: newSelected });
+
   }
 
 
