@@ -46,7 +46,7 @@ class MainNavbar extends React.Component {
         if(location.pathname == '/search') {
           return <Nav className="full-width">
             {this.props.user.role == '0' ? null :
-              <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My Appointments</Link>
+              <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My&nbsp;Appointments</Link>
             }
             <SearchBar className="nav-link"/>
             <Link to={"/users/" + this.props.user.id} title="Profile" className="nav-link">Profile</Link>
@@ -56,7 +56,7 @@ class MainNavbar extends React.Component {
           return  <><Nav>
             {storeDisplay}
             {this.props.user.role == '0' ? null :
-              <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My Appointments</Link>
+              <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My&nbsp;Appointments</Link>
             }
           </Nav>
           <Nav className="full-width justify-content-end">

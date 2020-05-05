@@ -277,7 +277,12 @@ class Profile extends React.Component {
 
       </Row>
       }
-      else if(this.props.user.role == '0') {
+      else {
+        let type = 'Customer'
+        if(this.props.user.role == '1'){
+          type = 'Salon Owner'
+        }
+        
         return <Row className="profile">
         <Col xs="11" md="3">
         <div className="profile-sidebar">
@@ -293,7 +298,7 @@ class Profile extends React.Component {
                 {this.props.user.first_name + " " + this.props.user.last_name}
               </div>
               <div className="profile-usertitle-job">
-                Stylist
+                {type}
               </div>
               <Button onClick={() => this.editProfile()}>Edit Profile</Button>
             </div>

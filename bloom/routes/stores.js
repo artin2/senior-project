@@ -193,7 +193,7 @@ async function editStore(req, res, next) {
                       await hourDb.query("BEGIN");
                       const query = 'UPDATE store_hours SET open_time=$1, close_time=$2 WHERE store_id=$3 and day_of_the_week=$4 RETURNING store_id';
                       for (let i = 0; i < newHours.length; i++) {
-                        if (newHours[i] != null) {
+                        if (newHours[i] != null && !(Object.keys(newHours[i]).length === 0 && newHours[i].constructor === Object)) {
                           let storeHoursValues = [newHours[i].open_time, newHours[i].close_time, storeId, i]
                           await hourDb.query(query, storeHoursValues);
                         }
@@ -528,6 +528,7 @@ async function editWorker(req, res, next) {
   let resp = res
   let failed = false
   if (newHours.length > 0) {
+    console.log("updating worker hours!", newHours)
     let worker_id = req.body.id
       ; (async (req, res) => {
         const hourDb = await db.client.connect();
@@ -535,7 +536,8 @@ async function editWorker(req, res, next) {
           await hourDb.query("BEGIN");
           const query = 'UPDATE worker_hours SET start_time=$1, end_time=$2 WHERE worker_id=$3 and day_of_the_week=$4 RETURNING worker_id';
           for (let i = 0; i < newHours.length; i++) {
-            if (newHours[i] != null) {
+            if (newHours[i] != null && !(Object.keys(newHours[i]).length === 0 && newHours[i].constructor === Object)) {
+              console.log("this one is not null:",newHours[i])
               let newHoursValues = [newHours[i].start_time, newHours[i].end_time, worker_id, i]
               await hourDb.query(query, newHoursValues);
             }

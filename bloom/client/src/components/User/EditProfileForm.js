@@ -66,7 +66,7 @@ class EditProfileForm extends React.Component {
   render() {
     return (
       <Container fluid>
-        <Row className="justify-content-center">
+        <Row className="justify-content-center" style={{marginTop: 60}}>
           <Col xs={8} sm={7} md={6} lg={5}>
             <Formik
               enableReinitialize

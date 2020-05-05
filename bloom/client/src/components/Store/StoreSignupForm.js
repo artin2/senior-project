@@ -43,6 +43,7 @@ class StoreSignupForm extends React.Component {
       { open_time: 540, close_time: 1020 },
       { open_time: 540, close_time: 1020 },
       { open_time: 540, close_time: 1020 }],
+      weekIsWorking: [true, true, true, true, true, true, true],
       address: []
     }
 
@@ -80,6 +81,18 @@ class StoreSignupForm extends React.Component {
     this.onRemove = this.onRemove.bind(this);
     this.shorterVersion = this.shorterVersion.bind(this);
   }
+
+  handleDayStatusChange = (day) => {
+    var updateWeekIsWorking = [
+      ...this.state.weekIsWorking.slice(0, day),
+      !this.state.weekIsWorking[day],
+      ...this.state.weekIsWorking.slice(day + 1)
+    ]
+
+    this.setState({
+      weekIsWorking: updateWeekIsWorking
+    })
+  };
 
   componentDidMount() {
     const google = window.google;
@@ -234,7 +247,14 @@ class StoreSignupForm extends React.Component {
                 }
 
                 values.owner_id = JSON.parse(Cookies.get('user').substring(2)).id
-                values.storeHours = this.state.storeHours
+                values.storeHours = this.state.storeHours.map((day, index) => {
+                  if(this.state.weekIsWorking[index]){
+                    return day
+                  } 
+                  else {
+                    return {open_time: null, close_time: null}
+                  }
+                })
                 values.address = this.state.address
 
 
@@ -386,9 +406,16 @@ class StoreSignupForm extends React.Component {
 
                     <Form.Group controlId="formHoursMonday">
                       <h5 className="text-left">Monday</h5>
+                      <Form.Check
+                        type="checkbox"
+                        id="monday-toggle"
+                        label="Working Today?"
+                        checked={this.state.weekIsWorking[0]}
+                        onChange={() => this.handleDayStatusChange(0)}
+                      />
                       <Form.Row>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[0].open_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[0]} value={this.state.storeHours[0].open_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={0}>{this.convertMinsToHrsMins(0)}</option>
                             <option value={60}>{this.convertMinsToHrsMins(60)}</option>
                             <option value={120}>{this.convertMinsToHrsMins(120)}</option>
@@ -407,7 +434,7 @@ class StoreSignupForm extends React.Component {
                           </Form.Control>
                         </Col>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[0].close_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[0]} value={this.state.storeHours[0].close_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={900}>{this.convertMinsToHrsMins(900)}</option>
                             <option value={960}>{this.convertMinsToHrsMins(960)}</option>
                             <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
@@ -425,9 +452,16 @@ class StoreSignupForm extends React.Component {
 
                     <Form.Group controlId="formHoursTuesday">
                       <h5 className="text-left">Tuesday</h5>
+                      <Form.Check
+                        type="checkbox"
+                        id="monday-toggle"
+                        label="Working Today?"
+                        checked={this.state.weekIsWorking[1]}
+                        onChange={() => this.handleDayStatusChange(1)}
+                      />
                       <Form.Row>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[1].open_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[1]} value={this.state.storeHours[1].open_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={0}>{this.convertMinsToHrsMins(0)}</option>
                             <option value={60}>{this.convertMinsToHrsMins(60)}</option>
                             <option value={120}>{this.convertMinsToHrsMins(120)}</option>
@@ -446,7 +480,7 @@ class StoreSignupForm extends React.Component {
                           </Form.Control>
                         </Col>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[1].close_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[1]} value={this.state.storeHours[1].close_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={900}>{this.convertMinsToHrsMins(900)}</option>
                             <option value={960}>{this.convertMinsToHrsMins(960)}</option>
                             <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
@@ -465,9 +499,16 @@ class StoreSignupForm extends React.Component {
 
                     <Form.Group controlId="formHoursWednesday">
                       <h5 className="text-left">Wednesday</h5>
+                      <Form.Check
+                        type="checkbox"
+                        id="monday-toggle"
+                        label="Working Today?"
+                        checked={this.state.weekIsWorking[2]}
+                        onChange={() => this.handleDayStatusChange(2)}
+                      />
                       <Form.Row>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[2].open_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[2]} value={this.state.storeHours[2].open_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={0}>{this.convertMinsToHrsMins(0)}</option>
                             <option value={60}>{this.convertMinsToHrsMins(60)}</option>
                             <option value={120}>{this.convertMinsToHrsMins(120)}</option>
@@ -486,7 +527,7 @@ class StoreSignupForm extends React.Component {
                           </Form.Control>
                         </Col>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[2].close_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[2]} value={this.state.storeHours[2].close_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={900}>{this.convertMinsToHrsMins(900)}</option>
                             <option value={960}>{this.convertMinsToHrsMins(960)}</option>
                             <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
@@ -504,9 +545,16 @@ class StoreSignupForm extends React.Component {
 
                     <Form.Group controlId="formHoursThursday">
                       <h5 className="text-left">Thursday</h5>
+                      <Form.Check
+                        type="checkbox"
+                        id="monday-toggle"
+                        label="Working Today?"
+                        checked={this.state.weekIsWorking[3]}
+                        onChange={() => this.handleDayStatusChange(3)}
+                      />
                       <Form.Row>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[3].open_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[3]} value={this.state.storeHours[3].open_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={0}>{this.convertMinsToHrsMins(0)}</option>
                             <option value={60}>{this.convertMinsToHrsMins(60)}</option>
                             <option value={120}>{this.convertMinsToHrsMins(120)}</option>
@@ -525,7 +573,7 @@ class StoreSignupForm extends React.Component {
                           </Form.Control>
                         </Col>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[3].close_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[3]} value={this.state.storeHours[3].close_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={900}>{this.convertMinsToHrsMins(900)}</option>
                             <option value={960}>{this.convertMinsToHrsMins(960)}</option>
                             <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
@@ -544,9 +592,16 @@ class StoreSignupForm extends React.Component {
 
                     <Form.Group controlId="formHoursFriday">
                       <h5 className="text-left">Friday</h5>
+                      <Form.Check
+                        type="checkbox"
+                        id="monday-toggle"
+                        label="Working Today?"
+                        checked={this.state.weekIsWorking[4]}
+                        onChange={() => this.handleDayStatusChange(4)}
+                      />
                       <Form.Row>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[4].open_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[4]} value={this.state.storeHours[4].open_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={0}>{this.convertMinsToHrsMins(0)}</option>
                             <option value={60}>{this.convertMinsToHrsMins(60)}</option>
                             <option value={120}>{this.convertMinsToHrsMins(120)}</option>
@@ -565,7 +620,7 @@ class StoreSignupForm extends React.Component {
                           </Form.Control>
                         </Col>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[4].close_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[4]} value={this.state.storeHours[4].close_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={900}>{this.convertMinsToHrsMins(900)}</option>
                             <option value={960}>{this.convertMinsToHrsMins(960)}</option>
                             <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
@@ -583,9 +638,16 @@ class StoreSignupForm extends React.Component {
 
                     <Form.Group controlId="formHoursSaturday">
                       <h5 className="text-left">Saturday</h5>
+                      <Form.Check
+                        type="checkbox"
+                        id="monday-toggle"
+                        label="Working Today?"
+                        checked={this.state.weekIsWorking[5]}
+                        onChange={() => this.handleDayStatusChange(5)}
+                      />
                       <Form.Row>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[5].open_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[5]} value={this.state.storeHours[5].open_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={0}>{this.convertMinsToHrsMins(0)}</option>
                             <option value={60}>{this.convertMinsToHrsMins(60)}</option>
                             <option value={120}>{this.convertMinsToHrsMins(120)}</option>
@@ -604,7 +666,7 @@ class StoreSignupForm extends React.Component {
                           </Form.Control>
                         </Col>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[5].close_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[5]} value={this.state.storeHours[5].close_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={900}>{this.convertMinsToHrsMins(900)}</option>
                             <option value={960}>{this.convertMinsToHrsMins(960)}</option>
                             <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
@@ -623,9 +685,16 @@ class StoreSignupForm extends React.Component {
 
                     <Form.Group controlId="formHoursSunday">
                       <h5 className="text-left">Sunday</h5>
+                      <Form.Check
+                        type="checkbox"
+                        id="monday-toggle"
+                        label="Working Today?"
+                        checked={this.state.weekIsWorking[6]}
+                        onChange={() => this.handleDayStatusChange(6)}
+                      />
                       <Form.Row>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[6].open_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[6]} value={this.state.storeHours[6].open_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={0}>{this.convertMinsToHrsMins(0)}</option>
                             <option value={60}>{this.convertMinsToHrsMins(60)}</option>
                             <option value={120}>{this.convertMinsToHrsMins(120)}</option>
@@ -644,7 +713,7 @@ class StoreSignupForm extends React.Component {
                           </Form.Control>
                         </Col>
                         <Col>
-                          <Form.Control as="select" value={this.state.storeHours[6].close_time} onChange={this.handleSelectChange.bind(this)}>
+                          <Form.Control as="select" disabled={!this.state.weekIsWorking[6]} value={this.state.storeHours[6].close_time} onChange={this.handleSelectChange.bind(this)}>
                             <option value={900}>{this.convertMinsToHrsMins(900)}</option>
                             <option value={960}>{this.convertMinsToHrsMins(960)}</option>
                             <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
