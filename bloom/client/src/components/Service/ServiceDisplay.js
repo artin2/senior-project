@@ -8,6 +8,7 @@ import { FaEdit, FaHourglassHalf, FaDollarSign } from 'react-icons/fa';
 //   addAlert
 // } from '../../reduxFolder/actions'
 // import store from '../../reduxFolder/store';
+import {Carousel, Image } from 'react-bootstrap'
 import LargeCarousel from '../LargeCarousel';
 import { getPictures } from '../s3'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
@@ -122,8 +123,14 @@ class ServiceDisplay extends React.Component {
     return (
       <Container fluid>
         <Row className="justify-content-center">
-          <Col md={6}>
-            <LargeCarousel className="carousel" pictures={this.state.pictures}/>
+          <Col md={6} className="vertical-align-contents px-0 h-100 w-100">
+            <Carousel interval="">
+              {this.state.pictures.map((picture, index) => (
+                <Carousel.Item key={"pic-" + index}>
+                  <Image fluid src={picture.url} alt={"Slide " + index} />
+                </Carousel.Item>
+              ))}
+            </Carousel>
           </Col>
           <Col md={5}>
             <Row className={"justify-content-center"}>

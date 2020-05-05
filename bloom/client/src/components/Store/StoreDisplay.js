@@ -3,7 +3,7 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import LargeCarousel from '../LargeCarousel';
-import { Button } from 'react-bootstrap';
+import { Button, Carousel, Image  } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import { withRouter } from "react-router-dom";
 import {
@@ -200,8 +200,14 @@ class StoreDisplay extends React.Component {
     return (
       <Container fluid>
         <Row className="justify-content-md-center" style={{ marginTop: '15px', marginBottom: '15px'}}>
-          <Col md={6}>
-            <LargeCarousel className="carousel" pictures={this.state.store.pictures}/>
+          <Col md={6} className="vertical-align-contents px-0 h-100 w-100">
+            <Carousel interval="">
+              {this.state.store.pictures.map((picture, index) => (
+                <Carousel.Item key={"pic-" + index}>
+                  <Image fluid src={picture.url} alt={"Slide " + index} />
+                </Carousel.Item>
+              ))}
+            </Carousel>
           </Col>
 
           <Col md={5}>
