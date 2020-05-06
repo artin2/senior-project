@@ -425,7 +425,6 @@ class WorkerEditForm extends React.Component {
                   })
                   .then(data => {
                     if (data) {
-
                       triggerWorkerDisplay(data)
                     }
                   });
