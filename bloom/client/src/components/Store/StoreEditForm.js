@@ -452,6 +452,8 @@ class StoreEditForm extends React.Component {
                   }
                 })
 
+                console.log("new hours are!", values.storeHours)
+
                 values.address = this.state.address
 
                 // remove files from s3
