@@ -11,7 +11,7 @@ import {
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import './StoreDisplay.css'
-import { getPictures } from '../s3'
+import { getPictures, defaultStorePictures } from '../s3'
 import {ListGroup} from 'react-bootstrap'
 import { FaEdit } from 'react-icons/fa';
 
@@ -84,22 +84,15 @@ class StoreDisplay extends React.Component {
 
   async componentDidMount() {
     // if we were passed the store data from calling component
-    let pictures = await getPictures('stores/' + this.props.match.params.store_id + '/images/')
-    if(pictures.length == 0){
-      pictures = [
-        {
-          url: "/hair.jpg",
-          key: "/hair.jpg"
-        },
-        {
-          url: "/nails.jpg",
-          key: "/nails.jpg"
-        },
-        {
-          url: "/salon.jpg",
-          key: "/salon.jpg"
-        }
-      ]
+    let pictures
+    try {
+      pictures = await getPictures('stores/' + this.props.match.params.store_id + '/images/')
+      if(pictures.length == 0){
+        pictures = defaultStorePictures()
+      }
+    } catch (e) {
+      pictures = defaultStorePictures()
+      console.log("Error! Could not get store images", e)
     }
 
     if(this.props.location.state && this.props.location.state.storeHours){
@@ -186,10 +179,10 @@ class StoreDisplay extends React.Component {
         let items = [];
         for (let i = 0; i < props.storeHours.length; i++) {
           if (props.storeHours[i].open_time != null) {
-            items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-1"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: {this.convertMinsToHrsMins(props.storeHours[i].open_time)}-{this.convertMinsToHrsMins(props.storeHours[i].close_time)}</ListGroup.Item></Col>);
+            items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-2"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: {this.convertMinsToHrsMins(props.storeHours[i].open_time)}-{this.convertMinsToHrsMins(props.storeHours[i].close_time)}</ListGroup.Item></Col>);
           }
           else {
-            items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-1"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: Off</ListGroup.Item></Col>);
+            items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-2"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: Off</ListGroup.Item></Col>);
           }
         }
         return items;
@@ -199,12 +192,13 @@ class StoreDisplay extends React.Component {
 
     return (
       <Container fluid>
-        <Row className="justify-content-md-center" style={{ marginTop: '15px', marginBottom: '15px'}}>
+        <Row className="justify-content-md-center" style={{ marginTop: '20px', marginBottom: '15px'}}>
           <Col md={6} className="vertical-align-contents px-0 h-100 w-100">
             <Carousel interval="">
               {this.state.store.pictures.map((picture, index) => (
+                // style={{maxWidth: '100%', maxHeight: '100%'}}
                 <Carousel.Item key={"pic-" + index}>
-                  <Image fluid src={picture.url} alt={"Slide " + index} />
+                  <Image style={{maxWidth: '200%', maxHeight: '100%'}} src={picture.url} alt={"Slide " + index} />
                 </Carousel.Item>
               ))}
             </Carousel>
@@ -215,14 +209,18 @@ class StoreDisplay extends React.Component {
               <p className="name">{this.state.store.name}</p>
               {editButton}
             </Row>
-            <p className="address">{this.state.store.address}</p>
-            <hr/>
-            <ListGroup variant="flush" style={{marginTop: "-30px"}}>
-              <Row className="justify-content-center mt-4">
-                <h5>Store Hours</h5>
-                <ListWorkingHours storeHours={this.state.storeHours}/>
-              </Row>
-            </ListGroup>
+            <Row>
+              <p className="address">{this.state.store.address}</p>
+              <hr/>
+            </Row>
+            <Row className={"justify-content-center"}>
+              <h5>Store Hours</h5>
+              <ListGroup variant="flush" style={{marginTop: "-30px"}}>
+                <Row className="justify-content-center mt-4">
+                  <ListWorkingHours storeHours={this.state.storeHours}/>
+                </Row>
+              </ListGroup>
+            </Row>
           </Col>
         </Row>
         <Row style={{marginTop: "20px", marginLeft: "25px"}}>

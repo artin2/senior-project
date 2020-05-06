@@ -18,7 +18,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 // import {addStore} from '../../reduxFolder/actions/stores.js'
 import UserStoresDashboardLoader from './UserStoresDashboardLoader';
-import { getPictures } from '../s3'
+import { getPictures, defaultStorePictures } from '../s3'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 // ***** NOTE: fix to properly display all the stores
@@ -123,45 +123,24 @@ class UserStoresDashboard extends React.Component {
         // let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
 
         var appendedStores = await Promise.all(data.map(async (store): Promise<Object> => {
-          let pictures = await getPictures('stores/' + store.id + '/images/')
+          try {
+            let pictures = await getPictures('stores/' + store.id + '/images/')
 
-          // once all data is clean and picture requirement is enforced we can remove this
-          if(pictures.length == 0){
-            pictures = [
-              {
-                url: "/hair.jpg",
-                key: "/hair.jpg"
-              },
-              {
-                url: "/nails.jpg",
-                key: "/nails.jpg"
-              },
-              {
-                url: "/salon.jpg",
-                key: "/salon.jpg"
-              }
-            ]
+            // once all data is clean and picture requirement is enforced we can remove this
+            if(pictures.length == 0){
+              pictures = defaultStorePictures()
+            }
+
+            // we can set pictures to defaultStorePictures to prevent s3 calls
+
+            var newstore = Object.assign({}, store);
+            newstore.pictures = pictures;
+            return newstore;
+          } catch (error) {
+            var newstore = Object.assign({}, store);
+            newstore.pictures = defaultStorePictures();
+            return newstore
           }
-
-          // we can use this for now to avoid s3 fetches
-          // let pictures = [
-          //     {
-          //       url: "/hair.jpg",
-          //       key: "/hair.jpg"
-          //     },
-          //     {
-          //       url: "/nails.jpg",
-          //       key: "/nails.jpg"
-          //     },
-          //     {
-          //       url: "/salon.jpg",
-          //       key: "/salon.jpg"
-          //     }
-          //   ]
-
-          var newstore = Object.assign({}, store);
-          newstore.pictures = pictures;
-          return newstore;
         }));
 
         this.setState({
