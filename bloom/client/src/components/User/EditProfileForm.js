@@ -92,7 +92,7 @@ class EditProfileForm extends React.Component {
                 handleChange,
                 handleBlur,
                 handleSubmit}) => (
-              <Form className="formBody rounded">
+              <Form className="formBody rounded p-5">
                 <h3>Edit Profile</h3>
 
                 <Form.Group controlId="formFirstName">
