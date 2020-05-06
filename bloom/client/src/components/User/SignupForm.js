@@ -143,7 +143,7 @@ class SignupForm extends React.Component {
             handleChange,
             handleBlur,
             handleSubmit}) => (
-          <Form className="formBody rounded">
+          <Form className="formBody rounded p-5">
             <h3>Sign Up</h3>
 
             <Row className="align-items-center">

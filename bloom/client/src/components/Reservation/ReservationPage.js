@@ -185,9 +185,9 @@ class ReservationPage extends React.Component {
           </Row>
         </Card>
       } else {
-        if (this.state.currentStep == 4) {
+        if (this.state.currentStep == 1) {
           return <ServiceSelection services={this.state.services} categories={this.state.categories} updateReservation={this.updateReservation} selectedServices={this.state.selectedServices} time={this.state.time} total={this.state.total} handleSubmit={this.handleSubmit} timeConvert={this.timeConvert} pluralize={this.pluralize} />
-        } else if(this.state.currentStep == 5) {
+        } else if(this.state.currentStep == 2) {
           return <DateSelection time={this.state.time}  store_id={this.props.match.params.store_id} selectedServices={this.state.selectedServices} storeHours={this.state.storeHours} workersSchedules={this.state.workersSchedules} handleSubmit={this.handleSubmit} updateAppointments={this.updateAppointments}/>
         } else {
           if(Cookies.get('user')){
