@@ -143,10 +143,10 @@ class SignupForm extends React.Component {
             handleChange,
             handleBlur,
             handleSubmit}) => (
-          <Form className="formBody rounded" style={{ width: '150%', marginLeft: '-20%'}}>
+          <Form className="formBody rounded">
             <h3>Sign Up</h3>
 
-            <Row >
+            <Row className="align-items-center">
               <Col xs={12} sm={10} md={5} lg={6}>
                 <Form.Group controlId="formFirstName">
                   <InputGroup>
@@ -276,7 +276,7 @@ class SignupForm extends React.Component {
                 <Button className="signup mb-1" onClick={handleSubmit}>Sign Up</Button>
                 </Col>
 
-                <Col xs={12} sm={10} md={7} lg={6} style={{marginTop: '8%'}}>
+                <Col xs={12} sm={10} md={7} lg={6} className="mb-5">
                 <p > OR </p>
                 <GoogleLogin
                   clientId={process.env.REACT_APP_GOOGLE_ID}
@@ -299,7 +299,7 @@ class SignupForm extends React.Component {
                 icon={<TiSocialFacebookCircular size={45} style={{paddingRight:"15px"}}/>}
                 callback={this.successFacebook}
                 />
-                <p className="my-1"> Already have a Bloom account? <Link onClick={() => this.props.toggleLogin(true)}> Log in. </Link></p>
+                <p className="my-1"> Already have a Bloom account? <Button variant="link" className="p-0" onClick={() => this.props.toggleLogin(true)}> Log in. </Button></p>
                 </Col>
 
                 </Row>
