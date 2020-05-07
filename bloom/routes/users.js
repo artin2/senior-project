@@ -175,6 +175,10 @@ async function edit(req, res, next) {
 
                 if (resultLast && resultLast.rows.length) {
                   let user = result.rows[0]
+                  user["worker_id"] = resultLast.rows[0]["id"]
+                  user["store_id"] = resultLast.rows[0]["store_id"]
+                  user["services"] = resultLast.rows[0]["services"]
+                  
                   delete user.password
                   const expiration = process.env.DB_ENV === 'dev' ? 1 : 7;
                   const date = new Date();
