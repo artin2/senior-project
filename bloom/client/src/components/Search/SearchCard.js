@@ -34,7 +34,7 @@ class SearchCard extends React.Component {
               <Carousel interval="">
                 {this.props.store.pictures.map((picture, index) => (
                   <Carousel.Item key={"pic-" + index}>
-                    <Image fluid src={picture.url} alt={"Slide " + index} />
+                    <Image fluid style={{height: '100%', width: '100%'}} src={picture.url} alt={"Slide " + index} />
                   </Carousel.Item>
                 ))}
               </Carousel>
@@ -47,7 +47,6 @@ class SearchCard extends React.Component {
                   <Card.Text className="mb-3">
                     <FaPhone size={12}/> {this.props.store.phone}
                   </Card.Text>
-                  <Card.Text className="mb-3">{this.props.store.description}</Card.Text>
 
 
                 </div>

@@ -405,7 +405,7 @@ class StoreEditForm extends React.Component {
 
   render() {
         return <Row className="justify-content-center" id="test">
-        <Col xs={8} sm={7} md={6} lg={5}>
+        <Col xs={8} sm={7} md={6} lg={5} className="my-5">
           <Formik
             enableReinitialize
             initialValues={{
@@ -515,7 +515,7 @@ class StoreEditForm extends React.Component {
               handleBlur,
               handleSubmit,
               setFieldValue }) => (
-                <Form className="formBody rounded">
+                <Form className="formBody rounded p-5">
                   <h3>Store Edit</h3>
 
                   <Form.Group controlId="formName">

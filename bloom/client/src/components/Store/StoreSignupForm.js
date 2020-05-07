@@ -217,7 +217,7 @@ class StoreSignupForm extends React.Component {
   render() {
     return (
       <Container fluid>
-        <Row className="justify-content-center">
+        <Row className="justify-content-center my-5">
           <Col xs={8} sm={7} md={6} lg={5}>
             <Formik
               initialValues={{
@@ -299,7 +299,7 @@ class StoreSignupForm extends React.Component {
                 handleSubmit,
                 setFieldValue
               }) => (
-                  <Form className="formBody rounded">
+                  <Form className="formBody rounded p-5">
                     <h3>Store Sign Up</h3>
 
                     <Form.Group controlId="formName">

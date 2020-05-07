@@ -218,7 +218,7 @@ class WorkerDisplay extends React.Component {
         </Row>
       } else {
         {/* CITATION: https://bootsnipp.com/snippets/M48pA */}
-        return <Row className="profile">
+        return <Row className="justify-content-center">
         <Col xs="11" md="3" className="mb-4">
         <div className="profile-sidebar">
             {/* <!-- SIDEBAR USERPIC --> */}

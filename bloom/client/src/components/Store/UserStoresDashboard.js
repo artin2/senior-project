@@ -165,12 +165,12 @@ class UserStoresDashboard extends React.Component {
           <>{this.state.stores.map((store, index) => (
             <div key={"store" + index}>
               <Row className="justify-content-center align-content-center my-5">
-                <Col md={6} className="vertical-align-contents">
+                <Col md={6} xl={5} className="vertical-align-contents">
                   <Carousel className="dashboard-carousel" interval="">
                     {store.pictures.map((picture, index) => (
                       <Carousel.Item key={"pic-" + index}>
-                        <Image fluid src={picture.url} alt={"alt-" + index}/>
-                        <img style={this.props.img} src={picture.url} alt={"Slide " + index} />
+                        <Image fluid style={{height: '100%', width: '100%'}}src={picture.url} alt={"alt-" + index}/>
+                        {/* <img style={this.props.img} src={picture.url} alt={"Slide " + index} /> */}
                       </Carousel.Item>
                     ))}
                   </Carousel>
