@@ -104,7 +104,16 @@ async function getStores(req, res, next) {
           // we were able to get search results
           if (result) {
             for (let i = 0; i < result.rows.length; i++) {
-              let pictures = await s3.getImagesLocal('stores/' + result.rows[i].id + '/images/')
+              let pictures
+              try {
+                pictures = await s3.getImagesLocal('stores/' + result.rows[i].id + '/images/')
+                if(pictures.length == 0){
+                  pictures = s3.defaultStorePictures()
+                }
+              } catch (e) {
+                console.log("Error in getting pictures.")
+                pictures = s3.defaultStorePictures()
+              }
               result.rows[i].pictures = pictures
             }
             helper.querySuccess(res, {stores: result.rows, center: {lat: lat, lng: lng}}, "Successfully got Search Results!");

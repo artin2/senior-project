@@ -17,6 +17,12 @@ import './Services.css';
 import { getPictures, defaultServicePictures } from '../s3'
 import { FaEdit } from 'react-icons/fa';
 import LinesEllipsis from 'react-lines-ellipsis'
+import { css } from '@emotion/core'
+import GridLoader from 'react-spinners/GridLoader'
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const colors = ['#d2d4cf', '#d2d4cf', '#d2d4cf'];
@@ -112,7 +118,7 @@ class ServiceDashboard extends React.Component {
     if(services.length > 0){
       var appendedServices = await Promise.all(services.map(async (service): Promise<Object> => {
         try {
-          let pictures = await getPictures('stores/' + service.store_id + '/services/' + service.id)
+          let pictures = await getPictures('stores/' + service.store_id + '/services/' + service.id + '/')
           if(pictures.length == 0){
             pictures = defaultServicePictures()
           }
@@ -206,7 +212,16 @@ class ServiceDashboard extends React.Component {
     }
 
     if(this.state.loading){
-      return <h1>Loading...</h1>
+      return <Row className="vertical-center">
+               <Col>
+                <GridLoader
+                  css={override}
+                  size={20}
+                  color={"#2196f3"}
+                  loading={this.state.isLoading}
+                />
+              </Col>
+            </Row>
     }
     else{
       return (

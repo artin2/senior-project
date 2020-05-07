@@ -284,21 +284,20 @@ class StoreEditForm extends React.Component {
     })
   };
 
-  deleteFileChangeHandler = async (event, setFieldValue, newPictureLength) => {
+  deleteFileChangeHandler = async (event) => {
     if(event.target.checked){
-      await this.state.keys.push(event.target.id)
-      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+      var joined = this.state.keys.concat(event.target.id);
+      this.setState({
+        keys: joined
+      })
     }
     else{
-      await this.state.keys.pop(event.target.id)
-      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+      this.setState({keys: this.state.keys.filter(item => item !== event.target.id)});
     }
   }
 
-  fileChangedHandler = async (event, setFieldValue, pictures) => {
+  fileChangedHandler = async (event) => {
     this.setState({ selectedFiles: event.target.files })
-    setFieldValue('pictureCount', this.state.pictures.length + event.target.files.length - this.state.keys.length)
-    setFieldValue('pictures', event.target.files)
   }
 
   async componentDidMount() {
@@ -417,7 +416,7 @@ class StoreEditForm extends React.Component {
               services: null,
               owners: null,
               pictures: [],
-              pictureCount: this.state.pictures.length - this.state.keys.length,
+              pictureCount: this.state.pictures.length - this.state.keys.length + this.state.selectedFiles.length,
               storeHours: this.state.storeHours
             }}
             validationSchema={this.yupValidationSchema}
@@ -958,7 +957,7 @@ class StoreEditForm extends React.Component {
                           // style={{marginLeft: 30}}
                           id={picture.key}
                           label={picture.key.split('/').slice(-1)[0]}
-                          onChange={event => this.deleteFileChangeHandler(event, setFieldValue, values.pictures.length)}
+                          onChange={event => this.deleteFileChangeHandler(event)}
                         />
                       </div>
                     ))}
@@ -968,7 +967,7 @@ class StoreEditForm extends React.Component {
                     <Form.Label>Add Images</Form.Label>
                     <br/>
                     <input
-                      onChange={event => this.fileChangedHandler(event, setFieldValue, values.pictures)}
+                      onChange={event => this.fileChangedHandler(event)}
                       type="file"
                       multiple
                       className={touched.pictures && errors.pictures ? "error" : null}
