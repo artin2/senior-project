@@ -92,6 +92,10 @@ class WorkerDisplay extends React.Component {
   };
 
   componentDidMount() {
+    let choice = 0
+    if(this.props.location.state && this.props.location.state.edit) {
+      choice = 1
+    }
     if (this.props.location && this.props.location.state && this.props.location.state.worker) {
       // let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
       Promise.all([
@@ -119,6 +123,7 @@ class WorkerDisplay extends React.Component {
           })
         }
         this.setState({
+          choice: choice,
           worker: this.props.location.state.worker,
           receivedServices: this.props.location.state.worker.services,
           storeHours: allResponses[1],
@@ -163,6 +168,7 @@ class WorkerDisplay extends React.Component {
           })
         }
         this.setState({
+          choice: choice,
           worker: allResponses[0],
           receivedServices: allResponses[0].services,
           selectedOption: convertedServices,
@@ -213,7 +219,7 @@ class WorkerDisplay extends React.Component {
       } else {
         {/* CITATION: https://bootsnipp.com/snippets/M48pA */}
         return <Row className="profile">
-        <Col xs="11" md="3">
+        <Col xs="11" md="3" className="mb-4">
         <div className="profile-sidebar">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
@@ -240,7 +246,7 @@ class WorkerDisplay extends React.Component {
             {/* <!-- END SIDEBAR BUTTONS --> */}
 
             {/* WORKING HOURS */}
-            <ListGroup variant="flush">
+            <ListGroup variant="flush" className="d-none d-lg-block">
               <Row className="justify-content-center mt-4">
                 <h5>Working Hours</h5>
                 <ListWorkingHours/>
@@ -272,19 +278,7 @@ class WorkerDisplay extends React.Component {
     }
     return (
       <Container fluid>
-        {/* <Row className="justify-content-center">
-          <Col>
-            <h1>{this.state.worker.first_name}</h1>
-            <p>{this.state.worker.last_name}</p>
-            <ul>
-                {this.state.worker.services.map((service, index) => (
-                  <li key={"cat-" + index}>{this.state.serviceMapping[service]}</li>
-                ))}
-              </ul>
-          </Col>
-        </Row> */}
         <DisplayWithLoading/>
-
       </Container>
     );
   }
