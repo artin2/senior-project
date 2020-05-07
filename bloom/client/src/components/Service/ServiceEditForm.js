@@ -90,28 +90,24 @@ class ServiceEditForm extends React.Component {
     })
   }
 
-  deleteFileChangeHandler = async (event, setFieldValue, newPictureLength) => {
+  deleteFileChangeHandler = async (event) => {
     if(event.target.checked){
-      await this.state.keys.push(event.target.id)
-      console.log(this.state.pictures.length, newPictureLength, this.state.keys.length)
-      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+      var joined = this.state.keys.concat(event.target.id);
+      this.setState({
+        keys: joined
+      })
     }
     else{
-      await this.state.keys.pop(event.target.id)
-      console.log(this.state.pictures.length, newPictureLength, this.state.keys.length)
-      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+      this.setState({keys: this.state.keys.filter(item => item !== event.target.id)});
     }
   }
 
-  fileChangedHandler = (event, setFieldValue, pictures) => {
+  fileChangedHandler = async (event) => {
     this.setState({ selectedFiles: event.target.files })
-    setFieldValue('pictureCount', this.state.pictures.length + event.target.files.length - this.state.keys.length)
-    setFieldValue('pictures', event.target.files)
   }
 
   async componentDidMount() {
-    let picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id)
-    console.log(picturesFetched)
+    let picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id + '/')
 
     if(this.props.location.state && this.props.location.state.service){
 
@@ -194,9 +190,7 @@ class ServiceEditForm extends React.Component {
       credentials: 'include',
     })
     .then(function(response){
-      console.log(response)
       if(response.status!==200){
-
         console.log("Error!", response.status)
       }
       else{
@@ -268,7 +262,7 @@ class ServiceEditForm extends React.Component {
                 duration: this.state.service.duration,
                 description: this.state.service.description,
                 pictures: [],
-                pictureCount: this.state.pictures.length - this.state.keys.length,
+                pictureCount: this.state.pictures.length - this.state.keys.length + this.state.selectedFiles.length,
                 workers: this.state.service.workers,
                 category: this.state.category,
                 store_id: this.props.match.params.store_id
@@ -287,14 +281,14 @@ class ServiceEditForm extends React.Component {
                 })
 
                 if(values.category.length == 0) {
-
                   this.setState({
                     categoryError: true
                   })
-
+                }
+                else{
+                  values.category = values.category[0]
                 }
 
-                // console.log(this.state.workers)
                 values.workers = this.state.workers.map(function(val){
                   return val.value;
                 })
@@ -489,7 +483,7 @@ class ServiceEditForm extends React.Component {
                         // style={{marginLeft: 30}}
                         id={picture.key}
                         label={picture.key.split('/').slice(-1)[0]}
-                        onChange={event => this.deleteFileChangeHandler(event, setFieldValue, values.pictures.length)}
+                        onChange={event => this.deleteFileChangeHandler(event)}
                       />
                     </div>
                   ))}
@@ -499,7 +493,7 @@ class ServiceEditForm extends React.Component {
                   <Form.Label>Add Images</Form.Label>
                   <br/>
                   <input
-                    onChange={event => this.fileChangedHandler(event, setFieldValue, values.pictures)}
+                    onChange={event => this.fileChangedHandler(event)}
                     type="file"
                     multiple
                     className={touched.pictures && errors.pictures ? "error" : null}
