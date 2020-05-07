@@ -15,6 +15,7 @@ import { getPictures, deleteHandler, uploadHandler } from '../s3'
 import { connect } from 'react-redux';
 import { css } from '@emotion/core'
 import GridLoader from 'react-spinners/GridLoader'
+import { Image } from 'react-bootstrap';
 const override = css`
   display: block;
   margin: 0 auto;
@@ -143,15 +144,19 @@ class EditProfileForm extends React.Component {
     let del = true
     if(this.state.picture){
       del = <Form.Group controlId="pictureCount">
-                  <Form.Label>Delete Profile Pic</Form.Label>
-                    <img className="img-fluid" src={this.state.picture.url} alt={"Pic 1"} />
-                    <Form.Check
-                      // style={{marginLeft: 30}}
-                      id={this.state.picture.key}
-                      label={this.state.picture.key.split('/').slice(-1)[0]}
-                      onChange={event => this.deleteFileChangeHandler(event)}
-                    />
-                </Form.Group>
+              <Form.Row className="justify-content-center">
+                <Form.Label><h5>Delete Profile Picture</h5></Form.Label>
+              </Form.Row>
+              <Image style={{height: "400px", width: "400px"}} fluid src={this.state.picture.url} alt={"Pic 1"} />
+              <Form.Check
+                // style={{marginLeft: 30}}
+                custom
+                className="form-custom"
+                id={this.state.picture.key}
+                label={this.state.picture.key.split('/').slice(-1)[0]}
+                onChange={event => this.deleteFileChangeHandler(event)}
+              />
+            </Form.Group>
     }
 
     if(this.state.isLoading){
@@ -208,6 +213,8 @@ class EditProfileForm extends React.Component {
                   }
 
                   this.props.editProfile(values)
+                  console.log("about to send new info: ", values)
+                  this.props.updateProfileContent(this.state.selectedFiles.length > 0, values.first_name, values.last_name)
                 }}
               >
               {( {values,
@@ -325,7 +332,7 @@ class EditProfileForm extends React.Component {
                   {del}
     
                     <Form.Group controlId="picture">
-                      <Form.Label>Add Profile Pic</Form.Label>
+                      <Form.Label><h5>Add Profile Picture</h5></Form.Label>
                       <br/>
                       <input
                         onChange={event => this.fileChangedHandler(event)}

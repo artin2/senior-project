@@ -42,6 +42,7 @@ class Profile extends React.Component {
       daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     }
     this.updateWorkerHours = this.updateWorkerHours.bind(this);
+    this.updateProfileContent = this.updateProfileContent.bind(this);
   }
 
   convertMinsToHrsMins(mins) {
@@ -89,6 +90,31 @@ class Profile extends React.Component {
     this.setState({
       userHours: newHours
     })
+  }
+
+  updateProfileContent = async (newPicture, newFirst, newLast) => {
+    var newUser = Object.assign({}, this.state.user)
+    newUser.first_name = newFirst
+    newUser.last_name = newLast
+    if(newPicture == true) {
+      let picturesFetched = []
+      try {
+        picturesFetched = await getPictures('users/' + this.props.user.id + '/')
+
+        if(picturesFetched.length > 0){
+          await this.setState({
+            picture: picturesFetched[0],
+            user: newUser
+          })
+        }
+      } catch (e) {
+        console.log("Error getting pictures from s3!", e)
+      }
+    } else {
+      this.setState({
+        user: newUser
+      })
+    }
   }
 
   updateContent = (selectedChoice) => {
@@ -193,46 +219,6 @@ class Profile extends React.Component {
         })
       })
     }
-    // else if(this.props.user.role == '2') {
-    //   await fetch(fetchDomain + '/workerByUserId/' + this.props.user.id, {
-    //     method: "GET",
-    //     headers: {
-    //         'Content-type': 'application/json'
-    //     },
-    //     credentials: 'include'
-    //   })
-    //   .then(function(response){
-    //     if(response.status!==200){
-    //       // throw an error alert
-    //       store.dispatch(addAlert(response))
-    //     }
-    //     else{
-    //       return response.json();
-    //     }
-    //   })
-    //   .then(data => {
-    //     let convertedServices = data.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
-    //     let receivedWorkerHours = data.storeHours.map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
-
-    //     // If worker hours are not complete, we default them to store hours. Worker hours should be complete though.
-    //     if (data.workerHours && data.workerHours.length == 7) {
-    //       receivedWorkerHours = data.workerHours
-    //     } else {
-    //       this.setState({
-    //         newHours: receivedWorkerHours
-    //       })
-    //     }
-
-    //     this.setState({
-    //       user: data.worker,
-    //       // receivedServices: allResponses[0].services,
-    //       selectedOption: convertedServices,
-    //       storeHours: data.storeHours,
-    //       userHours: receivedWorkerHours,
-    //       loading: false
-    //     })
-    //   });
-    // }
     else {
       this.setState({
         loading: false,
@@ -262,7 +248,7 @@ class Profile extends React.Component {
       } else if(this.state.choice == 1) {
         return <p>Past Appointments go here....</p>
       } else if(this.state.choice == 2) {
-        return <EditProfileForm picture={this.state.picture}/>
+        return <EditProfileForm updateProfileContent={this.updateProfileContent} picture={this.state.picture}/>
       } else {
         return <WorkerEditForm updateWorkerHours={this.updateWorkerHours} store_id={this.props.user.store_id} worker_id={this.props.user.worker_id}/>
       }
@@ -287,7 +273,7 @@ class Profile extends React.Component {
         <div className="profile-sidebar">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
-              <Image src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
+              <Image style={{height: '300px', width: '300px'}} src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
             </div>
             {/* <!-- END SIDEBAR USERPIC --> */}
 
@@ -346,7 +332,7 @@ class Profile extends React.Component {
         <div className="profile-sidebar mb-5">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
-              <Image src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
+              <Image style={{height: '300px', width: '300px'}} src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
             </div>
             {/* <!-- END SIDEBAR USERPIC --> */}
 

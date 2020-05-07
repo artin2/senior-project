@@ -938,7 +938,7 @@ class StoreEditForm extends React.Component {
                     <Form.Label><h5>Delete Images</h5></Form.Label>
                     {this.state.pictures.map((picture, index) => (
                       <div key={"pic-" + index}>
-                        <Image fluid style={{height: "400px", width: "400px"}}thumbnail src={picture.url} alt={"Slide " + index} />
+                        <Image fluid style={{height: "400px", width: "400px"}} thumbnail src={picture.url} alt={"Slide " + index} />
                         <Form.Check
                           // style={{marginLeft: 30}}
                           custom
