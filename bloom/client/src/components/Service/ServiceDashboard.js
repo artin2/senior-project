@@ -16,6 +16,7 @@ import './Services.css';
 // import gel from '../../assets/gel.jpg';
 import { getPictures, defaultServicePictures } from '../s3'
 import { FaEdit } from 'react-icons/fa';
+import LinesEllipsis from 'react-lines-ellipsis'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const colors = ['#d2d4cf', '#d2d4cf', '#d2d4cf'];
@@ -112,6 +113,9 @@ class ServiceDashboard extends React.Component {
       var appendedServices = await Promise.all(services.map(async (service): Promise<Object> => {
         try {
           let pictures = await getPictures('stores/' + service.store_id + '/services/' + service.id)
+          if(pictures.length == 0){
+            pictures = defaultServicePictures()
+          }
 
           var newService = Object.assign({}, service);
           newService.pictures = pictures;
@@ -177,7 +181,13 @@ class ServiceDashboard extends React.Component {
                                       <p> $ {service.cost}  </p>
                                       <p>  {service.duration} Minutes  </p>
                                       <p> {service.workers} </p>
-                                      <p> {service.description} </p>
+                                      <LinesEllipsis
+                                        text={service.description}
+                                        maxLine='6'
+                                        ellipsis={service.description.length > 55 ? service.description.substring(0, 55) + " ..." : service.description.substring(0) + " ..."}
+                                        trimRight
+                                        basedOn='words'
+                                      />
                                     </div>
                                   </Row>
                                 </Col>
