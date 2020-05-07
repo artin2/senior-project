@@ -196,7 +196,7 @@ class EditProfileForm extends React.Component {
                     <div className="error-message">{errors.password_confirmation}</div>
                   ): null}
                 </Form.Group>
-                <Button onClick={handleSubmit}>Submit</Button>
+                <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
               </Form>
             )}
             </Formik>

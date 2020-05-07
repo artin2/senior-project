@@ -193,8 +193,8 @@ class AddServiceForm extends React.Component {
 
     return (
       <Container fluid>
-        <Row className="justify-content-center">
-          <Col xs={8} sm={7} md={6} lg={5}>
+        <Row className="justify-content-center my-5">
+          <Col xs={12} lg={5}>
             <Formik
               enableReinitialize
               initialValues={{
@@ -285,7 +285,7 @@ class AddServiceForm extends React.Component {
                 handleBlur,
                 handleSubmit,
                 setFieldValue}) => (
-              <Form className="formBody rounded">
+              <Form className="formBody rounded p-4">
                 <h3>Add Service</h3>
 
                 <Form.Group controlId="formService">
@@ -419,7 +419,7 @@ class AddServiceForm extends React.Component {
                   ): null}
                 </Form.Group>
 
-                <Button onClick={handleSubmit}>Submit</Button>
+                <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
               </Form>
             )}
             </Formik>

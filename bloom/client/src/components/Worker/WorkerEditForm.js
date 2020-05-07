@@ -174,7 +174,7 @@ class WorkerEditForm extends React.Component {
   };
 
   componentDidMount() {
-
+    console.log("mounted")
     let store_id = this.props.match.params.store_id ? this.props.match.params.store_id : this.props.store_id;
     let worker_id = this.props.match.params.worker_id ? this.props.match.params.worker_id : this.props.worker_id;
 
@@ -240,7 +240,6 @@ class WorkerEditForm extends React.Component {
           storeWeekIsWorking[i] = false
         }
       }
-
       this.setState({
         storeHours: allResponses[1],
         workerHours: allResponses[0],
@@ -287,7 +286,7 @@ class WorkerEditForm extends React.Component {
             <GridLoader
               css={override}
               size={20}
-              color={"#2196f3"}
+              color={"#8CAFCB"}
               loading={this.state.isLoading}
             />
           </Col>
@@ -303,9 +302,11 @@ class WorkerEditForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[0]){
           mondayCheckBox = <Form.Check
+                            custom
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="monday-toggle"
                             label="Working Today?"
+                            className="form-custom"
                             checked={this.state.weekIsWorking[0]}
                             onChange={() => this.handleDayStatusChange(0)}
                           />
@@ -313,8 +314,10 @@ class WorkerEditForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[1]){
           tuesdayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="tuesday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[1]}
                             onChange={() => this.handleDayStatusChange(1)}
@@ -323,8 +326,10 @@ class WorkerEditForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[2]){
           wednesdayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="wednesday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[2]}
                             onChange={() => this.handleDayStatusChange(2)}
@@ -333,8 +338,10 @@ class WorkerEditForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[3]){
           thursdayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="thursday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[3]}
                             onChange={() => this.handleDayStatusChange(3)}
@@ -343,8 +350,10 @@ class WorkerEditForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[4]){
           fridayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="friday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[4]}
                             onChange={() => this.handleDayStatusChange(4)}
@@ -353,8 +362,10 @@ class WorkerEditForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[5]){
           saturdayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="saturday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[5]}
                             onChange={() => this.handleDayStatusChange(5)}
@@ -363,6 +374,8 @@ class WorkerEditForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[6]){
           sundayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
                             id="sunday-toggle"
                             label="Working Today?"
@@ -388,7 +401,6 @@ class WorkerEditForm extends React.Component {
 
                 let store_id = this.props.match.params.store_id ? this.props.match.params.store_id : this.props.store_id;
                 let worker_id = this.props.match.params.worker_id ? this.props.match.params.worker_id : this.props.worker_id;
-                let triggerWorkerDisplay = this.triggerWorkerDisplay;
 
                 values.newHours = this.state.workerHours.map((day, index) => {
                   if(this.state.weekIsWorking[index] && (this.state.originalWorkerHours[index].start_time != day.start_time || this.state.originalWorkerHours[index].end_time != day.end_time)){
@@ -423,7 +435,7 @@ class WorkerEditForm extends React.Component {
                   })
                   .then(data => {
                     if (data) {
-                      triggerWorkerDisplay(data)
+                      this.props.updateWorkerHours(this.state.workerHours)
                     }
                   });
               }}
@@ -436,10 +448,7 @@ class WorkerEditForm extends React.Component {
                 handleSubmit,
                 setFieldValue }) => (
                   <Form className="rounded">
-                    <h3>Worker Edit</h3>
-
-                    {/* Later make this work with store hours*/}
-                    <h4 style={{marginTop: 20}}>Hours</h4>
+                    <h3>Edit Worker Hours</h3>
 
                     <Form.Group controlId="formHoursMonday">
                       <Form.Row className="text-left">
@@ -591,7 +600,7 @@ class WorkerEditForm extends React.Component {
                       </Form.Row>
                     </Form.Group>
 
-                    <Button onClick={handleSubmit}>Submit</Button>
+                    <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
                   </Form>
                 )}
             </Formik>

@@ -94,7 +94,7 @@ class BookingPage extends React.Component {
               <GridLoader
                 css={override}
                 size={20}
-                color={"#2196f3"}
+                color={"#8CAFCB"}
                 loading={this.state.isLoading}
               />
             </Col>
@@ -103,7 +103,7 @@ class BookingPage extends React.Component {
       </Card>
       } else {
         return <Card text='dark'
-        className='mt-0 py-3' id="date-selection-form">
+        className='mt-0 py-3 add-shadow'>
           <Card.Title>Book Appointment</Card.Title>
           <Card.Body className='pt-0'>
             <Row className='justify-content-center'>
@@ -237,7 +237,7 @@ class BookingPage extends React.Component {
                         ) : null}
                       </Form.Group>
 
-                      <Button onClick={handleSubmit}>Submit</Button>
+                      <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
                     </Form>
                   )}
               </Formik>

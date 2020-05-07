@@ -167,7 +167,7 @@ class AppointmentDisplay extends React.Component {
     const AppointmentList = (props) => {
       let cards = [];
       for (let i = 0; i < this.state.group_ids.length; i ++) {
-        cards.push(<Card style={{cursor: 'pointer'}} key={this.state.group_ids[i]}className="my-5" onClick={() => this.triggerAppointmentDisplay(this.state.group_ids[i])}>
+        cards.push(<Card style={{cursor: 'pointer'}} key={this.state.group_ids[i]}className="my-5 add-shadow" onClick={() => this.triggerAppointmentDisplay(this.state.group_ids[i])}>
           <Card.Header as="h4">{this.state.store_name_mappings.find((element) => element.id == this.state.store_ids[i]).name} on {new Date(this.state.dates[i]).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</Card.Header>
           <Card.Body>
             <Card.Text as="div">
@@ -199,7 +199,7 @@ class AppointmentDisplay extends React.Component {
             <GridLoader
               css={override}
               size={20}
-              color={"#2196f3"}
+              color={"#8CAFCB"}
               loading={this.state.isLoading}
             />
           </Col>
@@ -217,7 +217,7 @@ class AppointmentDisplay extends React.Component {
       } else {
         return <Row className="justify-content-center mt-5">
         <Col xs={11} lg={8}>
-          <Card className="w-70 h-60">
+          <Card className="w-70 h-60 add-shadow">
           <Card.Header as="h4">My Appointments</Card.Header>
             <Card.Body>
               <Card.Text as="div">

@@ -105,7 +105,6 @@ class DateSelection extends React.Component {
   }
 
   componentDidMount() {
-    console.log("startdate is: ", this.state.startDate)
     fetch(fetchDomain + '/stores/' + this.props.store_id + '/appointments/month/' + (parseInt(this.state.startDate.getMonth()) + 1), {
       method: "GET",
       headers: {
@@ -137,7 +136,7 @@ class DateSelection extends React.Component {
   render() {
     const CreateTimeSelects = (props) => {
       let items = [];
-      for (let i = this.props.storeHours[this.state.startDate.getDay()].open_time; i + this.props.time <= this.props.storeHours[this.state.startDate.getDay()].close_time; i += 60) {
+      for (let i = this.props.storeHours[this.state.currDate.getDay()].open_time; i + this.props.time <= this.props.storeHours[this.state.currDate.getDay()].close_time; i += 60) {
         items.push(<option key={i} value={i}>{this.convertMinsToHrsMins(i)}</option>);
       }
       return items;
@@ -178,7 +177,7 @@ class DateSelection extends React.Component {
             // Check for conflicts via worker's existing appointments for the day
             // console.log("currWorkers appointments: ", currWorkerAppointments)
             for (let m = 0; m < currWorkerAppointments.length; m++) {
-              if ((currScheduleCurrTime >= currWorkerAppointments[m].start_time && currScheduleCurrTime <= currWorkerAppointments[m].end_time) || (currScheduleCurrTime + currScheduleCurrService.duration >= currWorkerAppointments[m].start_time && currScheduleCurrTime + currScheduleCurrService.duration <= currWorkerAppointments[m].end_time)) {
+              if ((currScheduleCurrTime >= currWorkerAppointments[m].start_time && currScheduleCurrTime < currWorkerAppointments[m].end_time) || (currScheduleCurrTime + currScheduleCurrService.duration > currWorkerAppointments[m].start_time && currScheduleCurrTime + currScheduleCurrService.duration < currWorkerAppointments[m].end_time)) {
                 // console.log("conflict found with because of slot from: ", this.convertMinsToHrsMins(currWorkerAppointments[m].start_time), "-", this.convertMinsToHrsMins(currWorkerAppointments[m].end_time))
                 // Worker is unavailable
                 available = false
@@ -189,7 +188,7 @@ class DateSelection extends React.Component {
 
           if (available) {
             // Add slot to the schedule we are building
-            currSchedule.push({ worker_id: currScheduleCurrWorker, service_id: currScheduleCurrService.id, start_time: currScheduleCurrTime, end_time: currScheduleCurrTime + currScheduleCurrService.duration, price: currScheduleCurrService.cost, date: this.state.startDate })
+            currSchedule.push({ worker_id: currScheduleCurrWorker, service_id: currScheduleCurrService.id, start_time: currScheduleCurrTime, end_time: currScheduleCurrTime + currScheduleCurrService.duration, price: currScheduleCurrService.cost, date: this.state.currDate })
             currScheduleCurrTime += currScheduleCurrService.duration
             currScheduleServiceIndex += 1
             //NOTE, will always cycle to first worker. What if we want to maintain worker for entire appointment duration? May be worth refactoring for continuity. 
@@ -210,11 +209,13 @@ class DateSelection extends React.Component {
 
         if (foundSchedule) {
           schedules.push(currSchedule)
-          slots.push(<Button className="mt-3 mx-2" key={i} onClick={() => this.handleSlotClick(currSchedule)}>{this.convertMinsToHrsMins(i)}</Button>)
+          slots.push(<Button className="mt-3 mx-2" style={{backgroundColor: '#8CAFCB', border: '0px'}} key={i} onClick={() => this.handleSlotClick(currSchedule)}>{this.convertMinsToHrsMins(i)}</Button>)
         }
       }
-      if (slots.length == 0) {
-        return <h1>No available appointments</h1>
+      if (slots.length == 0 && this.props.storeHours[this.state.currDate.getDay()].open_time == null) {
+        return <h2 className="mt-4">This store doesn't work on this day. Select another date. </h2>
+      } else if (slots.length == 0) {
+        return <h2 className="mt-4">No appointments available at this time.</h2>
       }
       return slots
     }
@@ -226,7 +227,7 @@ class DateSelection extends React.Component {
             <GridLoader
               css={override}
               size={20}
-              color={"#2196f3"}
+              color={"#8CAFCB"}
               loading={this.state.isLoading}
             />
           </Col>
@@ -245,7 +246,7 @@ class DateSelection extends React.Component {
     return (
       <Card
         text='dark'
-        className='mt-0 py-3'
+        className='mt-0 py-3 add-shadow'
         style={{overflow: 'visible'}}
       >
         <div id="date-selection-form">
@@ -269,8 +270,8 @@ class DateSelection extends React.Component {
               </Col>
               <Col xs="11" md="6" className="mt-3">
                 <Form>
-                  <Form.Control as="select" value={this.state.selectedTime} onChange={this.handleSelectChange.bind(this)}>
-                    <CreateTimeSelects date={this.state.startDate} />
+                  <Form.Control  key={this.state.currDate} as="select" value={this.state.selectedTime} onChange={this.handleSelectChange.bind(this)}>
+                    <CreateTimeSelects date={this.state.currDate} />
                   </Form.Control>
                 </Form>
               </Col>
