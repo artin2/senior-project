@@ -8,6 +8,28 @@ const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_AP
 
 // getting an export error, going to leave it for now
 
+function defaultStorePictures() {
+  return [
+    {
+      url: "/salon.jpg",
+      key: "/salon.jpg"
+    }
+  ]
+}
+
+function defaultServicePictures() {
+  return [
+    {
+      url: "/hair.jpg",
+      key: "/hair.jpg"
+    },
+    {
+      url: "/nails.jpg",
+      key: "/nails.jpg"
+    }
+  ]
+}
+
 async function getPictures(prefixPassed) {
   const response = await fetch(fetchDomain + '/getImages', {
       method: "POST",
@@ -74,4 +96,4 @@ async function deleteHandler(keysPassed) {
   })
 }
 
-export { getPictures, uploadHandler, deleteHandler}
+export { getPictures, uploadHandler, deleteHandler, defaultStorePictures, defaultServicePictures}

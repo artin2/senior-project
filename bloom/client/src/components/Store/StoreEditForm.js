@@ -284,25 +284,29 @@ class StoreEditForm extends React.Component {
     })
   };
 
-  deleteFileChangeHandler = async (event, setFieldValue, newPictureLength) => {
+  deleteFileChangeHandler = async (event) => {
     if(event.target.checked){
-      await this.state.keys.push(event.target.id)
-      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+      var joined = this.state.keys.concat(event.target.id);
+      this.setState({
+        keys: joined
+      })
     }
     else{
-      await this.state.keys.pop(event.target.id)
-      setFieldValue('pictureCount', this.state.pictures.length + newPictureLength - this.state.keys.length)
+      this.setState({keys: this.state.keys.filter(item => item !== event.target.id)});
     }
   }
 
-  fileChangedHandler = async (event, setFieldValue, pictures) => {
+  fileChangedHandler = async (event) => {
     this.setState({ selectedFiles: event.target.files })
-    setFieldValue('pictureCount', this.state.pictures.length + event.target.files.length - this.state.keys.length)
-    setFieldValue('pictures', event.target.files)
   }
 
   async componentDidMount() {
-    let picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/images/')
+    let picturesFetched = []
+    try {
+      picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/images/')
+    } catch (e) {
+      console.log("Error! Could not get pictures from s3", e)
+    }
 
     // if we were given the existing data from calling component use that, else fetch
     // check if categories are empty, if they are then cache/store needs to be updated.
@@ -400,7 +404,7 @@ class StoreEditForm extends React.Component {
 
   render() {
         return <Row className="justify-content-center" id="test">
-        <Col xs={8} sm={7} md={6} lg={5}>
+        <Col xs={8} sm={7} md={6} lg={5} className="my-5">
           <Formik
             enableReinitialize
             initialValues={{
@@ -412,7 +416,7 @@ class StoreEditForm extends React.Component {
               services: null,
               owners: null,
               pictures: [],
-              pictureCount: this.state.pictures.length - this.state.keys.length,
+              pictureCount: this.state.pictures.length - this.state.keys.length + this.state.selectedFiles.length,
               storeHours: this.state.storeHours
             }}
             validationSchema={this.yupValidationSchema}
@@ -452,17 +456,27 @@ class StoreEditForm extends React.Component {
                   }
                 })
 
+                console.log("new hours are!", values.storeHours)
+
                 values.address = this.state.address
 
                 // remove files from s3
                 if(this.state.keys.length > 0){
-                  await deleteHandler(this.state.keys)
+                  try {
+                    await deleteHandler(this.state.keys)
+                  } catch (e) {
+                    console.log("Error! Could not delete images from s3", e)
+                  }
                 }
 
                 // upload new images to s3 from client to avoid burdening back end
                 if(this.state.selectedFiles.length > 0){
                   let prefix = 'stores/' + this.props.match.params.store_id + '/images/'
-                  await uploadHandler(prefix, this.state.selectedFiles)
+                  try {
+                    await uploadHandler(prefix, this.state.selectedFiles)
+                  } catch (e) {
+                    console.log("Error! Could not upload images to s3", e)
+                  }
                 }
 
                 fetch(fetchDomain + '/stores/edit/' + store_id , {
@@ -500,7 +514,7 @@ class StoreEditForm extends React.Component {
               handleBlur,
               handleSubmit,
               setFieldValue }) => (
-                <Form className="formBody rounded">
+                <Form className="formBody rounded p-5">
                   <h3>Store Edit</h3>
 
                   <Form.Group controlId="formName">
@@ -943,7 +957,7 @@ class StoreEditForm extends React.Component {
                           // style={{marginLeft: 30}}
                           id={picture.key}
                           label={picture.key.split('/').slice(-1)[0]}
-                          onChange={event => this.deleteFileChangeHandler(event, setFieldValue, values.pictures.length)}
+                          onChange={event => this.deleteFileChangeHandler(event)}
                         />
                       </div>
                     ))}
@@ -953,7 +967,7 @@ class StoreEditForm extends React.Component {
                     <Form.Label>Add Images</Form.Label>
                     <br/>
                     <input
-                      onChange={event => this.fileChangedHandler(event, setFieldValue, values.pictures)}
+                      onChange={event => this.fileChangedHandler(event)}
                       type="file"
                       multiple
                       className={touched.pictures && errors.pictures ? "error" : null}

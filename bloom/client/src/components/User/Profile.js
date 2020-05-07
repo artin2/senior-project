@@ -88,12 +88,6 @@ class Profile extends React.Component {
     })
   };
 
-  editProfile() {
-    this.props.history.push({
-      pathname: '/users/edit/' + this.props.user.id
-    })
-  }
-
   componentDidMount() {
 
     let store_id = this.props.user.store_id;
@@ -180,7 +174,8 @@ class Profile extends React.Component {
     }
     else {
       this.setState({
-        loading: false
+        loading: false,
+        choice: 2
       })
     }
   }
@@ -204,9 +199,11 @@ class Profile extends React.Component {
         //need to make this dynamic
         return <Calendar role={"my"} store_id={this.props.user.store_id}/>
       } else if(this.state.choice == 1) {
-        return <WorkerEditForm store_id={this.props.user.store_id} worker_id={this.props.user.worker_id}/>
-      } else {
         return <p>Past Appointments go here....</p>
+      } else if(this.state.choice == 2) {
+        return <EditProfileForm/>
+      } else {
+        return <WorkerEditForm store_id={this.props.user.store_id} worker_id={this.props.user.worker_id}/>
       }
     }
 
@@ -224,8 +221,8 @@ class Profile extends React.Component {
         </Row>
       } else if(this.props.user.role == '2') {
         {/* CITATION: https://bootsnipp.com/snippets/M48pA */}
-        return <Row className="profile">
-        <Col xs="11" md="3">
+        return <Row className="justify-content-center my-4 mx-1">
+        <Col xs="11" md="3" className="mb-4">
         <div className="profile-sidebar">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
@@ -241,14 +238,13 @@ class Profile extends React.Component {
               <div className="profile-usertitle-job">
                 Stylist
               </div>
-              <Button onClick={() => this.editProfile()}>Edit Profile</Button>
             </div>
             {/* <!-- END SIDEBAR USER TITLE --> */}
 
 
 
             {/* WORKING HOURS */}
-            <ListGroup variant="flush">
+            <ListGroup variant="flush" className="d-none d-lg-block">
               <Row className="justify-content-center mt-4">
                 <h5>Working Hours</h5>
                 <ListWorkingHours/>
@@ -260,8 +256,9 @@ class Profile extends React.Component {
             <div className="profile-usermenu">
               <Nav defaultActiveKey="link-0" className="flex-column" variant="pills">
                 <Nav.Link eventKey="link-0" active={this.state.choice == 0} onClick={() => this.updateContent(0)}>Calendar</Nav.Link>
-                <Nav.Link eventKey="link-1" active={this.state.choice == 1}  onClick={() => this.updateContent(1)}>Edit Worker Hours</Nav.Link>
-                <Nav.Link eventKey="link-2" active={this.state.choice == 2} onClick={() => this.updateContent(2)}>Past Appointments</Nav.Link>
+                <Nav.Link eventKey="link-1" active={this.state.choice == 1} onClick={() => this.updateContent(1)}>Past Appointments</Nav.Link>
+                <Nav.Link eventKey="link-2" active={this.state.choice == 2}  onClick={() => this.updateContent(2)}>Edit Profile</Nav.Link>
+                <Nav.Link eventKey="link-3" active={this.state.choice == 3}  onClick={() => this.updateContent(3)}>Edit Working Hours</Nav.Link>
               </Nav>
             </div>
             {/* <!-- END MENU --> */}
@@ -283,9 +280,9 @@ class Profile extends React.Component {
           type = 'Salon Owner'
         }
         
-        return <Row className="profile">
+        return <Row className="justify-content-center my-5">
         <Col xs="11" md="3">
-        <div className="profile-sidebar">
+        <div className="profile-sidebar mb-5">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
               <Image src="https://i.redd.it/v0caqchbtn741.jpg" className="img-responsive" alt="" rounded />
@@ -300,9 +297,22 @@ class Profile extends React.Component {
               <div className="profile-usertitle-job">
                 {type}
               </div>
-              <Button onClick={() => this.editProfile()}>Edit Profile</Button>
             </div>
             {/* <!-- END SIDEBAR USER TITLE --> */}
+
+            {/* <!-- SIDEBAR MENU --> */}
+            <div className="profile-usermenu">
+              <Nav defaultActiveKey="link-0" className="flex-column" variant="pills">
+                <Nav.Link eventKey="link-0" active={this.state.choice == 2}  onClick={() => this.updateContent(2)}>Edit Profile</Nav.Link>
+              </Nav>
+            </div>
+            {/* <!-- END MENU --> */}
+          </div>
+        </Col>
+
+        <Col xs="11" md="9">
+        <div className="profile-content">
+            <RenderProfileContent/>
           </div>
         </Col>
       </Row>

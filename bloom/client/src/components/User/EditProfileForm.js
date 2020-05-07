@@ -66,8 +66,8 @@ class EditProfileForm extends React.Component {
   render() {
     return (
       <Container fluid>
-        <Row className="justify-content-center" style={{marginTop: 60}}>
-          <Col xs={8} sm={7} md={6} lg={5}>
+        <Row className="justify-content-center my-5">
+          <Col xs={12} lg={5}>
             <Formik
               enableReinitialize
               initialValues={{
@@ -80,9 +80,8 @@ class EditProfileForm extends React.Component {
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-                values.id = this.props.match.params.user_id
+                values.id = this.props.user.id
                 values.role = this.props.user.role
-                
                 this.props.editProfile(values)
               }}
             >
@@ -92,7 +91,7 @@ class EditProfileForm extends React.Component {
                 handleChange,
                 handleBlur,
                 handleSubmit}) => (
-              <Form className="formBody rounded">
+              <Form className="rounded">
                 <h3>Edit Profile</h3>
 
                 <Form.Group controlId="formFirstName">

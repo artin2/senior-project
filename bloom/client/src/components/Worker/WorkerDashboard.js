@@ -56,9 +56,10 @@ class WorkerDashboard extends React.Component {
 
   triggerWorkerEditForm(workerPassed) {
     this.props.history.push({
-      pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + workerPassed.id + '/edit',
+      pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + workerPassed.id,
       state: {
-        worker: workerPassed
+        worker: workerPassed,
+        edit: true
       }
     })
   }

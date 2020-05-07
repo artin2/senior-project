@@ -4,6 +4,7 @@ import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
+import { Image } from 'react-bootstrap';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 const helper = require('../Search/helper.js');
 
@@ -152,10 +153,8 @@ class Category extends React.Component {
 
   render() {
     return (
-      <div onClick={() => this.getStores()} className="image_container" style={this.props.style}>
-      <img src={this.props.img} alt="paint" className="images"
-
-      />
+      <div onClick={() => this.getStores()} className="image-container" style={this.props.style}>
+      <Image fluid src={this.props.img} alt="paint" className="images"/>
       <p className="text"> {this.props.text} </p>
       </div>
     );

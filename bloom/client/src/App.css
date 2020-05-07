@@ -21,6 +21,7 @@
   background-color: #f0f0f0;
   position: absolute;
   overflow:auto;
+  overflow-x: hidden;
   height:100%;
   width:100%;
   padding-top: 78px;

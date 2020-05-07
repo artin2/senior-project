@@ -208,8 +208,7 @@ class AdvancedSearch extends React.Component {
 
   render() {
     return (
-      <Container className="book_window">
-      <Form className="formBody rounded" onSubmit={this.handleSubmit}>
+      <Form className="formBody rounded p-5" onSubmit={this.handleSubmit}>
         <h3>Book Now</h3>
         <Form.Group controlId="autocomplete">
         <Row>
@@ -255,7 +254,6 @@ class AdvancedSearch extends React.Component {
         </Form.Group>
           <Button disabled={!(this.state.address)} style={{backgroundColor: '#8CAFCB', border: '0px'}} type="submit">Submit</Button>
       </Form>
-      </Container>
     );
   }
 }

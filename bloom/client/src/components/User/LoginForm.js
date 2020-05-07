@@ -96,7 +96,7 @@ class LoginForm extends React.Component {
   }
 
   render() {
-    return ( <Form className="formBody rounded">
+    return ( <Form className="formBody rounded p-5">
               <h3>{this.props.title}</h3>
               <Form.Row className="justify-content-center">
               <Col xs={12} sm={10} md={9} lg={8}>
@@ -148,7 +148,7 @@ class LoginForm extends React.Component {
                     icon={<TiSocialFacebookCircular size={45} style={{paddingRight:"15px"}}/>}
                     callback={this.successFacebook}
                     />
-                  <p className="my-1"> Don't have a Bloom account yet? <Link  onClick={() => this.props.toggleLogin(false)}> Sign Up. </Link></p>
+                  <p className="my-1"> Don't have a Bloom account yet? <Button variant="link"className="p-0" onClick={() => this.props.toggleLogin(false)}> Sign Up. </Button></p>
               </Col>
               </Form.Row>
             </Form>

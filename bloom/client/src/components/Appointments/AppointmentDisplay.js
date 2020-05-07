@@ -176,11 +176,11 @@ class AppointmentDisplay extends React.Component {
               <Card.Body>
                 <Card.Text as="div">
                   <ListGroup as="div" variant="flush">
-                    <ListGroup.Item>Appointment Start Time: {this.convertMinsToHrsMins(this.state.start_time)}</ListGroup.Item>
-                    <ListGroup.Item>Appointment End Time: {this.convertMinsToHrsMins(this.state.end_time)}</ListGroup.Item>
-                    <ListGroup.Item>Services: {this.state.service_names.toString()}</ListGroup.Item>
-                    <ListGroup.Item>Total Cost: {this.state.cost}</ListGroup.Item>
-                    <ListGroup.Item>Scheduled Technicians: {this.state.workers.toString()}</ListGroup.Item>
+                    <ListGroup.Item><b>Appointment Date:</b> {new Date(this.state.appointment[0].date).toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} </ListGroup.Item>
+                    <ListGroup.Item><b>Appointment Time:</b> {this.convertMinsToHrsMins(this.state.start_time)}-{this.convertMinsToHrsMins(this.state.end_time)}</ListGroup.Item>
+                    <ListGroup.Item><b>Services:</b> {this.state.service_names.toString()}</ListGroup.Item>
+                    <ListGroup.Item><b>Scheduled Technicians:</b> {this.state.workers.toString()}</ListGroup.Item>
+                    <ListGroup.Item><b>Total Cost:</b> ${this.state.cost}</ListGroup.Item>
                   </ListGroup>
                 </Card.Text>
                 {cancelButton}

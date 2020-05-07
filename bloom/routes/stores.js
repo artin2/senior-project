@@ -104,7 +104,16 @@ async function getStores(req, res, next) {
           // we were able to get search results
           if (result) {
             for (let i = 0; i < result.rows.length; i++) {
-              let pictures = await s3.getImagesLocal('stores/' + result.rows[i].id + '/images/')
+              let pictures
+              try {
+                pictures = await s3.getImagesLocal('stores/' + result.rows[i].id + '/images/')
+                if(pictures.length == 0){
+                  pictures = s3.defaultStorePictures()
+                }
+              } catch (e) {
+                console.log("Error in getting pictures.")
+                pictures = s3.defaultStorePictures()
+              }
               result.rows[i].pictures = pictures
             }
             helper.querySuccess(res, {stores: result.rows, center: {lat: lat, lng: lng}}, "Successfully got Search Results!");
@@ -170,7 +179,7 @@ async function editStore(req, res, next) {
       // connect to the db
       db.client.connect((err, client, done) => {
         // try to update the store
-        db.client.query(query, values, (err, result) => {
+        db.client.query(query, values, async (err, result) => {
           done()
             if (err) {
               helper.queryError(res, err);
@@ -178,7 +187,6 @@ async function editStore(req, res, next) {
 
             // we were successful in updating the store
             if (result && result.rows.length == 1) {
-              console.log('Updated store, now moving to update hours if necessary')
               store = result.rows[0];
 
               // Need to update hours for each day of the week. Client should only send us the days of the week that need updating. Not all 7.
@@ -186,33 +194,77 @@ async function editStore(req, res, next) {
               // Below is for scoping issues. Res is undefined below
               let resp = res
               if (newHours.length > 0) {
-                let storeId = req.body.id
-                  ; (async (req, res) => {
-                    const hourDb = await db.client.connect();
-                    try {
-                      await hourDb.query("BEGIN");
-                      const query = 'UPDATE store_hours SET open_time=$1, close_time=$2 WHERE store_id=$3 and day_of_the_week=$4 RETURNING store_id';
-                      for (let i = 0; i < newHours.length; i++) {
-                        if (newHours[i] != null && !(Object.keys(newHours[i]).length === 0 && newHours[i].constructor === Object)) {
-                          let storeHoursValues = [newHours[i].open_time, newHours[i].close_time, storeId, i]
-                          await hourDb.query(query, storeHoursValues);
+                let store_id = req.body.id
+                let failed = await editStoreHours(newHours, store_id)
+
+                let workerHours = await getWorkersSchedulesInternal(req.body.id)
+
+                ; (async (req, res) => {
+                  const hourDb = await db.client.connect();
+                  try {
+                    for (let i = 0; i < newHours.length; i++) {
+                      if (newHours[i] != null && !(Object.keys(newHours[i]).length === 0 && newHours[i].constructor === Object)) {
+                        for(let j = 0; j < workerHours.length; j++){
+                          if(workerHours[j].day_of_the_week === i){
+                            let store_id = workerHours[j].store_id
+                            let worker_id = workerHours[j].worker_id
+                            let new_open = newHours[i].open_time
+                            let new_close = newHours[i].close_time
+                            let old_start = workerHours[j].start_time
+                            let old_end = workerHours[j].end_time
+
+                            if(old_start != null){
+                              if(new_open){
+                                if(old_start < new_open && old_end > new_close){
+                                  await hourDb.query("BEGIN");
+                                  const query = 'UPDATE worker_hours SET start_time=$1, end_time=$2 WHERE store_id=$3 AND worker_id=$4 AND day_of_the_week=$5';
+                                  let workerHoursValues = [new_open, new_close, store_id, worker_id, i]
+                                  await hourDb.query(query, workerHoursValues);
+                                  await hourDb.query("COMMIT");
+                                }
+                                else if(old_start < new_open){
+                                  await hourDb.query("BEGIN");
+                                  const query = 'UPDATE worker_hours SET start_time=$1 WHERE store_id=$2 AND worker_id=$3 AND day_of_the_week=$4';
+                                  let workerHoursValues = [new_open, store_id, worker_id, i]
+                                  await hourDb.query(query, workerHoursValues);
+                                  await hourDb.query("COMMIT");
+                                }
+                                else if(old_end > new_close){
+                                  await hourDb.query("BEGIN");
+                                  const query = 'UPDATE worker_hours SET end_time=$1 WHERE store_id=$2 AND worker_id=$3 AND day_of_the_week=$4';
+                                  let workerHoursValues = [new_close, store_id, worker_id, i]
+                                  await hourDb.query(query, workerHoursValues);
+                                  await hourDb.query("COMMIT");
+                                }
+                              }
+                              else{
+                                await hourDb.query("BEGIN");
+                                const query = 'UPDATE worker_hours SET start_time = $1, end_time=$2 WHERE store_id=$3 AND worker_id=$4 AND day_of_the_week=$5';
+                                let workerHoursValues = [new_open, new_close, store_id, worker_id, i]
+                                await hourDb.query(query, workerHoursValues);
+                                await hourDb.query("COMMIT");
+                              }
+
+                              let j = workerHours.length
+                            }
+                          }
                         }
                       }
-                      await hourDb.query("COMMIT");
-                    } catch (e) {
-                      await hourDb.query("ROLLBACK");
-                      console.log('##########Rolling Back#############')
-                      failed = true
-                      throw e;
-                    } finally {
-                      if (!failed) {
-                        helper.querySuccess(resp, store, 'Successfully updated store!');
-                      } else {
-                        helper.queryError(res, "Unable to Update Store!");
-                      }
-                      hourDb.release();
                     }
-                  })().catch(e => helper.queryError(resp, e));
+                  } catch (e) {
+                    await hourDb.query("ROLLBACK", e);
+                    failed = true
+                    throw e;
+                  } finally {
+                    if (!failed) {
+                      helper.querySuccess(resp, store, 'Successfully updated store!');
+                    } else {
+                      helper.queryError(resp, "Unable to Update Store!");
+                    }
+                    hourDb.release();
+                  }
+                })().catch(e => helper.queryError(resp, e));
+
               } else {
                 if (!failed) {
                   // ******this is not working at the moment, need to wait for both queries to finish before sending this message....
@@ -240,6 +292,43 @@ async function editStore(req, res, next) {
     helper.queryError(res, "Missing Parameters!");
   }
 };
+
+async function editStoreHours(newHours, store_id){
+  try {
+    console.log("editing store hours!")
+    let failed = true
+    const hourDb = await db.client.connect();
+    console.log("connect")
+    try {
+      await hourDb.query("BEGIN");
+      console.log("began")
+
+      for (let i = 0; i < newHours.length; i++) {
+        console.log("checking if we have to update:", newHours[i])
+        if (newHours[i] != null && !(Object.keys(newHours[i]).length === 0 && newHours[i].constructor === Object)) {
+          console.log("have to update this one!", newHours[i])
+          let query = 'UPDATE store_hours SET open_time=$1, close_time=$2 WHERE store_id=$3 and day_of_the_week=$4 RETURNING store_id';
+          let storeHoursValues = [newHours[i].open_time, newHours[i].close_time, store_id, i]
+          console.log("query:", query, "values", storeHoursValues)
+          await hourDb.query(query, storeHoursValues);
+        }
+      }
+      await hourDb.query("COMMIT");
+      console.log("commit")
+      failed = false
+    } catch (e) {
+      await hourDb.query("ROLLBACK");
+      console.log('##########Rolling Back#############', e)
+      failed = true
+    } finally {
+      hourDb.release();
+    }
+    return failed
+  } catch (err) {
+    console.log("couldn't connect?", err)
+    return true
+  }
+}
 
 async function addStore(req, res, next) {
   console.log("!!!! ENTER !!!!")
@@ -475,6 +564,7 @@ async function addWorkerHours(workerHours, worker_id, store_id){
     return failed
   } catch (err) {
     console.log("couldn't connect?", err)
+    return true
   }
 }
 
@@ -1082,7 +1172,45 @@ async function getWorkerInfo(worker_id) {
   return res.rows[0]
 };
 
+async function getWorkersSchedulesInternal(store_id) {
+  try{
+    console.log("store id is:", store_id)
+    // add join to get worker ids from store id
+    let query = 'SELECT * FROM worker_hours WHERE store_id = $1'
+    let values = [store_id]
 
+    return new Promise(function(resolve, reject) { 
+      db.client.connect((err, client, done) => {
+      // try to get the store item based on id
+        db.client.query(query, values, (err, result) => {
+          done()
+            if (err) {
+              console.log("query error", err)
+              reject(err)
+            }
+
+            // we were successfuly able to get the store item
+            if (result && result.rows.length > 0) {
+              console.log("got the worker hours")
+              resolve(result.rows)
+            }
+            else {
+              console.log("no worker hours")
+              resolve(result.rows)
+            }
+          });
+        if (err) {
+          console.log("connect error", err)
+          reject(err)
+        }
+      });
+    })
+  }
+  catch(err){
+    console.log("Some sort of error!", err);
+    reject(err)
+  }
+};
 
 module.exports = {
   getStore: getStore,
