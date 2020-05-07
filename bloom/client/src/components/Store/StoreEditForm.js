@@ -1,17 +1,14 @@
 import React from 'react';
 import '../../App.css';
-import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
-import GridLoader from 'react-spinners/GridLoader'
-import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPhone, FaMap } from 'react-icons/fa';
+import { FaShoppingCart, FaPen, FaPhone, FaMap } from 'react-icons/fa';
 import { Formik } from 'formik';
 import { css } from '@emotion/core'
 import * as Yup from 'yup';
-import Select from 'react-select';
 import {
   addAlert
 } from '../../reduxFolder/actions/alert'
@@ -20,12 +17,12 @@ import { getPictures, deleteHandler, uploadHandler } from '../s3'
 import { Multiselect } from 'multiselect-react-dropdown';
 import { withRouter } from "react-router-dom";
 import { Image } from 'react-bootstrap';
-const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
-
+import GridLoader from 'react-spinners/GridLoader'
 const override = css`
   display: block;
   margin: 0 auto;
 `;
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 const helper = require('../Search/helper.js');
 
 class StoreEditForm extends React.Component {
@@ -65,14 +62,8 @@ class StoreEditForm extends React.Component {
       category: helper.getCategories(),
       categoryError: false,
       selected: [],
-
+      isLoading: true
     };
-
-    // options for the categories field
-    // this.options = [
-    //   { value: 'nails', label: 'Nails' },
-    //   { value: 'hair', label: 'Hair' },
-    // ];
 
     // RegEx for phone number validation
     this.phoneRegExp = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
@@ -92,8 +83,7 @@ class StoreEditForm extends React.Component {
       address: Yup.string()
         .required("Address is required"),
       category: Yup.array()
-        .required("Category is required")
-        .nullable(),
+        .required("Category is required"),
       pictureCount: Yup.number()
         .required("Pictures are required")
         .min(1, "Must have at least one picture")
@@ -101,33 +91,16 @@ class StoreEditForm extends React.Component {
 
     this.autocomplete = null
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
-
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
-    this.onSelect = this.onSelect.bind(this);
-    this.onRemove = this.onRemove.bind(this);
+    this.onChange = this.onChange.bind(this);
     this.shorterVersion = this.shorterVersion.bind(this);
     this.longerVersion = this.longerVersion.bind(this);
     this.triggerStoreDisplayNoResp = this.triggerStoreDisplayNoResp.bind(this);
     this.autocompleteChange = this.autocompleteChange.bind(this)
   }
 
-  onSelect(selectedList, selectedItem) {
-
-    this.setState({
-      selected: selectedList,
-      categoryError: false
-
-    })
-
-
-  }
-
-  onRemove(selectedList, removedItem, event) {
-
-    this.setState({
-      selected: selectedList
-    })
-
+  onChange(selectedList, item, setFieldValue) {
+    setFieldValue("category", selectedList)
   }
 
   autocompleteChange(event, setFieldValue){
@@ -191,7 +164,6 @@ class StoreEditForm extends React.Component {
   }
 
   shorterVersion(name) {
-
     if(name == "Spa & Wellness") {
       return "Spa"
     }
@@ -208,7 +180,6 @@ class StoreEditForm extends React.Component {
   }
 
   longerVersion(name) {
-
     if(name == "Spa") {
       return "Spa & Wellness"
     }
@@ -314,7 +285,7 @@ class StoreEditForm extends React.Component {
     if (this.props.location.state && this.props.location.state.store) {
       let convertedCategory = this.props.location.state.store.category.map((str, indx) => ({ id: indx, name: this.longerVersion(str)}));
 
-      fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/storeHours', {
+      await fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/storeHours', {
         method: "GET",
         headers: {
             'Content-type': 'application/json'
@@ -347,14 +318,13 @@ class StoreEditForm extends React.Component {
           weekIsWorking: oldWeekIsWorking,
           storeHours: data,
           originalStoreHours: dataCopy,
-          loading: false,
+          isLoading: false,
           pictures: picturesFetched
         })
       });
     }
     else {
-
-      Promise.all([
+      await Promise.all([
         fetch(fetchDomain + '/stores/' + this.props.match.params.store_id, {
         method: "GET",
         headers: {
@@ -391,7 +361,7 @@ class StoreEditForm extends React.Component {
           storeHours: response2,
           originalStoreHours: dataCopy,
           weekIsWorking: oldWeekIsWorking,
-          loading: false,
+          isLoading: false,
           pictures: picturesFetched
         })
       })
@@ -404,7 +374,21 @@ class StoreEditForm extends React.Component {
   }
 
   render() {
-        return <Row className="justify-content-center mx-1" id="test">
+    if(this.state.isLoading){
+      return <Row className="vertical-center">
+               <Col>
+                <GridLoader
+                  css={override}
+                  size={20}
+                  color={"#8CAFCB"}
+                  loading={this.state.isLoading}
+                />
+              </Col>
+            </Row>
+    }
+    else{
+      return (
+        <Row className="justify-content-center mx-1" id="test">
         <Col xs={12} lg={5} className="my-5">
           <Formik
             enableReinitialize
@@ -424,88 +408,78 @@ class StoreEditForm extends React.Component {
             onSubmit={async (values) => {
               let shorterVersion = this.shorterVersion
 
-              values.category = this.state.selected.map(function (val) {
+              values.category = values.category.map(function (val) {
                 return shorterVersion(val.name)
               })
 
-              if(values.category.length == 0) {
+              let store_id = this.props.match.params.store_id
+              let triggerStoreDisplay = this.triggerStoreDisplay
+              let triggerStoreDisplayNoResp = this.triggerStoreDisplayNoResp
 
-                this.setState({
-                  categoryError: true
-                })
-                return;
+              values.services = this.state.store.services
+              values.owners = this.state.store.owners
+              values.id = store_id
+              values.storeHours = values.storeHours.map((day, index) => {
+                if(this.state.weekIsWorking[index] && (this.state.originalStoreHours[index].open_time !== day.open_time || this.state.originalStoreHours[index].close_time !== day.close_time)){
+                  return day
+                } 
+                else if(this.state.weekIsWorking[index] && (this.state.originalStoreHours[index].open_time == day.open_time && this.state.originalStoreHours[index].close_time == day.close_time)){
+                  return {}
+                }else if(this.state.weekIsWorking[index] == false && this.state.originalStoreHours[index].open_time == null){
+                  return {}
+                }
+                else{
+                  return {open_time: null, close_time: null}
+                }
+              })
+
+              values.address = this.state.address
+
+              // remove files from s3
+              if(this.state.keys.length > 0){
+                try {
+                  await deleteHandler(this.state.keys)
+                } catch (e) {
+                  console.log("Error! Could not delete images from s3", e)
+                }
               }
 
-                let store_id = this.props.match.params.store_id
-                let triggerStoreDisplay = this.triggerStoreDisplay
-                let triggerStoreDisplayNoResp = this.triggerStoreDisplayNoResp
-
-                values.services = this.state.store.services
-                values.owners = this.state.store.owners
-                values.id = store_id
-                values.storeHours = values.storeHours.map((day, index) => {
-                  if(this.state.weekIsWorking[index] && (this.state.originalStoreHours[index].open_time !== day.open_time || this.state.originalStoreHours[index].close_time !== day.close_time)){
-                    return day
-                  } 
-                  else if(this.state.weekIsWorking[index] && (this.state.originalStoreHours[index].open_time == day.open_time && this.state.originalStoreHours[index].close_time == day.close_time)){
-                    return {}
-                  }else if(this.state.weekIsWorking[index] == false && this.state.originalStoreHours[index].open_time == null){
-                    return {}
-                  }
-                  else{
-                    return {open_time: null, close_time: null}
-                  }
-                })
-
-                console.log("new hours are!", values.storeHours)
-
-                values.address = this.state.address
-
-                // remove files from s3
-                if(this.state.keys.length > 0){
-                  try {
-                    await deleteHandler(this.state.keys)
-                  } catch (e) {
-                    console.log("Error! Could not delete images from s3", e)
-                  }
+              // upload new images to s3 from client to avoid burdening back end
+              if(this.state.selectedFiles.length > 0){
+                let prefix = 'stores/' + this.props.match.params.store_id + '/images/'
+                try {
+                  await uploadHandler(prefix, this.state.selectedFiles)
+                } catch (e) {
+                  console.log("Error! Could not upload images to s3", e)
                 }
+              }
 
-                // upload new images to s3 from client to avoid burdening back end
-                if(this.state.selectedFiles.length > 0){
-                  let prefix = 'stores/' + this.props.match.params.store_id + '/images/'
-                  try {
-                    await uploadHandler(prefix, this.state.selectedFiles)
-                  } catch (e) {
-                    console.log("Error! Could not upload images to s3", e)
-                  }
+              fetch(fetchDomain + '/stores/edit/' + store_id , {
+                method: "POST",
+                headers: {
+                  'Content-type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(values)
+              })
+              .then(function(response){
+                if(response.status!==200){
+                  store.dispatch(addAlert(response))
                 }
-
-                fetch(fetchDomain + '/stores/edit/' + store_id , {
-                  method: "POST",
-                  headers: {
-                    'Content-type': 'application/json'
-                  },
-                  credentials: 'include',
-                  body: JSON.stringify(values)
-                })
-                .then(function(response){
-                  if(response.status!==200){
-                    store.dispatch(addAlert(response))
-                  }
-                  else {
-                    // redirect to home page signed in
-                    return response.json()
-                  }
-                })
-                .then(data => {
-                  if(data){
-                    triggerStoreDisplay(data)
-                  }
-                  else{
-                    console.log("should not be here, but going to redirect until this is fixed")
-                    // this.triggerStoreDisplayNoResp()
-                  }
-                });
+                else {
+                  // redirect to home page signed in
+                  return response.json()
+                }
+              })
+              .then(data => {
+                if(data){
+                  triggerStoreDisplay(data)
+                }
+                else{
+                  console.log("should not be here, but going to redirect until this is fixed")
+                  // this.triggerStoreDisplayNoResp()
+                }
+              });
             }}
           >
             {({ values,
@@ -602,25 +576,22 @@ class StoreEditForm extends React.Component {
                       ) : null}
                     </Form.Group>
 
-                  <Form.Group controlId="category">
-
-
-                  <Multiselect
-                    selectedValues={this.state.selected}
-                    options={this.state.category}
-                    onSelect={this.onSelect}
-                    onRemove={this.onRemove}
-                    placeholder="Category"
-                    closeIcon="cancel"
-                    displayValue="name"
-                    avoidHighlightFirstOption={true}
-                    style={{multiselectContainer: { width: '100%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
+                  <Form.Group controlId="formCategory" className={touched.category && errors.category ? "error" : null}>
+                    <Multiselect
+                      selectedValues={this.state.selected}
+                      options={this.state.category}
+                      onSelect={async (selectedList, selectedItem) => this.onChange(selectedList, selectedItem, setFieldValue)}
+                      onRemove={async (selectedList, removedItem) => this.onChange(selectedList, removedItem, setFieldValue)}
+                      placeholder="Category"
+                      closeIcon="cancel"
+                      displayValue="name"
+                      avoidHighlightFirstOption={true}
+                      style={{multiselectContainer: { width: '100%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
                     />
-
-                  {(this.state.categoryError) ? (
-                    <div className="error-message">Category is required</div>
-                      ) : null}
-                </Form.Group>
+                  </Form.Group>
+                  {touched.category && errors.category ? (
+                      <div className="error-message" style={{marginTop: -15}}>{errors.category}</div>
+                    ) : null}
 
                   <h4>Store Hours</h4>
 
@@ -1000,7 +971,8 @@ class StoreEditForm extends React.Component {
           </Formik>
         </Col>
       </Row>
-      }
+      );
     }
-
+  }
+}
 export default withRouter(StoreEditForm);

@@ -6,10 +6,9 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
-import { FaShoppingCart, FaRoad, FaBuilding, FaUniversity, FaGlobe, FaPen, FaPhone, FaMap } from 'react-icons/fa';
+import { FaShoppingCart, FaPen, FaPhone, FaMap } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import Select from 'react-select';
 import Cookies from 'js-cookie';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -21,7 +20,12 @@ import {
 import store from '../../reduxFolder/store';
 import { uploadHandler } from '../s3';
 import { Multiselect } from 'multiselect-react-dropdown';
-
+import { css } from '@emotion/core'
+import GridLoader from 'react-spinners/GridLoader'
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 const helper = require('../Search/helper.js');
 
@@ -63,9 +67,8 @@ class StoreSignupForm extends React.Component {
       phone: Yup.string()
         .matches(this.phoneRegExp, "Phone number is not valid")
         .required("Phone number is required"),
-      // category: Yup.array()
-      //   .required("Category is required")
-      //   .nullable(),
+      category: Yup.array()
+        .required("Category is required"),
       address: Yup.string()
         .required("Address is required"),
       pictureCount: Yup.number()
@@ -77,8 +80,7 @@ class StoreSignupForm extends React.Component {
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
 
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
-    this.onSelect = this.onSelect.bind(this);
-    this.onRemove = this.onRemove.bind(this);
+    this.onChange = this.onChange.bind(this);
     this.shorterVersion = this.shorterVersion.bind(this);
   }
 
@@ -166,24 +168,9 @@ class StoreSignupForm extends React.Component {
     return name;
   }
 
-  onSelect(selectedList, selectedItem) {
-
-    this.setState({
-      selected: selectedList,
-      categoryError: false
-
-    })
-
+  onChange(selectedList, item, setFieldValue) {
+    setFieldValue("category", selectedList)
   }
-
-  onRemove(selectedList, removedItem, event) {
-
-    this.setState({
-      selected: selectedList
-    })
-
-  }
-
 
   handleSelectChange = (event) => {
     var days = ['formHoursMonday', 'formHoursTuesday', 'formHoursWednesday', 'formHoursThursday', 'formHoursFriday', 'formHoursSaturday', 'formHoursSunday']
@@ -231,20 +218,11 @@ class StoreSignupForm extends React.Component {
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-
                 let shorterVersion = this.shorterVersion
 
-                values.category = this.state.selected.map(function (val) {
+                values.category = values.category.map(function (val) {
                   return shorterVersion(val.name)
                 })
-
-                if(values.category.length == 0) {
-
-                  this.setState({
-                    categoryError: true
-                  })
-                  return;
-                }
 
                 values.owner_id = JSON.parse(Cookies.get('user').substring(2)).id
                 values.storeHours = this.state.storeHours.map((day, index) => {
@@ -256,7 +234,6 @@ class StoreSignupForm extends React.Component {
                   }
                 })
                 values.address = this.state.address
-
 
                 let triggerStoreDisplay = this.triggerStoreDisplay
 
@@ -385,22 +362,21 @@ class StoreSignupForm extends React.Component {
                       ) : null}
                     </Form.Group>
 
-                    <Form.Group controlId="formCategory">
+                    <Form.Group controlId="formCategory" className={touched.category && errors.category ? "error" : null}>
                       <Multiselect
                         options={this.state.category}
-                        onSelect={this.onSelect}
-                        onRemove={this.onRemove}
+                        onSelect={async (selectedList, selectedItem) => this.onChange(selectedList, selectedItem, setFieldValue)}
+                        onRemove={async (selectedList, removedItem) => this.onChange(selectedList, removedItem, setFieldValue)}
                         placeholder="Category"
                         closeIcon="cancel"
                         displayValue="name"
                         avoidHighlightFirstOption={true}
                         style={{multiselectContainer: { width: '100%'},  groupHeading:{width: 50, maxWidth: 50}, chips: { background: "#587096", height: 35 }, inputField: {color: 'black'}, searchBox: { minWidth: '100%', height: '30', backgroundColor: 'white', borderRadius: "5px" }} }
                       />
-
-                      {(this.state.categoryError) ? (
-                        <div className="error-message">Category is required</div>
-                      ) : null}
                     </Form.Group>
+                    {touched.category && errors.category ? (
+                        <div className="error-message" style={{marginTop: -15}}>{errors.category}</div>
+                      ) : null}
 
                     <h4>Store Hours</h4>
 
