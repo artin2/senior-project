@@ -253,7 +253,7 @@ class Profile extends React.Component {
             {/* WORKING HOURS */}
             <ListGroup variant="flush" className="d-none d-lg-block">
               <Row className="justify-content-center mt-4">
-                <h5>Working Hours</h5>
+                <Col xs={12}><h5>Working Hours</h5></Col>
                 <ListWorkingHours/>
               </Row>
             </ListGroup>

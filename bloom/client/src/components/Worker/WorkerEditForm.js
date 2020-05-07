@@ -174,7 +174,6 @@ class WorkerEditForm extends React.Component {
   };
 
   componentDidMount() {
-    console.log("mounted")
     let store_id = this.props.match.params.store_id ? this.props.match.params.store_id : this.props.store_id;
     let worker_id = this.props.match.params.worker_id ? this.props.match.params.worker_id : this.props.worker_id;
 
@@ -435,7 +434,15 @@ class WorkerEditForm extends React.Component {
                   })
                   .then(data => {
                     if (data) {
-                      this.props.updateWorkerHours(this.state.workerHours)
+                      let actualHours = []
+                      for(let i = 0; i < this.state.workerHours.length; i++) {
+                        if(this.state.weekIsWorking[i] && this.state.storeWeekIsWorking[i]) {
+                          actualHours.push(this.state.workerHours[i])
+                        } else {
+                          actualHours.push({end_time: null, start_time: null})
+                        }
+                      }
+                      this.props.updateWorkerHours(actualHours)
                     }
                   });
               }}
