@@ -9,6 +9,7 @@ import Calendar from '../Calendar/CalendarPage'
 import EditProfileForm from './EditProfileForm';
 import GridLoader from 'react-spinners/GridLoader'
 import WorkerEditForm from '../Worker/WorkerEditForm';
+import { getPictures } from '../s3'
 import { css } from '@emotion/core'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
@@ -33,6 +34,7 @@ class Profile extends React.Component {
       },
       loading: true,
       userHours: [],
+      picture: null,
       // receivedServices: [],
       selectedOption: [],
       storeHours: [],
@@ -88,11 +90,23 @@ class Profile extends React.Component {
     })
   };
 
-  componentDidMount() {
+  async componentDidMount() {
+    let picturesFetched = []
+    try {
+      picturesFetched = await getPictures('users/' + this.props.user.id + '/')
+
+      if(picturesFetched.length > 0){
+        await this.setState({
+          picture: picturesFetched[0],
+        })
+      }
+    } catch (e) {
+      console.log("Error getting pictures from s3!", e)
+    }
 
     let store_id = this.props.user.store_id;
     let worker_id = this.props.user.worker_id;
-    if (this.props.user && this.props.user.role == '2') {
+    if (this.props.user && this.props.user.role == '2' && (this.props.user.store_id && this.props.user.worker_id)) {
       // let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
       Promise.all([
         fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id + '/hours', {
@@ -127,7 +141,7 @@ class Profile extends React.Component {
         })
       })
     }
-    else if(this.props.user.role == '2') {
+    else if(this.props.user.role == '2'  && (this.props.user.store_id && this.props.user.worker_id)) {
       Promise.all([
         fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id, {
           method: "GET",
@@ -172,6 +186,46 @@ class Profile extends React.Component {
         })
       })
     }
+    // else if(this.props.user.role == '2') {
+    //   await fetch(fetchDomain + '/workerByUserId/' + this.props.user.id, {
+    //     method: "GET",
+    //     headers: {
+    //         'Content-type': 'application/json'
+    //     },
+    //     credentials: 'include'
+    //   })
+    //   .then(function(response){
+    //     if(response.status!==200){
+    //       // throw an error alert
+    //       store.dispatch(addAlert(response))
+    //     }
+    //     else{
+    //       return response.json();
+    //     }
+    //   })
+    //   .then(data => {
+    //     let convertedServices = data.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
+    //     let receivedWorkerHours = data.storeHours.map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
+
+    //     // If worker hours are not complete, we default them to store hours. Worker hours should be complete though.
+    //     if (data.workerHours && data.workerHours.length == 7) {
+    //       receivedWorkerHours = data.workerHours
+    //     } else {
+    //       this.setState({
+    //         newHours: receivedWorkerHours
+    //       })
+    //     }
+
+    //     this.setState({
+    //       user: data.worker,
+    //       // receivedServices: allResponses[0].services,
+    //       selectedOption: convertedServices,
+    //       storeHours: data.storeHours,
+    //       userHours: receivedWorkerHours,
+    //       loading: false
+    //     })
+    //   });
+    // }
     else {
       this.setState({
         loading: false,
@@ -201,7 +255,7 @@ class Profile extends React.Component {
       } else if(this.state.choice == 1) {
         return <p>Past Appointments go here....</p>
       } else if(this.state.choice == 2) {
-        return <EditProfileForm/>
+        return <EditProfileForm picture={this.state.picture}/>
       } else {
         return <WorkerEditForm store_id={this.props.user.store_id} worker_id={this.props.user.worker_id}/>
       }
@@ -226,7 +280,7 @@ class Profile extends React.Component {
         <div className="profile-sidebar">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
-              <Image src="https://i.redd.it/v0caqchbtn741.jpg" className="img-responsive" alt="" rounded />
+              <Image src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
             </div>
             {/* <!-- END SIDEBAR USERPIC --> */}
 
@@ -285,7 +339,7 @@ class Profile extends React.Component {
         <div className="profile-sidebar mb-5">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
-              <Image src="https://i.redd.it/v0caqchbtn741.jpg" className="img-responsive" alt="" rounded />
+              <Image src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
             </div>
             {/* <!-- END SIDEBAR USERPIC --> */}
 

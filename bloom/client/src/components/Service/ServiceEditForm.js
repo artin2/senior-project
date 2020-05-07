@@ -108,7 +108,12 @@ class ServiceEditForm extends React.Component {
   }
 
   async componentDidMount() {
-    let picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id + '/')
+    let picturesFetched = []
+    try {
+      picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id + '/')
+    } catch (e) {
+      console.log("Error getting pictures from s3!", e)
+    }
 
     if(this.props.location.state && this.props.location.state.service){
 

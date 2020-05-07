@@ -104,6 +104,11 @@ app.post('/checkTokenAndPermissions', withAuth, async(req, res, next) => {
   }
 });
 
+// app.get('/workerByUserId/:user_id', withAuth, function(req, res) {
+//   console.log('hit the all users route')
+//   await users.getUsers(req, res, next);
+// });
+
 
 //**** STORE ROUTES ****//
 
