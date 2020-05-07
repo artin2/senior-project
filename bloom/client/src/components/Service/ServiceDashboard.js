@@ -14,8 +14,9 @@ import './Services.css';
 // import eyelash from '../../assets/eyelash4.png';
 // import wedding from '../../assets/wedding.jpg';
 // import gel from '../../assets/gel.jpg';
-import { getPictures } from '../s3'
+import { getPictures, defaultServicePictures } from '../s3'
 import { FaEdit } from 'react-icons/fa';
+import LinesEllipsis from 'react-lines-ellipsis'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const colors = ['#d2d4cf', '#d2d4cf', '#d2d4cf'];
@@ -106,38 +107,26 @@ class ServiceDashboard extends React.Component {
           return response.json();
         }
       })
-      console.log("here service is", services)
     }
 
     if(services.length > 0){
-      console.log("service exists")
       var appendedServices = await Promise.all(services.map(async (service): Promise<Object> => {
-        let pictures = await getPictures('stores/' + service.store_id + '/services/' + service.id)
+        try {
+          let pictures = await getPictures('stores/' + service.store_id + '/services/' + service.id)
+          if(pictures.length == 0){
+            pictures = defaultServicePictures()
+          }
 
-        // once all data is clean and picture requirement is enforced we can remove this
-        // if(pictures.length == 0){
-        //   pictures = [
-        //     {
-        //       url: "/hair.jpg",
-        //       key: "/hair.jpg"
-        //     },
-        //     {
-        //       url: "/nails.jpg",
-        //       key: "/nails.jpg"
-        //     },
-        //     {
-        //       url: "/salon.jpg",
-        //       key: "/salon.jpg"
-        //     }
-        //   ]
-        // }
-
-        var newService = Object.assign({}, service);
-        newService.pictures = pictures;
-        return newService;
+          var newService = Object.assign({}, service);
+          newService.pictures = pictures;
+          return newService;
+        } catch (e) {
+          console.log("Error get service pictures!", e)
+          var newService = Object.assign({}, service);
+          newService.pictures = defaultServicePictures();
+          return newService
+        }
       }));
-
-      console.log("new services is:", appendedServices)
 
       this.setState({
         services: appendedServices,
@@ -148,7 +137,6 @@ class ServiceDashboard extends React.Component {
       this.setState({
         loading: false
       })
-      console.log("no services!")
     }
   }
 
@@ -162,8 +150,8 @@ class ServiceDashboard extends React.Component {
                     {/* <Button className="buttons" onClick={() => this.triggerServiceEditForm()}>Edit Services</Button> */}
                     <div className="service_container">
                       {this.state.services.map((service, indx) => (
-                        <div>
-                          <Row key={"service-" + service.id}>
+                        <div key={"service-" + service.id}>
+                          <Row>
                               <Col className="px-0 h-50 w-50" xs={12} lg={6}>
                                 <Carousel interval="">
                                   {service.pictures.map((picture, index) => (
@@ -193,7 +181,13 @@ class ServiceDashboard extends React.Component {
                                       <p> $ {service.cost}  </p>
                                       <p>  {service.duration} Minutes  </p>
                                       <p> {service.workers} </p>
-                                      <p> {service.description} </p>
+                                      <LinesEllipsis
+                                        text={service.description}
+                                        maxLine='6'
+                                        ellipsis={service.description.length > 55 ? service.description.substring(0, 55) + " ..." : service.description.substring(0) + " ..."}
+                                        trimRight
+                                        basedOn='words'
+                                      />
                                     </div>
                                   </Row>
                                 </Col>

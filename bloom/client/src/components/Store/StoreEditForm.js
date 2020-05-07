@@ -302,7 +302,12 @@ class StoreEditForm extends React.Component {
   }
 
   async componentDidMount() {
-    let picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/images/')
+    let picturesFetched = []
+    try {
+      picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/images/')
+    } catch (e) {
+      console.log("Error! Could not get pictures from s3", e)
+    }
 
     // if we were given the existing data from calling component use that, else fetch
     // check if categories are empty, if they are then cache/store needs to be updated.
@@ -458,13 +463,21 @@ class StoreEditForm extends React.Component {
 
                 // remove files from s3
                 if(this.state.keys.length > 0){
-                  await deleteHandler(this.state.keys)
+                  try {
+                    await deleteHandler(this.state.keys)
+                  } catch (e) {
+                    console.log("Error! Could not delete images from s3", e)
+                  }
                 }
 
                 // upload new images to s3 from client to avoid burdening back end
                 if(this.state.selectedFiles.length > 0){
                   let prefix = 'stores/' + this.props.match.params.store_id + '/images/'
-                  await uploadHandler(prefix, this.state.selectedFiles)
+                  try {
+                    await uploadHandler(prefix, this.state.selectedFiles)
+                  } catch (e) {
+                    console.log("Error! Could not upload images to s3", e)
+                  }
                 }
 
                 fetch(fetchDomain + '/stores/edit/' + store_id , {

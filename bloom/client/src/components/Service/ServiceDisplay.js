@@ -10,7 +10,7 @@ import { FaEdit, FaHourglassHalf, FaDollarSign } from 'react-icons/fa';
 // import store from '../../reduxFolder/store';
 import {Carousel, Image } from 'react-bootstrap'
 import LargeCarousel from '../LargeCarousel';
-import { getPictures } from '../s3'
+import { getPictures, defaultServicePictures } from '../s3'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class ServiceDisplay extends React.Component {
@@ -32,7 +32,16 @@ class ServiceDisplay extends React.Component {
   }
 
   async componentDidMount(): Promise<void> {
-    let picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id + '/')
+    let picturesFetched
+    try {
+      picturesFetched = await getPictures('stores/' + this.props.match.params.store_id + '/services/' + this.props.match.params.service_id + '/')
+      if(picturesFetched.length == 0){
+        picturesFetched = defaultServicePictures()
+      }
+    } catch (e) {
+      console.log("Error geting service images!", e)
+      picturesFetched = defaultServicePictures()
+    }
 
     // should remove when data is stable
     if(picturesFetched.length == 0){
