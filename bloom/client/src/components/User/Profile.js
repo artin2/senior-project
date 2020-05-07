@@ -10,6 +10,7 @@ import EditProfileForm from './EditProfileForm';
 import GridLoader from 'react-spinners/GridLoader'
 import WorkerEditForm from '../Worker/WorkerEditForm';
 import { getPictures } from '../s3'
+import workerImage from '../../assets/worker.png'
 import { css } from '@emotion/core'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
@@ -273,7 +274,7 @@ class Profile extends React.Component {
         <div className="profile-sidebar">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
-              <Image style={{height: '300px', width: '300px'}} src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
+              <Image style={{height: '300px', width: '300px'}} src={this.state.picture && Object.keys(this.state.picture).length !== 0 && this.state.picture.constructor === Object ? this.state.picture.url : workerImage} className="img-responsive" alt="" rounded />
             </div>
             {/* <!-- END SIDEBAR USERPIC --> */}
 

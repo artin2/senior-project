@@ -8,6 +8,8 @@ import ListGroup from 'react-bootstrap/ListGroup'
 import './WorkerDisplay.css'
 import Calendar from '../Calendar/CalendarPage'
 import WorkerEditForm from './WorkerEditForm';
+import workerImage from '../../assets/worker.png'
+import { getPictures } from '../s3'
 import GridLoader from 'react-spinners/GridLoader'
 import { css } from '@emotion/core'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
@@ -40,8 +42,17 @@ class WorkerDisplay extends React.Component {
       selectedOption: [],
       storeHours: [],
       choice: 0,
+      picture: null,
       daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     }
+
+    this.updateWorkerHours = this.updateWorkerHours.bind(this);
+  }
+
+  updateWorkerHours = (newHours) => {
+    this.setState({
+      workerHours: newHours
+    })
   }
 
   convertMinsToHrsMins(mins) {
@@ -91,12 +102,31 @@ class WorkerDisplay extends React.Component {
     })
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     let choice = 0
     if(this.props.location.state && this.props.location.state.edit) {
       choice = 1
     }
     if (this.props.location && this.props.location.state && this.props.location.state.worker) {
+      let picturesFetched = []
+      try {
+        picturesFetched = await getPictures('users/' + this.props.location.state.worker.user_id + '/')
+        console.log("!!!!!!!", picturesFetched)
+  
+        if(picturesFetched.length > 0){
+          await this.setState({
+            picture: picturesFetched[0],
+          })
+        }
+        else{
+          await this.setState({
+            picture: picturesFetched,
+          })
+        }
+      } catch (e) {
+        console.log("Error getting pictures from s3!", e)
+      }
+
       // let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
       Promise.all([
         fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id + '/hours', {
@@ -113,7 +143,7 @@ class WorkerDisplay extends React.Component {
           },
           credentials: 'include'
         }).then(value => value.json())
-      ]).then(allResponses => {
+      ]).then(async allResponses => {
         let receivedWorkerHours = allResponses[1].map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
         if (allResponses[0] && allResponses[0].length == 7) {
           receivedWorkerHours = allResponses[0]
@@ -155,7 +185,20 @@ class WorkerDisplay extends React.Component {
           },
           credentials: 'include'
         }).then(value => value.json())
-      ]).then(allResponses => {
+      ]).then(async allResponses => {
+        let picturesFetched = []
+        try {
+          picturesFetched = await getPictures('users/' + allResponses[0].user_id + '/')
+    
+          if(picturesFetched.length > 0){
+            await this.setState({
+              picture: picturesFetched[0],
+            })
+          }
+        } catch (e) {
+          console.log("Error getting pictures from s3!", e)
+        }
+
         let convertedServices = allResponses[0].services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
         let receivedWorkerHours = allResponses[1].map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
 
@@ -169,6 +212,7 @@ class WorkerDisplay extends React.Component {
         }
         this.setState({
           choice: choice,
+          picture: picturesFetched,
           worker: allResponses[0],
           receivedServices: allResponses[0].services,
           selectedOption: convertedServices,
@@ -198,7 +242,7 @@ class WorkerDisplay extends React.Component {
       if(this.state.choice == 0) {
         return <Calendar role={this.state.worker.first_name + "'s"} id={this.state.worker.id} />
       } else if(this.state.choice == 1) {
-        return <WorkerEditForm worker={this.state.worker} receivedServices={this.state.receivedServices} selectedOption={this.state.selectedOption} storeHours={this.state.storeHours} workerHours={this.state.workerHours} updateWorker={this.updateWorker}/>
+        return <WorkerEditForm updateWorkerHours={this.updateWorkerHours} worker={this.state.worker} receivedServices={this.state.receivedServices} selectedOption={this.state.selectedOption} storeHours={this.state.storeHours} workerHours={this.state.workerHours} updateWorker={this.updateWorker}/>
       } else {
         return <p>Past Appointments go here....</p>
       }
@@ -223,7 +267,7 @@ class WorkerDisplay extends React.Component {
         <div className="profile-sidebar">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
-              <Image src="https://i.redd.it/v0caqchbtn741.jpg" className="img-responsive" alt="" rounded />
+              <Image src={this.state.picture && Object.keys(this.state.picture).length !== 0 && this.state.picture.constructor === Object ? this.state.picture.url : workerImage} className="img-responsive" alt="" rounded />
             </div>
             {/* <!-- END SIDEBAR USERPIC --> */}
 

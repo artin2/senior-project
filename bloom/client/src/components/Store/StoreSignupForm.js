@@ -434,7 +434,7 @@ class StoreSignupForm extends React.Component {
                         custom
                         className="form-custom"
                         type="checkbox"
-                        id="monday-toggle"
+                        id="tuesday-toggle"
                         label="Working Today?"
                         checked={this.state.weekIsWorking[1]}
                         onChange={() => this.handleDayStatusChange(1)}
@@ -483,7 +483,7 @@ class StoreSignupForm extends React.Component {
                         custom
                         className="form-custom"
                         type="checkbox"
-                        id="monday-toggle"
+                        id="wednesday-toggle"
                         label="Working Today?"
                         checked={this.state.weekIsWorking[2]}
                         onChange={() => this.handleDayStatusChange(2)}
@@ -531,7 +531,7 @@ class StoreSignupForm extends React.Component {
                         custom
                         className="form-custom"
                         type="checkbox"
-                        id="monday-toggle"
+                        id="thursday-toggle"
                         label="Working Today?"
                         checked={this.state.weekIsWorking[3]}
                         onChange={() => this.handleDayStatusChange(3)}
@@ -580,7 +580,7 @@ class StoreSignupForm extends React.Component {
                         custom
                         className="form-custom"
                         type="checkbox"
-                        id="monday-toggle"
+                        id="friday-toggle"
                         label="Working Today?"
                         checked={this.state.weekIsWorking[4]}
                         onChange={() => this.handleDayStatusChange(4)}
@@ -628,7 +628,7 @@ class StoreSignupForm extends React.Component {
                         custom
                         className="form-custom"
                         type="checkbox"
-                        id="monday-toggle"
+                        id="saturday-toggle"
                         label="Working Today?"
                         checked={this.state.weekIsWorking[5]}
                         onChange={() => this.handleDayStatusChange(5)}
@@ -677,7 +677,7 @@ class StoreSignupForm extends React.Component {
                         custom
                         className="form-custom"
                         type="checkbox"
-                        id="monday-toggle"
+                        id="sunday-toggle"
                         label="Working Today?"
                         checked={this.state.weekIsWorking[6]}
                         onChange={() => this.handleDayStatusChange(6)}
