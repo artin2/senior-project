@@ -286,7 +286,7 @@ class AddWorkerForm extends React.Component {
                           />
         }
 
-        return <Row className="justify-content-center">
+        return <Row className="justify-content-center my-5">
           <Col xs={8} sm={7} md={6} lg={5}>
             <Formik
               initialValues={{
@@ -339,7 +339,7 @@ class AddWorkerForm extends React.Component {
                 handleBlur,
                 handleSubmit,
                 setFieldValue }) => (
-                  <Form className="formBody rounded">
+                  <Form className="formBody rounded p-5">
                     <h2>Add Worker</h2>
 
                     <Form.Group controlId="formEmail">
