@@ -196,7 +196,7 @@ class WorkerDisplay extends React.Component {
 
     const RenderProfileContent = () => {
       if(this.state.choice == 0) {
-        return <Calendar role={this.state.worker.first_name + "'s"} />
+        return <Calendar role={this.state.worker.first_name + "'s"} id={this.state.worker.id} />
       } else if(this.state.choice == 1) {
         return <WorkerEditForm worker={this.state.worker} receivedServices={this.state.receivedServices} selectedOption={this.state.selectedOption} storeHours={this.state.storeHours} workerHours={this.state.workerHours} updateWorker={this.updateWorker}/>
       } else {
