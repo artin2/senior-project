@@ -380,9 +380,11 @@ class StoreSignupForm extends React.Component {
 
                     <h4>Store Hours</h4>
 
-                    <Form.Group controlId="formHoursMonday">
-                      <h5 className="text-left">Monday</h5>
+                    <Form.Group className="text-left" controlId="formHoursMonday">
+                      <h5>Monday</h5>
                       <Form.Check
+                        custom
+                        className="form-custom"
                         type="checkbox"
                         id="monday-toggle"
                         label="Working Today?"
@@ -426,9 +428,11 @@ class StoreSignupForm extends React.Component {
                       </Form.Row>
                     </Form.Group>
 
-                    <Form.Group controlId="formHoursTuesday">
-                      <h5 className="text-left">Tuesday</h5>
+                    <Form.Group className="text-left" controlId="formHoursTuesday">
+                      <h5>Tuesday</h5>
                       <Form.Check
+                        custom
+                        className="form-custom"
                         type="checkbox"
                         id="monday-toggle"
                         label="Working Today?"
@@ -473,9 +477,11 @@ class StoreSignupForm extends React.Component {
                     </Form.Group>
 
 
-                    <Form.Group controlId="formHoursWednesday">
-                      <h5 className="text-left">Wednesday</h5>
+                    <Form.Group className="text-left" controlId="formHoursWednesday">
+                      <h5>Wednesday</h5>
                       <Form.Check
+                        custom
+                        className="form-custom"
                         type="checkbox"
                         id="monday-toggle"
                         label="Working Today?"
@@ -519,9 +525,11 @@ class StoreSignupForm extends React.Component {
                       </Form.Row>
                     </Form.Group>
 
-                    <Form.Group controlId="formHoursThursday">
-                      <h5 className="text-left">Thursday</h5>
+                    <Form.Group className="text-left" controlId="formHoursThursday">
+                      <h5>Thursday</h5>
                       <Form.Check
+                        custom
+                        className="form-custom"
                         type="checkbox"
                         id="monday-toggle"
                         label="Working Today?"
@@ -566,9 +574,11 @@ class StoreSignupForm extends React.Component {
                     </Form.Group>
 
 
-                    <Form.Group controlId="formHoursFriday">
-                      <h5 className="text-left">Friday</h5>
+                    <Form.Group className="text-left" controlId="formHoursFriday">
+                      <h5>Friday</h5>
                       <Form.Check
+                        custom
+                        className="form-custom"
                         type="checkbox"
                         id="monday-toggle"
                         label="Working Today?"
@@ -612,9 +622,11 @@ class StoreSignupForm extends React.Component {
                       </Form.Row>
                     </Form.Group>
 
-                    <Form.Group controlId="formHoursSaturday">
-                      <h5 className="text-left">Saturday</h5>
+                    <Form.Group className="text-left" controlId="formHoursSaturday">
+                      <h5>Saturday</h5>
                       <Form.Check
+                        custom
+                        className="form-custom"
                         type="checkbox"
                         id="monday-toggle"
                         label="Working Today?"
@@ -659,9 +671,11 @@ class StoreSignupForm extends React.Component {
                     </Form.Group>
 
 
-                    <Form.Group controlId="formHoursSunday">
-                      <h5 className="text-left">Sunday</h5>
+                    <Form.Group className="text-left" controlId="formHoursSunday">
+                      <h5>Sunday</h5>
                       <Form.Check
+                        custom
+                        className="form-custom"
                         type="checkbox"
                         id="monday-toggle"
                         label="Working Today?"
@@ -720,7 +734,7 @@ class StoreSignupForm extends React.Component {
                       <div className="error-message">{errors.pictureCount}</div>
                     ): null}
 
-                    <Button onClick={handleSubmit}>Submit</Button>
+                    <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
                   </Form>
                 )}
             </Formik>

@@ -9,10 +9,18 @@ label.custom-control-label {
   padding-left: 1rem;
   padding-bottom: 1rem;
   font-size: large;
-  margin-left: 2rem;
+  margin-left: 1.5rem;
 }
 
 label.custom-control-label::before, label.custom-control-label::after{
   height: 2rem;
   width: 2rem;
+}
+
+.custom-checkbox .custom-control-input:checked~.custom-control-label::before{
+  background-color: #8CAFCB;
+}
+
+.custom-control-input:checked~.custom-control-label::before {
+  border: none;
 }

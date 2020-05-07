@@ -202,7 +202,7 @@ class AddWorkerForm extends React.Component {
             <GridLoader
               css={override}
               size={20}
-              color={"#2196f3"}
+              color={"#8CAFCB"}
               loading={this.state.isLoading}
             />
           </Col>
@@ -218,8 +218,10 @@ class AddWorkerForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[0]){
           mondayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="monday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[0]}
                             onChange={() => this.handleDayStatusChange(0)}
@@ -228,8 +230,10 @@ class AddWorkerForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[1]){
           tuesdayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="tuesday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[1]}
                             onChange={() => this.handleDayStatusChange(1)}
@@ -238,8 +242,10 @@ class AddWorkerForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[2]){
           wednesdayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="wednesday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[2]}
                             onChange={() => this.handleDayStatusChange(2)}
@@ -248,8 +254,10 @@ class AddWorkerForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[3]){
           thursdayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="thursday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[3]}
                             onChange={() => this.handleDayStatusChange(3)}
@@ -258,8 +266,10 @@ class AddWorkerForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[4]){
           fridayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="friday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[4]}
                             onChange={() => this.handleDayStatusChange(4)}
@@ -268,8 +278,10 @@ class AddWorkerForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[5]){
           saturdayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
-                            id="sunday-toggle"
+                            id="saturday-toggle"
                             label="Working Today?"
                             checked={this.state.weekIsWorking[5]}
                             onChange={() => this.handleDayStatusChange(5)}
@@ -278,6 +290,8 @@ class AddWorkerForm extends React.Component {
 
         if(this.state.storeWeekIsWorking[6]){
           sundayCheckBox = <Form.Check
+                            custom
+                            className="form-custom"
                             type="checkbox"
                             id="sunday-toggle"
                             label="Working Today?"
@@ -287,7 +301,7 @@ class AddWorkerForm extends React.Component {
         }
 
         return <Row className="justify-content-center my-5">
-          <Col xs={8} sm={7} md={6} lg={5}>
+          <Col xs={12} lg={5}>
             <Formik
               initialValues={{
                 email: this.state.email,
@@ -339,7 +353,7 @@ class AddWorkerForm extends React.Component {
                 handleBlur,
                 handleSubmit,
                 setFieldValue }) => (
-                  <Form className="formBody rounded p-5">
+                  <Form className="formBody rounded p-4">
                     <h2>Add Worker</h2>
 
                     <Form.Group controlId="formEmail">
@@ -517,7 +531,7 @@ class AddWorkerForm extends React.Component {
                         </Col>
                       </Form.Row>
                     </Form.Group>
-                    <Button onClick={handleSubmit}>Submit</Button>
+                    <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
                   </Form>
                 )}
             </Formik>

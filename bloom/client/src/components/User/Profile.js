@@ -41,6 +41,7 @@ class Profile extends React.Component {
       choice: 0,
       daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     }
+    this.updateWorkerHours = this.updateWorkerHours.bind(this);
   }
 
   convertMinsToHrsMins(mins) {
@@ -81,6 +82,12 @@ class Profile extends React.Component {
       user: user,
       userHours: updateHours,
       // receivedServices: services
+    })
+  }
+
+  updateWorkerHours = (newHours) => {
+    this.setState({
+      userHours: newHours
     })
   }
 
@@ -239,10 +246,10 @@ class Profile extends React.Component {
       let items = [];
       for (let i = 0; i < this.state.userHours.length; i++) {
         if (this.state.userHours[i].start_time != null) {
-          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item>{this.state.daysOfWeek[i]}: {this.convertMinsToHrsMins(this.state.userHours[i].start_time)}-{this.convertMinsToHrsMins(this.state.userHours[i].end_time)}</ListGroup.Item></Col>);
+          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item className="px-0">{this.state.daysOfWeek[i]}: {this.convertMinsToHrsMins(this.state.userHours[i].start_time)}-{this.convertMinsToHrsMins(this.state.userHours[i].end_time)}</ListGroup.Item></Col>);
         }
         else {
-          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item>{this.state.daysOfWeek[i]}: Off</ListGroup.Item></Col>);
+          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item className="px-0">{this.state.daysOfWeek[i]}: Off</ListGroup.Item></Col>);
         }
       }
       return items;
@@ -257,7 +264,7 @@ class Profile extends React.Component {
       } else if(this.state.choice == 2) {
         return <EditProfileForm picture={this.state.picture}/>
       } else {
-        return <WorkerEditForm store_id={this.props.user.store_id} worker_id={this.props.user.worker_id}/>
+        return <WorkerEditForm updateWorkerHours={this.updateWorkerHours} store_id={this.props.user.store_id} worker_id={this.props.user.worker_id}/>
       }
     }
 
@@ -268,7 +275,7 @@ class Profile extends React.Component {
             <GridLoader
               css={override}
               size={20}
-              color={"#2196f3"}
+              color={"#8CAFCB"}
               loading={this.state.isLoading}
             />
           </Col>

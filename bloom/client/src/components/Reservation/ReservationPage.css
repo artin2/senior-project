@@ -3,9 +3,14 @@
   margin-top: 1.2rem;
 }
 
-.shoppingCartSmall {
+.shopping-cart-col {
   position: fixed;
   bottom: 0;
+}
+
+.add-shadow{
+  box-shadow: 8px 8px 5px #8888;
+  border-radius: 10px;
 }
 
 .smallText {

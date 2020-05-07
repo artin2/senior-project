@@ -16,6 +16,7 @@ import { getPictures, deleteHandler, uploadHandler } from '../s3'
 import { Multiselect } from 'multiselect-react-dropdown';
 import { withRouter } from "react-router-dom";
 import { css } from '@emotion/core'
+import { Image } from 'react-bootstrap';
 import GridLoader from 'react-spinners/GridLoader'
 const override = css`
   display: block;
@@ -379,7 +380,7 @@ class StoreEditForm extends React.Component {
                 <GridLoader
                   css={override}
                   size={20}
-                  color={"#2196f3"}
+                  color={"#8CAFCB"}
                   loading={this.state.isLoading}
                 />
               </Col>
@@ -387,8 +388,8 @@ class StoreEditForm extends React.Component {
     }
     else{
       return (
-        <Row className="justify-content-center" id="test">
-        <Col xs={8} sm={7} md={6} lg={5} className="my-5">
+        <Row className="justify-content-center mx-1" id="test">
+        <Col xs={12} lg={5} className="my-5">
           <Formik
             enableReinitialize
             initialValues={{
@@ -488,7 +489,7 @@ class StoreEditForm extends React.Component {
               handleBlur,
               handleSubmit,
               setFieldValue }) => (
-                <Form className="formBody rounded p-5">
+                <Form className="formBody rounded p-4">
                   <h3>Store Edit</h3>
 
                   <Form.Group controlId="formName">
@@ -594,9 +595,11 @@ class StoreEditForm extends React.Component {
 
                   <h4>Store Hours</h4>
 
-                  <Form.Group controlId="formHoursMonday">
-                    <h5 className="text-left">Monday</h5>
+                  <Form.Group className="text-left" controlId="formHoursMonday">
+                    <h5>Monday</h5>
                     <Form.Check
+                      custom
+                      className="form-custom"
                       type="checkbox"
                       id="monday-toggle"
                       label="Working Today?"
@@ -640,9 +643,11 @@ class StoreEditForm extends React.Component {
                     </Form.Row>
                   </Form.Group>
 
-                  <Form.Group controlId="formHoursTuesday">
-                    <h5 className="text-left">Tuesday</h5>
+                  <Form.Group className="text-left" controlId="formHoursTuesday">
+                    <h5>Tuesday</h5>
                     <Form.Check
+                      custom
+                      className="form-custom"
                       type="checkbox"
                       id="monday-toggle"
                       label="Working Today?"
@@ -687,9 +692,11 @@ class StoreEditForm extends React.Component {
                   </Form.Group>
 
 
-                  <Form.Group controlId="formHoursWednesday">
-                    <h5 className="text-left">Wednesday</h5>
+                  <Form.Group className="text-left" controlId="formHoursWednesday">
+                    <h5>Wednesday</h5>
                     <Form.Check
+                      custom
+                      className="form-custom"
                       type="checkbox"
                       id="monday-toggle"
                       label="Working Today?"
@@ -733,9 +740,11 @@ class StoreEditForm extends React.Component {
                     </Form.Row>
                   </Form.Group>
 
-                  <Form.Group controlId="formHoursThursday">
-                    <h5 className="text-left">Thursday</h5>
+                  <Form.Group className="text-left" controlId="formHoursThursday">
+                    <h5>Thursday</h5>
                     <Form.Check
+                      custom
+                      className="form-custom"
                       type="checkbox"
                       id="monday-toggle"
                       label="Working Today?"
@@ -780,9 +789,11 @@ class StoreEditForm extends React.Component {
                   </Form.Group>
 
 
-                  <Form.Group controlId="formHoursFriday">
-                    <h5 className="text-left">Friday</h5>
+                  <Form.Group className="text-left" controlId="formHoursFriday">
+                    <h5>Friday</h5>
                     <Form.Check
+                      custom
+                      className="form-custom"
                       type="checkbox"
                       id="monday-toggle"
                       label="Working Today?"
@@ -826,9 +837,11 @@ class StoreEditForm extends React.Component {
                     </Form.Row>
                   </Form.Group>
 
-                  <Form.Group controlId="formHoursSaturday">
-                    <h5 className="text-left">Saturday</h5>
+                  <Form.Group className="text-left" controlId="formHoursSaturday">
+                    <h5>Saturday</h5>
                     <Form.Check
+                      custom
+                      className="form-custom"
                       type="checkbox"
                       id="monday-toggle"
                       label="Working Today?"
@@ -873,9 +886,11 @@ class StoreEditForm extends React.Component {
                   </Form.Group>
 
 
-                  <Form.Group controlId="formHoursSunday">
-                    <h5 className="text-left">Sunday</h5>
+                  <Form.Group className="text-left" controlId="formHoursSunday">
+                    <h5>Sunday</h5>
                     <Form.Check
+                      custom
+                      className="form-custom"
                       type="checkbox"
                       id="monday-toggle"
                       label="Working Today?"
@@ -920,12 +935,14 @@ class StoreEditForm extends React.Component {
                   </Form.Group>
 
                   <Form.Group controlId="pictures">
-                    <Form.Label>Delete Images</Form.Label>
+                    <Form.Label><h5>Delete Images</h5></Form.Label>
                     {this.state.pictures.map((picture, index) => (
                       <div key={"pic-" + index}>
-                        <img className="img-fluid" src={picture.url} alt={"Slide " + index} />
+                        <Image fluid style={{height: "400px", width: "400px"}}thumbnail src={picture.url} alt={"Slide " + index} />
                         <Form.Check
                           // style={{marginLeft: 30}}
+                          custom
+                          className="form-custom"
                           id={picture.key}
                           label={picture.key.split('/').slice(-1)[0]}
                           onChange={event => this.deleteFileChangeHandler(event)}
@@ -935,7 +952,7 @@ class StoreEditForm extends React.Component {
                   </Form.Group>
 
                   <Form.Group controlId="pictureCount">
-                    <Form.Label>Add Images</Form.Label>
+                    <Form.Label><h5>Add Images</h5></Form.Label>
                     <br/>
                     <input
                       onChange={event => this.fileChangedHandler(event)}
@@ -948,7 +965,7 @@ class StoreEditForm extends React.Component {
                     ): null}
                   </Form.Group>
 
-                  <Button onClick={handleSubmit}>Submit</Button>
+                  <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
                 </Form>
               )}
           </Formik>

@@ -252,7 +252,7 @@ class AdvancedSearch extends React.Component {
 
           </Row>
         </Form.Group>
-          <Button disabled={!(this.state.address)} style={{backgroundColor: '#8CAFCB', border: '0px'}} type="submit">Submit</Button>
+          <Button disabled={!(this.state.address)} style={{backgroundColor: '#8CAFCB', border: 'none'}} type="submit">Submit</Button>
       </Form>
     );
   }

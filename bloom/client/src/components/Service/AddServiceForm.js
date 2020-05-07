@@ -164,7 +164,7 @@ class AddServiceForm extends React.Component {
                 <GridLoader
                   css={override}
                   size={20}
-                  color={"#2196f3"}
+                  color={"#8CAFCB"}
                   loading={this.state.isLoading}
                 />
               </Col>
@@ -174,7 +174,7 @@ class AddServiceForm extends React.Component {
       return (
         <Container fluid>
           <Row className="justify-content-center my-5">
-            <Col xs={8} sm={7} md={6} lg={5}>
+            <Col xs={12} lg={5}>
               <Formik
                 initialValues={{
                   name: '',
@@ -372,7 +372,7 @@ class AddServiceForm extends React.Component {
                     ): null}
                   </Form.Group>
   
-                  <Button onClick={handleSubmit}>Submit</Button>
+                  <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
                 </Form>
               )}
               </Formik>

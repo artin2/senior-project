@@ -337,7 +337,7 @@ class EditProfileForm extends React.Component {
                       ): null}
                     </Form.Group>
 
-                  <Button onClick={handleSubmit}>Submit</Button>
+                  <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
                 </Form>
               )}
               </Formik>

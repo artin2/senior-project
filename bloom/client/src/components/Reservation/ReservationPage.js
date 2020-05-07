@@ -172,13 +172,13 @@ class ReservationPage extends React.Component {
     let that = this;
     const DisplayByStep = (props) => {
       if (this.state.loading) {
-        return <Card className="fullHeight">
+        return <Card className="add-shadow">
           <Row className="vertical-center">
             <Col>
               <GridLoader
                 css={override}
                 size={20}
-                color={"#2196f3"}
+                color={"#8CAFCB"}
                 loading={this.state.loading}
               />
             </Col>
@@ -254,7 +254,7 @@ class ReservationPage extends React.Component {
           <Col xs={12} lg={4} className="d-none d-lg-block">
             <Card
               text='dark'
-              className='shoppingCart mt-0'
+              className='shoppingCart mt-0 add-shadow'
             >
               <Card.Header>Shopping Cart</Card.Header>
               <Card.Body className='pt-0'>
@@ -269,10 +269,11 @@ class ReservationPage extends React.Component {
               </Card.Body>
             </Card>
           </Col>
-          <Col xs={12} className="d-lg-none shoppingCartSmall px-0">
+          <Col xs={12} className="d-lg-none shopping-cart-col p-3">
             <Card
               bg='light'
               text='dark'
+              className='add-shadow'
             >
               <Card.Header className='py-1'>Shopping Cart</Card.Header>
               <Card.Body className="smallPadding">
