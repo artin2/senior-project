@@ -11,7 +11,8 @@ class StaticPage extends React.Component {
           <img src={paint} alt="paint" style={{top: 75, left: 0, position: 'absolute', height: '100%', width:'100%', filter: 'grayscale(0.4)'}}/>
           <img src={paint} alt="paint" style={{transform: 'scaleY(-1)', top: 680, left: 0, position: 'absolute', height: '100%', width:'100%', filter: 'grayscale(0.4)'}}/>
           <img src={paint} alt="paint" style={{top: 1290, left: 0, position: 'absolute', height: '50%', width:'100%', filter: 'grayscale(0.4)'}}/>
-          <img src={paint} className={"d-block d-lg-none"} alt="paint" style={{transform: 'scaleY(-1)', top: 1600, left: 0, position: 'absolute', height: '70%', width:'100%', filter: 'grayscale(0.4)'}}/>
+          <img src={paint} className={"d-block d-lg-none"} alt="paint" style={{transform: 'scaleY(-1)', top: 1600, left: 0, position: 'absolute', height: '100%', width:'100%', filter: 'grayscale(0.4)'}}/>
+          <img src={paint} className={"d-block d-lg-none"} alt="paint" style={{top: 2250, left: 0, position: 'absolute', height: '50%', width:'100%', filter: 'grayscale(0.4)'}}/>
           <Row className="justify-content-center">
             <Col xs={12} sm={11} md={10} lg={9}>
               <div className="container_about mt-5 p-5">
@@ -24,7 +25,12 @@ class StaticPage extends React.Component {
                   that you can view on any device, as well as through the mobile application, 
                   making it easy to quickly schedule appointments on the go.
                   </p>
-
+                  </div>
+              </Col>
+            </Row>
+            <Row className="justify-content-center">
+            <Col xs={12} sm={11} md={10} lg={9}>
+              <div className="container_about mt-5 p-5">
                   <h1 className="about mb-5">~ Our Team ~</h1>
                   <Row id="arthur" className="justify-content-space-around align-items-center">
                     <Col xs={12} lg={4} className="mb-4 px-0">
@@ -32,7 +38,7 @@ class StaticPage extends React.Component {
                     </Col>
                     <Col xs={12} lg={8} className="mb-4">
                       <h3>CEO: Arthur Kasumyan</h3>
-                      <p>Arthur Kasumyan is a humble master of JavaScript. He claims he's only okay at React.js, but look at this website? It's beautiful. Hats off to our wonderful humble and handsome CEO.</p>
+                      <p>Arthur Kasumyan is a humble master of JavaScript. He claims he's only okay at React.js, but look at this website? It's beautiful. Wow, what a wonderful, humble, and handsome CEO.</p>
                     </Col>
                   </Row>
                   <Row id="artin" className="justify-content-space-around align-items-center">

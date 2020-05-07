@@ -218,7 +218,7 @@ class StoreSignupForm extends React.Component {
     return (
       <Container fluid>
         <Row className="justify-content-center my-5">
-          <Col xs={8} sm={7} md={6} lg={5}>
+          <Col xs={12} lg={5}>
             <Formik
               initialValues={{
                 name: '',
