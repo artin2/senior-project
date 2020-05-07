@@ -217,7 +217,7 @@ class ServiceDashboard extends React.Component {
                 <GridLoader
                   css={override}
                   size={20}
-                  color={"#2196f3"}
+                  color={"#8CAFCB"}
                   loading={this.state.isLoading}
                 />
               </Col>

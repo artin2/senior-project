@@ -9,6 +9,7 @@ import Calendar from '../Calendar/CalendarPage'
 import EditProfileForm from './EditProfileForm';
 import GridLoader from 'react-spinners/GridLoader'
 import WorkerEditForm from '../Worker/WorkerEditForm';
+import { getPictures } from '../s3'
 import { css } from '@emotion/core'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
@@ -33,12 +34,15 @@ class Profile extends React.Component {
       },
       loading: true,
       userHours: [],
+      picture: null,
       // receivedServices: [],
       selectedOption: [],
       storeHours: [],
       choice: 0,
       daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     }
+    this.updateWorkerHours = this.updateWorkerHours.bind(this);
+    this.updateProfileContent = this.updateProfileContent.bind(this);
   }
 
   convertMinsToHrsMins(mins) {
@@ -82,17 +86,60 @@ class Profile extends React.Component {
     })
   }
 
+  updateWorkerHours = (newHours) => {
+    this.setState({
+      userHours: newHours
+    })
+  }
+
+  updateProfileContent = async (newPicture, newFirst, newLast) => {
+    var newUser = Object.assign({}, this.state.user)
+    newUser.first_name = newFirst
+    newUser.last_name = newLast
+    if(newPicture == true) {
+      let picturesFetched = []
+      try {
+        picturesFetched = await getPictures('users/' + this.props.user.id + '/')
+
+        if(picturesFetched.length > 0){
+          await this.setState({
+            picture: picturesFetched[0],
+            user: newUser
+          })
+        }
+      } catch (e) {
+        console.log("Error getting pictures from s3!", e)
+      }
+    } else {
+      this.setState({
+        user: newUser
+      })
+    }
+  }
+
   updateContent = (selectedChoice) => {
     this.setState({
       choice: selectedChoice
     })
   };
 
-  componentDidMount() {
+  async componentDidMount() {
+    let picturesFetched = []
+    try {
+      picturesFetched = await getPictures('users/' + this.props.user.id + '/')
+
+      if(picturesFetched.length > 0){
+        await this.setState({
+          picture: picturesFetched[0],
+        })
+      }
+    } catch (e) {
+      console.log("Error getting pictures from s3!", e)
+    }
 
     let store_id = this.props.user.store_id;
     let worker_id = this.props.user.worker_id;
-    if (this.props.user && this.props.user.role == '2') {
+    if (this.props.user && this.props.user.role == '2' && (this.props.user.store_id && this.props.user.worker_id)) {
       // let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
       Promise.all([
         fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id + '/hours', {
@@ -127,7 +174,7 @@ class Profile extends React.Component {
         })
       })
     }
-    else if(this.props.user.role == '2') {
+    else if(this.props.user.role == '2'  && (this.props.user.store_id && this.props.user.worker_id)) {
       Promise.all([
         fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id, {
           method: "GET",
@@ -185,10 +232,10 @@ class Profile extends React.Component {
       let items = [];
       for (let i = 0; i < this.state.userHours.length; i++) {
         if (this.state.userHours[i].start_time != null) {
-          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item>{this.state.daysOfWeek[i]}: {this.convertMinsToHrsMins(this.state.userHours[i].start_time)}-{this.convertMinsToHrsMins(this.state.userHours[i].end_time)}</ListGroup.Item></Col>);
+          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item className="px-0">{this.state.daysOfWeek[i]}: {this.convertMinsToHrsMins(this.state.userHours[i].start_time)}-{this.convertMinsToHrsMins(this.state.userHours[i].end_time)}</ListGroup.Item></Col>);
         }
         else {
-          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item>{this.state.daysOfWeek[i]}: Off</ListGroup.Item></Col>);
+          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item className="px-0">{this.state.daysOfWeek[i]}: Off</ListGroup.Item></Col>);
         }
       }
       return items;
@@ -201,9 +248,9 @@ class Profile extends React.Component {
       } else if(this.state.choice == 1) {
         return <p>Past Appointments go here....</p>
       } else if(this.state.choice == 2) {
-        return <EditProfileForm/>
+        return <EditProfileForm updateProfileContent={this.updateProfileContent} picture={this.state.picture}/>
       } else {
-        return <WorkerEditForm store_id={this.props.user.store_id} worker_id={this.props.user.worker_id}/>
+        return <WorkerEditForm updateWorkerHours={this.updateWorkerHours} store_id={this.props.user.store_id} worker_id={this.props.user.worker_id}/>
       }
     }
 
@@ -214,7 +261,7 @@ class Profile extends React.Component {
             <GridLoader
               css={override}
               size={20}
-              color={"#2196f3"}
+              color={"#8CAFCB"}
               loading={this.state.isLoading}
             />
           </Col>
@@ -226,7 +273,7 @@ class Profile extends React.Component {
         <div className="profile-sidebar">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
-              <Image src="https://i.redd.it/v0caqchbtn741.jpg" className="img-responsive" alt="" rounded />
+              <Image style={{height: '300px', width: '300px'}} src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
             </div>
             {/* <!-- END SIDEBAR USERPIC --> */}
 
@@ -246,7 +293,7 @@ class Profile extends React.Component {
             {/* WORKING HOURS */}
             <ListGroup variant="flush" className="d-none d-lg-block">
               <Row className="justify-content-center mt-4">
-                <h5>Working Hours</h5>
+                <Col xs={12}><h5>Working Hours</h5></Col>
                 <ListWorkingHours/>
               </Row>
             </ListGroup>
@@ -285,7 +332,7 @@ class Profile extends React.Component {
         <div className="profile-sidebar mb-5">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
-              <Image src="https://i.redd.it/v0caqchbtn741.jpg" className="img-responsive" alt="" rounded />
+              <Image style={{height: '300px', width: '300px'}} src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
             </div>
             {/* <!-- END SIDEBAR USERPIC --> */}
 

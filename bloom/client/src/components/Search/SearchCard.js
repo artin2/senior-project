@@ -28,7 +28,7 @@ class SearchCard extends React.Component {
     console.log(this.props.store)
     return (
       <Col xs={12} className="my-3 px-0 h-100">
-        <Card style={{height: '100%'}}>
+        <Card className="add-shadow" style={{height: '100%'}}>
           <Row style={{height: '100%'}}>
             <Col md={6} className="vertical-align-contents px-0 h-100 w-100">
               <Carousel interval="">

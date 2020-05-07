@@ -27,19 +27,19 @@ class ServiceSelection extends React.Component {
     const ServiceCheckBoxes = (props) => {
       if (this.props.services) {
         const categories = this.props.categories.map((category) => {
-          return <div id={category} key={category} className="pl-4">
+          return <div id={category} key={category}>
               <h4>{category}</h4>
               {
                 this.props.services.map((service) => {
                   if(service.category == category) {
                     return <div key={service.name}>
                       <Row>
-                        <Col xs='8' sm='10'>
+                        <Col xs='8' sm='10' className="pl-3">
                           <Form.Check
                             custom
                             type="checkbox" 
                             id={service.name}
-                            label={service.name} 
+                            label={service.name}
                             checked={this.props.selectedServices.find(x => x.name === service.name)}
                             onChange={this.handleChange}
                             className='formCustom'
@@ -60,7 +60,7 @@ class ServiceSelection extends React.Component {
       return null
     }
     return (
-      <Card className='py-3'>
+      <Card className='p-4 add-shadow'>
         <h3>Select Services</h3>
           <Row className="text-left">
             <Col>
@@ -69,7 +69,7 @@ class ServiceSelection extends React.Component {
           </Row>
           <Row className="justify-content-center">
             <Col md="3">
-            <Button block onClick={this.props.handleSubmit}>Next</Button>
+            <Button block style={{backgroundColor: '#8CAFCB', border: '0px'}} disabled={this.props.selectedServices.length == 0} onClick={this.props.handleSubmit}>Next</Button>
             </Col>
           </Row>
         

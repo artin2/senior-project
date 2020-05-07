@@ -25,7 +25,6 @@ import UserStoresDashboard from './components/Store/UserStoresDashboard';
 import AddWorkerForm from './components/Worker/AddWorkerForm';
 import WorkerDashboard from './components/Worker/WorkerDashboard';
 import WorkerDisplay from './components/Worker/WorkerDisplay';
-import WorkerEditForm from './components/Worker/WorkerEditForm';
 import AddServiceForm from './components/Service/AddServiceForm';
 import ServiceDashboard from './components/Service/ServiceDashboard';
 import ServiceDisplay from './components/Service/ServiceDisplay';
@@ -74,7 +73,6 @@ function App() {
             <Route path="/stores/:store_id/services" component={redirectWithoutAuth(ServiceDashboard)}/>
 
             <Route path="/stores/addWorker/:store_id" component={redirectWithoutAuth(AddWorkerForm)}/>
-            <Route path="/stores/:store_id/workers/:worker_id/edit" component={redirectWithoutAuth(WorkerEditForm)}/>
             <Route path="/stores/:store_id/workers/:worker_id" component={WorkerDisplay}/>
             <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
             <Route path="/stores/:store_id" component={StoreDisplay}/>

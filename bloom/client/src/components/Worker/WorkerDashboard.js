@@ -10,6 +10,7 @@ import { Image } from 'react-bootstrap';
 import ListGroup from 'react-bootstrap/ListGroup'
 import UserDashboardLoader from '../Store/UserStoresDashboardLoader';
 import workerImage from '../../assets/worker.png'
+import { getPictures } from '../s3'
 // import {
 //   addAlert
 // } from '../../reduxFolder/actions'
@@ -145,6 +146,19 @@ class WorkerDashboard extends React.Component {
 
       if(this.state.workers.length > 0){
         for (let i = 0; i < this.state.workers.length; i++) {
+          let picturesFetched = {}
+          try {
+            picturesFetched = await getPictures('users/' + this.state.workers[i].user_id + '/')
+            if(picturesFetched.length > 0){
+              picturesFetched = picturesFetched[0]
+            }
+            else{
+              picturesFetched = {}
+            }
+          } catch (e) {
+            console.log("Error getting pictures from s3!", e)
+          }
+          
           fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.state.workers[i].id + '/hours', {
             method: "GET",
             headers: {
@@ -163,18 +177,24 @@ class WorkerDashboard extends React.Component {
           })
           .then(data => {
             if(data){
-              console.log("got the worker hours", data)
               var stateCopy = Object.assign({}, this.state);
               stateCopy.workers[i].workerHours = data
+              stateCopy.workers[i].picture = picturesFetched
               this.setState(stateCopy)
             }
           });
         }
-      }
 
-      this.setState({
-        loading: false
-      })
+        console.log(this.state)
+        this.setState({
+          loading: false
+        })
+      }
+      else{
+        this.setState({
+          loading: false
+        })
+      }
     }
   }
 
@@ -222,7 +242,7 @@ class WorkerDashboard extends React.Component {
                     <Col md={4} className="vertical-align-contents">
                       {/* <Carousel className="dashboard-carousel" interval="">
                         <Carousel.Item key={"pic-" + index}> */}
-                          <Image className="dashboard-carousel" fluid src={workerImage} alt={"alt-" + index}/>
+                          <Image className="dashboard-carousel" fluid src={worker.picture && Object.keys(worker.picture).length !== 0 && worker.picture.constructor === Object ? worker.picture.url : workerImage} alt={"alt-" + index}/>
                         {/* </Carousel.Item>
                       </Carousel> */}
                     </Col>

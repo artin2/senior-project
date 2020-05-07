@@ -159,7 +159,7 @@ class AppointmentDisplay extends React.Component {
             <GridLoader
               css={override}
               size={20}
-              color={"#2196f3"}
+              color={"#8CAFCB"}
               loading={this.state.isLoading}
             />
           </Col>
@@ -167,11 +167,11 @@ class AppointmentDisplay extends React.Component {
       } else {
         let cancelButton;
         if (Cookies.get('user') && this.state.user_id == JSON.parse(Cookies.get('user').substring(2)).id) {
-          cancelButton = <Button variant="danger" className="float-left" onClick={() => this.triggerAppointmentCancel()}>Cancel Appointment</Button>
+          cancelButton = <Button variant="danger" onClick={() => this.triggerAppointmentCancel()}>Cancel Appointment</Button>
         }
         return <Row className="justify-content-md-center">
           <Col lg={5}>
-            <Card className="mt-5">
+            <Card className="mt-5 add-shadow">
               <Card.Header as="h5">Your Appointment at: {this.state.store_name}</Card.Header>
               <Card.Body>
                 <Card.Text as="div">
