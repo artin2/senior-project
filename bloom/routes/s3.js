@@ -1,5 +1,5 @@
 //CITATION: https://medium.com/@khelif96/uploading-files-from-a-react-app-to-aws-s3-the-right-way-541dd6be689
-var aws = require('aws-sdk'); 
+var aws = require('aws-sdk');
 // var fs = require('fs');
 const helper = require('../helper.js')
 require('dotenv').config();
@@ -12,6 +12,7 @@ async function getPresignedUploadUrl(req, res) {
   });  // Create a new instance of S3
   const fileName = req.body.fileName;
   const fileType = req.body.fileType;
+  // console.log(fileName, fileType, process.env.AWSAccessKey, process.env.AWSBucket)
 
   await s3.getSignedUrl('putObject', {
     Bucket: process.env.AWSBucket,
@@ -115,7 +116,7 @@ async function getSignedUrl(s3, params){
 
 
 // function getBucketObject(urlParams){
-//   return  new Promise ((resolve, reject)=> { 
+//   return  new Promise ((resolve, reject)=> {
 //     let pathToSave = '/local-files/'+params.Key;
 //     let tempFile = fs.createWriteStream(pathToSave);
 //     let stream = s3.getObject(params).createReadStream().pipe(tempFile);
@@ -126,7 +127,7 @@ async function getSignedUrl(s3, params){
 //     stream.on('close', function(){
 //       if (!had_error) {
 //         resolve(pathToSave);
-//       } 
+//       }
 //     });
 //   })
 // }

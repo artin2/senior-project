@@ -197,6 +197,7 @@ class StoreDisplay extends React.Component {
       return null
     }
 
+    console.log(this.state.store.pictures)
     return (
       <Container fluid>
         <Row className="justify-content-md-center" style={{ marginTop: '15px', marginBottom: '15px'}}>

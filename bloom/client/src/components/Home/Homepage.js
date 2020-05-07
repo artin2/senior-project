@@ -163,8 +163,8 @@ class Homepage extends React.Component {
                 <p className="bloom"> Bloom </p>
               </Row>
               <p className="subtitle"> A platform that helps you find
-              salons, beauty experts and stylists that are located near your house
-              and will soon become your favorite salons. ETC ETC We can change that later. </p>
+              salons, beauty experts and stylists that are located near your house.
+              Search today to find the salons that will soon become your favorite. </p>
 
             </Col>
           </Row>

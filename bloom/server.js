@@ -34,6 +34,7 @@ const secret = process.env.JWT_SECRET;
 const withAuth = function(req, res, next) {
 const token = req.cookies.token;
 
+
   if (!token) {
     console.log("No token")
     res.status(401).send('Unauthorized: No token provided');
@@ -66,6 +67,10 @@ app.post('/users/:id', withAuth, async (req, res, next) => {
   await users.edit(req, res, next);
 });
 
+app.get('/allUsers', withAuth, async (req, res, next) => {
+  console.log('hit the all users route')
+  await users.getUsers(req, res, next);
+});
 
 app.get('/checkToken', withAuth, function(req, res) {
   console.log("hit the check token route")
@@ -206,6 +211,11 @@ app.get('/stores/:store_id/appointments', withAuth, async(req, res, next) => {
   await stores.getAllAppointments(req, res, next);
 })
 
+app.post('/stores/:store_id/appointments/update', withAuth, async(req, res, next) => {
+  console.log("hit the updateAppointment route")
+  await appointments.updateAppointment(req, res, next);
+})
+
 app.get('/appointments/display/:group_id', withAuth, async(req, res, next) => {
   console.log("hit the getAppointmentsForDisplay route")
   await appointments.getAppointmentsForDisplay(req, res, next);
@@ -220,6 +230,8 @@ app.get('/appointments/delete/:group_id', withAuth, async(req, res, next) => {
   console.log("hit the deleteAppointment route")
   await appointments.deleteAppointment(req, res, next);
 })
+
+
 
 //s3
 app.post('/getPresignedUrl', withAuth, async (req, res) => {

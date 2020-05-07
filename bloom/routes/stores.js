@@ -941,7 +941,7 @@ async function getAllAppointments(req, res, next) {
   try {
     // console.log("---------getting apps")
     // query for store appointments
-    let query = 'SELECT worker_id, date, start_time, end_time, service_id, price, date FROM appointments WHERE store_id = $1'
+    let query = 'SELECT group_id, id, user_id, worker_id, date, start_time, end_time, service_id, price, date FROM appointments WHERE store_id = $1'
     let values = [req.params.store_id]
     db.client.connect((err, client, done) => {
       // try to get the store appointments based on month

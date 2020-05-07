@@ -18,6 +18,7 @@ async function getPictures(prefixPassed) {
       body: JSON.stringify({prefix: prefixPassed})
     })
   const pictures = await response.json()
+  console.log(pictures)
 
   return pictures
 }
@@ -52,7 +53,7 @@ async function uploadHandler(prefix, selectedFiles) {
         },
         body: selectedFiles[i]
       })
-    
+
     // if(responseS3.status!==200){
     //   // throw an error alert
     //   store.dispatch(addAlert(response))

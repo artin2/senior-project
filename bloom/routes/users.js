@@ -7,12 +7,17 @@ async function login(req, res) {
     let query = 'SELECT * from users WHERE email = $1'
     let values = [req.body.email]
 
+    console.log(db.client.connect())
+
     db.client.connect((err, client, done) => {
+
       db.client.query(query, values, async (err, result) => {
+
         done()
 
           if (result && result.rows.length == 1 && result.rows[0]["provider"] == req.body.provider) {
             try {
+
               let passwordMatch = (!req.body.provider) ? await auth.verifyHash(result.rows[0]["password"], req.body.password) : true
 
               if(passwordMatch != false) {
@@ -111,7 +116,7 @@ async function signup(req, res) {
               // for some reason the cookie is not being attatched to the response...
               // cookie is successfuly generated for sure tho..
               // await auth.generateToken(res, result.rows[0]);
-              let tokenGen = await auth.generateToken(res, result.rows[0]) 
+              let tokenGen = await auth.generateToken(res, result.rows[0])
               delete result.rows[0].password
               helper.querySuccess(res, {user: result.rows[0], token: tokenGen}, "Successfully Created User!");
             }
@@ -233,8 +238,41 @@ async function edit(req, res, next) {
   }
 };
 
+async function getUsers(req, res, next) {
+  try {
+    // query for stores owned by the user
+    let query = `SELECT id, first_name, last_name
+                FROM users`
+
+    db.client.connect((err, client, done) => {
+      // try to get all stores registered to this user
+      db.client.query(query, (err, result) => {
+        done()
+          if (err) {
+            helper.queryError(res, err);
+          }
+          // we were successfuly able to get the users stores
+          if (result && result.rows.length > 0) {
+            helper.querySuccess(res, result.rows, "Successfully got all users!");
+          }
+          else {
+            helper.queryError(res, "No users!");
+          }
+        });
+      if (err) {
+        helper.dbConnError(res, err);
+      }
+    });
+  }
+  catch (err) {
+    helper.authError(res, err);
+  }
+};
+
+
 module.exports = {
   login: login,
   signup: signup,
-  edit: edit
+  edit: edit,
+  getUsers: getUsers
 };

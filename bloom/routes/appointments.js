@@ -19,7 +19,7 @@ async function getAppointmentsForUser(req, res) {
         if (result && result.rows.length > 0) {
           console.log("first query was successful")
           console.log(result.rows)
-          
+
           let stores = []
           let dates =[]
           let start_times = []
@@ -45,7 +45,7 @@ async function getAppointmentsForUser(req, res) {
               end_times.push(latest_end_time)
               costs.push(cost)
               grouped_service_ids.push(curr_group_services)
-              curr_group_services = [] 
+              curr_group_services = []
               group_id = result.rows[i].group_id
               earliest_start_time = result.rows[i].start_time
               latest_end_time = result.rows[i].end_time
@@ -85,7 +85,7 @@ async function getAppointmentsForUser(req, res) {
                 store_name_mappings: store_name_mappings,
                 store_ids: stores,
                 dates: dates,
-                start_times: start_times, 
+                start_times: start_times,
                 end_times: end_times,
                 costs: costs,
                 group_ids: group_ids,
@@ -114,7 +114,7 @@ async function getAppointmentsForUser(req, res) {
 
 async function getServiceMappings(res, service_ids, callback) {
   console.log("about to get service mappings")
-  
+
   db.client.connect((err, client, done) => {
     var params = [];
     for(var i = 1; i <= service_ids.length; i++) {
@@ -147,7 +147,7 @@ async function getServiceMappings(res, service_ids, callback) {
 
 function getStoreNameMappings(res, stores, callback) {
   console.log("about to get store name mappings")
-  
+
   db.client.connect((err, client, done) => {
     //get the store name mappings
     var params = [];
@@ -177,7 +177,7 @@ function getStoreNameMappings(res, stores, callback) {
   });
 }
 
-//REFACTOR BELOW IN THE FUTURE TO USE CALLBACKS. 
+//REFACTOR BELOW IN THE FUTURE TO USE CALLBACKS.
 async function getAppointmentsForDisplay(req, res) {
   console.log("about to get appointment info")
   console.log("group_id is: ", req.params.group_id)
@@ -234,7 +234,7 @@ function getWorkerNames(res, appointment, user_id, start_time, end_time, store_i
   console.log("cost: ", cost)
   console.log("service_ids: ", service_ids)
   console.log("worker_ids: ", worker_ids)
-  
+
   db.client.connect((err, client, done) => {
     var params = [];
     for(var i = 1; i <= worker_ids.length; i++) {
@@ -270,7 +270,7 @@ function getServiceNames(res, appointment, user_id, start_time, end_time, store_
   console.log("previous results go us: ")
   console.log("worker_names: ", worker_names)
   let service_names = []
-  
+
   db.client.connect((err, client, done) => {
     var params = [];
     for(var i = 1; i <= service_ids.length; i++) {
@@ -306,7 +306,7 @@ function getStoreName(res, appointment, user_id, start_time, end_time, store_id,
   console.log("previous results go us: ")
   console.log("service_names: ", service_names)
   let store_name = ''
-  
+
   db.client.connect((err, client, done) => {
     //get the store name
     query = 'SELECT name FROM stores WHERE id=$1'
@@ -322,7 +322,7 @@ function getStoreName(res, appointment, user_id, start_time, end_time, store_id,
           let response = {
             appointment: appointment,
             user_id: user_id,
-            start_time: start_time, 
+            start_time: start_time,
             end_time: end_time,
             store_name: store_name,
             cost: cost,
@@ -373,8 +373,44 @@ async function deleteAppointment(req, res) {
   });
 };
 
+async function updateAppointment(req, res) {
+
+
+  let appointment = req.body.appointment[0];
+
+  console.log(appointment, appointment.date)
+
+  db.client.connect((err, client, done) => {
+
+    let query = 'UPDATE appointments SET user_id=$1, worker_id=$2, service_id=$3, store_id=$4, date=$5, start_time=$6, end_time=$7, price=$8 WHERE id=$9'
+    let values = [req.body.user_id, appointment.worker_id, appointment.service_id, appointment.store_id, appointment.date, appointment.start_time, appointment.end_time, appointment.price, appointment.id]
+
+    db.client.query(query, values, (err, result) => {
+      done()
+        if (err) {
+          helper.queryError(res, err);
+        }
+        // we were able to delete the appointment
+        if (result) {
+          console.log("update appointment was successful", result)
+          helper.querySuccess(res, result, 'Successfully updated appointment')
+        }
+        else {
+          helper.queryError(res, "Could not update appointments!");
+        }
+      }
+    );
+
+    if (err) {
+      helper.dbConnError(res, err);
+    }
+  });
+};
+
+
 module.exports = {
   getAppointmentsForUser: getAppointmentsForUser,
   getAppointmentsForDisplay: getAppointmentsForDisplay,
-  deleteAppointment: deleteAppointment
+  deleteAppointment: deleteAppointment,
+  updateAppointment: updateAppointment
 };
