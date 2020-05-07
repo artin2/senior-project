@@ -80,9 +80,8 @@ class EditProfileForm extends React.Component {
               }}
               validationSchema={this.yupValidationSchema}
               onSubmit={(values) => {
-                values.id = this.props.match.params.user_id
+                values.id = this.props.user.id
                 values.role = this.props.user.role
-                
                 this.props.editProfile(values)
               }}
             >
