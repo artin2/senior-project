@@ -37,7 +37,7 @@ class SearchBar extends React.Component {
 
   handleSelectChange = (selectedCategory) => {
     // there must be a better way to do this
-    if(selectedCategory.value == "Nails") {
+    if(selectedCategory.value === "Nails") {
       this.setState({ 
         nails: true,
         hair: false,	
@@ -46,7 +46,7 @@ class SearchBar extends React.Component {
         spa: false,	
         makeup: false,
       })
-    } else if (selectedCategory.value == "Hair") {
+    } else if (selectedCategory.value === "Hair") {
       this.setState({ 
         nails: false,
         hair: true,	
@@ -55,7 +55,7 @@ class SearchBar extends React.Component {
         spa: false,	
         makeup: false,
       })
-    } else if (selectedCategory.value == "Facials") {
+    } else if (selectedCategory.value === "Facials") {
       this.setState({ 
         nails: false,
         hair: false,	
@@ -64,7 +64,7 @@ class SearchBar extends React.Component {
         spa: false,	
         makeup: false,
       })
-    } else if (selectedCategory.value == "Barbershops") {
+    } else if (selectedCategory.value === "Barbershops") {
       this.setState({ 
         nails: false,
         hair: false,	
@@ -73,7 +73,7 @@ class SearchBar extends React.Component {
         spa: false,	
         makeup: false,
       })
-    } else if (selectedCategory.value == "Spa") {
+    } else if (selectedCategory.value === "Spa") {
       this.setState({ 
         nails: false,
         hair: false,	
@@ -82,7 +82,7 @@ class SearchBar extends React.Component {
         spa: true,	
         makeup: false,
       })
-    } else if (selectedCategory.value == "Makeup") {
+    } else if (selectedCategory.value === "Makeup") {
       this.setState({ 
         nails: false,
         hair: false,	
@@ -115,8 +115,6 @@ class SearchBar extends React.Component {
     let queryString = require('./helper.js').queryString;
     const formState = (({ address, distance, nails, hair, spa, facials, barber, makeup }) => ({ address, distance, nails, hair, spa, facials, barber, makeup }))(this.state);
     let query = queryString(formState)
-    console.log("query is: ", query)
-    console.log("address is: ", this.state.address)
     this.props.history.push({
       pathname: "/search",
       search: query,
@@ -148,7 +146,6 @@ class SearchBar extends React.Component {
 
     this.autocomplete.addListener("place_changed", this.handlePlaceSelect)
     if(this.props.location.state && this.props.location.state.address) {
-      console.log("exists address", this.props.location.state.address)
       this.setState({
         address: this.props.location.state.address
       })

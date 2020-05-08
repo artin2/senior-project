@@ -8,8 +8,6 @@ const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_AP
 // USER FUNCTIONS
 
 export function signup(values){
-
-  console.log(values)
   return dispatch => {
     fetch(fetchDomain + '/signUp' , {
       method: "POST",

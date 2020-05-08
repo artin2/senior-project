@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navbar, Nav, NavDropdown, Row, Col } from 'react-bootstrap';
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import { Link } from "react-router-dom";
 import './MainNavbar.css'
 import { connect } from 'react-redux';
@@ -7,17 +7,13 @@ import { useLocation } from 'react-router-dom'
 import SearchBar from '../Search/SearchBar'
 
 class MainNavbar extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     let storeDisplay = null
 
     const RenderNavBarBasedOnPageAndUser = (props) => {
       let location = useLocation();
       if(this.props.user == null || (Object.keys(this.props.user).length === 0 && this.props.user.constructor === Object)) {
-        if(location.pathname == '/search') {
+        if(location.pathname === '/search') {
           return <Nav className="full-width">
               <SearchBar className="nav-link"/>
               <Link to="/about" className="nav-link">About</Link>
@@ -32,7 +28,7 @@ class MainNavbar extends React.Component {
           </Nav>
         }
       } else {
-        if(this.props.user.role == '1'){
+        if(this.props.user.role === 1 || this.props.user.role === '1'){
           storeDisplay = <NavDropdown title="Manage Stores" id="basic-nav-dropdown">
             <NavDropdown.Item href={"/users/" + this.props.user.id + "/stores"}>Dashboard</NavDropdown.Item>
             {/* <NavDropdown.Item href="/stores/:store_id/services">Services</NavDropdown.Item> */}
@@ -43,7 +39,7 @@ class MainNavbar extends React.Component {
         else{
           storeDisplay = <Link to="/store/signup" className="nav-link">Create&nbsp;Store</Link>
         }
-        if(location.pathname == '/search') {
+        if(location.pathname === '/search') {
           return <Nav className="full-width">
             <Link to={"/users/" + this.props.user.id + '/appointments'} className="nav-link">My&nbsp;Appointments</Link>
             <SearchBar className="nav-link"/>

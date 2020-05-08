@@ -5,9 +5,6 @@ import Col from 'react-bootstrap/Col'
 import { Button, Image } from 'react-bootstrap';
 // import SearchCard from '../Search/SearchCard';
 import Carousel from 'react-bootstrap/Carousel'
-// import salon from '../../assets/salon.jpg';
-import salon2 from '../../assets/salon2.jpeg';
-import hair from '../../assets/hair_salon.jpg';
 import { FaEdit } from 'react-icons/fa';
 import './UserStoresDashboard.css'
 import {
@@ -15,10 +12,10 @@ import {
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+// import { bindActionCreators } from 'redux';
 // import {addStore} from '../../reduxFolder/actions/stores.js'
 import UserStoresDashboardLoader from './UserStoresDashboardLoader';
-import { getPictures, defaultStorePictures } from '../s3'
+import { /*getPictures,*/ defaultStorePictures } from '../s3'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 // ***** NOTE: fix to properly display all the stores
@@ -123,21 +120,21 @@ class UserStoresDashboard extends React.Component {
         // let convertedCategory = data.category.map((str) => ({ value: str.toLowerCase(), label: str }));
 
         var appendedStores = await Promise.all(data.map(async (store): Promise<Object> => {
+          var newstore = Object.assign({}, store);
           try {
-            let pictures = await getPictures('stores/' + store.id + '/images/')
+            let pictures = defaultStorePictures()
+            // let pictures = await getPictures('stores/' + store.id + '/images/')
 
-            // once all data is clean and picture requirement is enforced we can remove this
-            if(pictures.length == 0){
-              pictures = defaultStorePictures()
-            }
+            // // once all data is clean and picture requirement is enforced we can remove this
+            // if(pictures.length === 0){
+            //   pictures = defaultStorePictures()
+            // }
 
             // we can set pictures to defaultStorePictures to prevent s3 calls
 
-            var newstore = Object.assign({}, store);
             newstore.pictures = pictures;
             return newstore;
           } catch (error) {
-            var newstore = Object.assign({}, store);
             newstore.pictures = defaultStorePictures();
             return newstore
           }

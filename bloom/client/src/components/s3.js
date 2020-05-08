@@ -40,7 +40,6 @@ async function getPictures(prefixPassed) {
       body: JSON.stringify({prefix: prefixPassed})
     })
   const pictures = await response.json()
-  console.log(pictures)
 
   return pictures
 }
@@ -68,7 +67,7 @@ async function uploadHandler(prefix, selectedFiles) {
     })
     const url = await response.json()
 
-    const responseS3 = await fetch(url, {
+    await fetch(url, {
         method: "PUT",
         headers: {
             'Content-type': selectedFiles[i].type
@@ -86,7 +85,7 @@ async function uploadHandler(prefix, selectedFiles) {
 // function for uploading all selected files to s3
 async function deleteHandler(keysPassed) {
   // remove each image from s3
-  const response = await fetch(fetchDomain + '/deleteImages/', {
+  await fetch(fetchDomain + '/deleteImages/', {
     method: "POST",
     headers: {
         'Content-type': 'application/json'

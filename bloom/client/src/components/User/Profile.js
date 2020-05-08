@@ -1,5 +1,5 @@
 import React from 'react';
-import {Container, Row, Col, Button} from 'react-bootstrap'
+import {Container, Row, Col} from 'react-bootstrap'
 import { connect } from 'react-redux';
 import Image from 'react-bootstrap/Image'
 import Nav from 'react-bootstrap/Nav'
@@ -11,6 +11,7 @@ import GridLoader from 'react-spinners/GridLoader'
 import WorkerEditForm from '../Worker/WorkerEditForm';
 import { getPictures } from '../s3'
 import workerImage from '../../assets/worker.png'
+import { convertMinsToHrsMins } from '../helperFunctions'
 import { css } from '@emotion/core'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
@@ -20,7 +21,6 @@ const override = css`
 `;
 
 class Profile extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -44,32 +44,6 @@ class Profile extends React.Component {
     }
     this.updateWorkerHours = this.updateWorkerHours.bind(this);
     this.updateProfileContent = this.updateProfileContent.bind(this);
-  }
-
-  convertMinsToHrsMins(mins) {
-    let h = Math.floor(mins / 60);
-    let m = mins % 60;
-    let am = false
-    if (h == 24) {
-      am = true
-      h -= 12
-    }
-    else if (h < 12) {
-      am = true
-    } else if (h != 12) {
-      h -= 12
-    }
-    h = h < 10 ? '0' + h : h;
-    if (h == 0) {
-      h = '12'
-    }
-    m = m < 10 ? '0' + m : m;
-    if (am) {
-      return `${h}:${m}am`;
-    } else {
-      return `${h}:${m}pm`;
-    }
-
   }
 
   updateUser = (user, newHours, services) => {
@@ -97,7 +71,7 @@ class Profile extends React.Component {
     var newUser = Object.assign({}, this.state.user)
     newUser.first_name = newFirst
     newUser.last_name = newLast
-    if(newPicture == true) {
+    if(newPicture === true) {
       let picturesFetched = []
       try {
         picturesFetched = await getPictures('users/' + this.props.user.id + '/')
@@ -140,7 +114,7 @@ class Profile extends React.Component {
 
     let store_id = this.props.user.store_id;
     let worker_id = this.props.user.worker_id;
-    if (this.props.user && this.props.user.role == '2' && (this.props.user.store_id && this.props.user.worker_id)) {
+    if (this.props.user && this.props.user.role === '2' && (this.props.user.store_id && this.props.user.worker_id)) {
       // let convertedServices = this.props.location.state.worker.services.map((service) => ({ value: service, label: this.state.serviceMapping[service] }));
       Promise.all([
         fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id + '/hours', {
@@ -159,7 +133,7 @@ class Profile extends React.Component {
         }).then(value => value.json())
       ]).then(allResponses => {
         let receivedWorkerHours = allResponses[1].map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
-        if (allResponses[0] && allResponses[0].length == 7) {
+        if (allResponses[0] && allResponses[0].length === 7) {
           receivedWorkerHours = allResponses[0]
         } else {
           this.setState({
@@ -175,7 +149,7 @@ class Profile extends React.Component {
         })
       })
     }
-    else if(this.props.user.role == '2'  && (this.props.user.store_id && this.props.user.worker_id)) {
+    else if(this.props.user.role === '2'  && (this.props.user.store_id && this.props.user.worker_id)) {
       Promise.all([
         fetch(fetchDomain + '/stores/' + store_id + '/workers/' + worker_id, {
           method: "GET",
@@ -203,7 +177,7 @@ class Profile extends React.Component {
         let receivedWorkerHours = allResponses[1].map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
 
         // If worker hours are not complete, we default them to store hours. Worker hours should be complete though.
-        if (allResponses[2] && allResponses[2].length == 7) {
+        if (allResponses[2] && allResponses[2].length === 7) {
           receivedWorkerHours = allResponses[2]
         } else {
           this.setState({
@@ -233,7 +207,7 @@ class Profile extends React.Component {
       let items = [];
       for (let i = 0; i < this.state.userHours.length; i++) {
         if (this.state.userHours[i].start_time != null) {
-          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item className="px-0">{this.state.daysOfWeek[i]}: {this.convertMinsToHrsMins(this.state.userHours[i].start_time)}-{this.convertMinsToHrsMins(this.state.userHours[i].end_time)}</ListGroup.Item></Col>);
+          items.push(<Col sm="11" md="10" key={i}><ListGroup.Item className="px-0">{this.state.daysOfWeek[i]}: {convertMinsToHrsMins(this.state.userHours[i].start_time)}-{convertMinsToHrsMins(this.state.userHours[i].end_time)}</ListGroup.Item></Col>);
         }
         else {
           items.push(<Col sm="11" md="10" key={i}><ListGroup.Item className="px-0">{this.state.daysOfWeek[i]}: Off</ListGroup.Item></Col>);
@@ -243,12 +217,12 @@ class Profile extends React.Component {
     }
 
     const RenderProfileContent = () => {
-      if(this.state.choice == 0) {
+      if(this.state.choice === 0) {
         //need to make this dynamic
         return <Calendar role={"my"} store_id={this.props.user.store_id}/>
-      } else if(this.state.choice == 1) {
+      } else if(this.state.choice === 1) {
         return <p>Past Appointments go here....</p>
-      } else if(this.state.choice == 2) {
+      } else if(this.state.choice === 2) {
         return <EditProfileForm updateProfileContent={this.updateProfileContent} picture={this.state.picture}/>
       } else {
         return <WorkerEditForm updateWorkerHours={this.updateWorkerHours} store_id={this.props.user.store_id} worker_id={this.props.user.worker_id}/>
@@ -267,8 +241,7 @@ class Profile extends React.Component {
             />
           </Col>
         </Row>
-      } else if(this.props.user.role == '2') {
-        {/* CITATION: https://bootsnipp.com/snippets/M48pA */}
+      } else if(this.props.user.role === '2') {
         return <Row className="justify-content-center my-4 mx-1">
         <Col xs="11" md="3" className="mb-4">
         <div className="profile-sidebar">
@@ -303,10 +276,10 @@ class Profile extends React.Component {
             {/* <!-- SIDEBAR MENU --> */}
             <div className="profile-usermenu">
               <Nav defaultActiveKey="link-0" className="flex-column" variant="pills">
-                <Nav.Link eventKey="link-0" active={this.state.choice == 0} onClick={() => this.updateContent(0)}>Calendar</Nav.Link>
-                <Nav.Link eventKey="link-1" active={this.state.choice == 1} onClick={() => this.updateContent(1)}>Past Appointments</Nav.Link>
-                <Nav.Link eventKey="link-2" active={this.state.choice == 2}  onClick={() => this.updateContent(2)}>Edit Profile</Nav.Link>
-                <Nav.Link eventKey="link-3" active={this.state.choice == 3}  onClick={() => this.updateContent(3)}>Edit Working Hours</Nav.Link>
+                <Nav.Link eventKey="link-0" active={this.state.choice === 0} onClick={() => this.updateContent(0)}>Calendar</Nav.Link>
+                <Nav.Link eventKey="link-1" active={this.state.choice === 1} onClick={() => this.updateContent(1)}>Past Appointments</Nav.Link>
+                <Nav.Link eventKey="link-2" active={this.state.choice === 2}  onClick={() => this.updateContent(2)}>Edit Profile</Nav.Link>
+                <Nav.Link eventKey="link-3" active={this.state.choice === 3}  onClick={() => this.updateContent(3)}>Edit Working Hours</Nav.Link>
               </Nav>
             </div>
             {/* <!-- END MENU --> */}
@@ -324,7 +297,7 @@ class Profile extends React.Component {
       }
       else {
         let type = 'Customer'
-        if(this.props.user.role == '1'){
+        if(this.props.user.role === '1'){
           type = 'Salon Owner'
         }
         
@@ -351,7 +324,7 @@ class Profile extends React.Component {
             {/* <!-- SIDEBAR MENU --> */}
             <div className="profile-usermenu">
               <Nav defaultActiveKey="link-0" className="flex-column" variant="pills">
-                <Nav.Link eventKey="link-0" active={this.state.choice == 2}  onClick={() => this.updateContent(2)}>Edit Profile</Nav.Link>
+                <Nav.Link eventKey="link-0" active={this.state.choice === 2}  onClick={() => this.updateContent(2)}>Edit Profile</Nav.Link>
               </Nav>
             </div>
             {/* <!-- END MENU --> */}

@@ -36,15 +36,17 @@ class Category extends React.Component {
 
     const google = window.google;
     if (navigator.geolocation) {
-         this._displayLocation = (latitude, longitude) => {
-          const geocoder = new google.maps.Geocoder();
-          const latlng = new google.maps.LatLng(latitude, longitude);
-          this.geocodeAddress(geocoder, latlng);
-        };
-    this.geoSuccess = (position) => {
-         this._displayLocation(position.coords.latitude, position.coords.longitude);
+      this._displayLocation = (latitude, longitude) => {
+        const geocoder = new google.maps.Geocoder();
+        const latlng = new google.maps.LatLng(latitude, longitude);
+        this.geocodeAddress(geocoder, latlng);
       };
-    this.geoError = (error) => {
+
+      this.geoSuccess = (position) => {
+          this._displayLocation(position.coords.latitude, position.coords.longitude);
+        };
+
+      this.geoError = (error) => {
         switch (error.code) {
           case error.TIMEOUT:
           console.log("Browser geolocation error !\n\nTimeout.");
@@ -58,23 +60,22 @@ class Category extends React.Component {
           default:
           console.log(error.code);
           break;
-         }
+        }
       };
-       await navigator.geolocation.getCurrentPosition(this.geoSuccess, this.geoError);
-      }
-      else {
-       console.log("Geolocation is not supported for this Browser/OS.");
-      }
-
+      await navigator.geolocation.getCurrentPosition(this.geoSuccess, this.geoError);
+    }
+    else {
+      console.log("Geolocation is not supported for this Browser/OS.");
+    }
 
     this.geoCodeCallback = (results, status, event) => {
-        const google = window.google; // eslint-disable-line
-       if (status === google.maps.GeocoderStatus.OK) {
+      const google = window.google; // eslint-disable-line
+      if (status === google.maps.GeocoderStatus.OK) {
         if (results[0]) {
           const add = results[0].formatted_address;
-          const value = add.split(",");
-          const count = value.length;
-          const city = value[count - 3];
+          // const value = add.split(",");
+          // const count = value.length;
+          // const city = value[count - 3];
           console.log("My Current Location:", add)
           this.setState({
             address: add
@@ -83,26 +84,24 @@ class Category extends React.Component {
         } else {
           console.log("address not found");
         }
-        } else {
-          console.log(status);
-        }
+      } else {
+        console.log(status);
       }
-    this.geocodeAddress = (geocoder, latlng) => {
+    }
 
+    this.geocodeAddress = (geocoder, latlng) => {
       this.setState({
         center: {
           lat: latlng.lat(),
           lng: latlng.lng()
         },
       })
-        geocoder.geocode({ location: latlng }, this.geoCodeCallback);
-      }
-
-
+      geocoder.geocode({ location: latlng }, this.geoCodeCallback);
+    }
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    if(prevState.address != this.state.address){
+    if(prevState.address !== this.state.address){
       await this.setState({
         [this.props.id]: true
       })
@@ -132,7 +131,6 @@ class Category extends React.Component {
           stateRep.stores = data.stores
           stateRep.redirect = true
 
-
           this.props.history.push({
             pathname: '/search',
             search: query,
@@ -143,13 +141,9 @@ class Category extends React.Component {
     }
   }
 
-
   async getStores() {
-
     this.getCurrentLocation()
-
   }
-
 
   render() {
     return (

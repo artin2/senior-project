@@ -1,20 +1,10 @@
-// this component is ready to be reusable for WorkerDashboard.js, if we decide that it can have the same
-// view as this one... just need to rename to StoreserviceDashboard.js
-
 import React from 'react';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import { Button, Carousel, Image } from 'react-bootstrap';
-// import {
-//   addAlert
-// } from '../../reduxFolder/actions'
-// import store from '../../reduxFolder/store';
 import './Services.css';
-// import eyelash from '../../assets/eyelash4.png';
-// import wedding from '../../assets/wedding.jpg';
-// import gel from '../../assets/gel.jpg';
-import { getPictures, defaultServicePictures } from '../s3'
+import { /*getPictures,*/ defaultServicePictures } from '../s3'
 import { FaEdit } from 'react-icons/fa';
 import LinesEllipsis from 'react-lines-ellipsis'
 import { css } from '@emotion/core'
@@ -27,46 +17,17 @@ const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_AP
 
 const colors = ['#d2d4cf', '#d2d4cf', '#d2d4cf'];
 
+// component for managing all the services of a store
 class ServiceDashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state ={
       loading: true,
-      services: [
-        // {
-        //   id: '0',
-        //   name: 'Eyelash Remove',
-        //   category: 'Eyelashes',
-        //   cost: '25',
-        //   duration: '20',
-        //   description: 'Remove your eyelashes or something like that',
-        //   workers: ['Tiffany', 'Yuki'],
-        //   pictures: ["test"]
-        // },
-        // {
-        //   id: '1',
-        //   name: 'Gel Manicure',
-        //   category: 'Nails',
-        //   cost: '30',
-        //   duration: '60',
-        //   description: 'Its like a regular manicure, with gel!',
-        //   workers: ['Tiffany', 'Yuki'],
-        //   // pictures: [gel]
-        // },
-        // {
-        //   id: '2',
-        //   name: 'Wedding Makeup',
-        //   category: 'Makeup',
-        //   cost: '200',
-        //   duration: '120',
-        //   description: 'Full face makeup or something for your big day',
-        //   workers: ['Tiffany', 'Yuki'],
-        //   // pictures: [wedding]
-        // },
-      ]
+      services: []
     }
   }
 
+  // trigger functions are for redirecting to a different page
   triggerServiceEdit(servicePassed) {
     this.props.history.push({
       pathname: '/stores/' + this.props.match.params.store_id + "/services/" + servicePassed.id + '/edit',
@@ -92,7 +53,8 @@ class ServiceDashboard extends React.Component {
   }
 
   async componentDidMount() {
-    let services
+    // retrieve the services, either passed or fetching directly from db
+    let services;
     if(this.props.location.state && this.props.location.state.services){
       services = this.props.location.state.services
     }
@@ -115,20 +77,26 @@ class ServiceDashboard extends React.Component {
       })
     }
 
+    // if there are services, retrieve the pictures of the services
     if(services.length > 0){
       var appendedServices = await Promise.all(services.map(async (service): Promise<Object> => {
+        var newService = Object.assign({}, service);
         try {
-          let pictures = await getPictures('stores/' + service.store_id + '/services/' + service.id + '/')
-          if(pictures.length == 0){
-            pictures = defaultServicePictures()
-          }
+          // // fetch the pictures from s3
+          // let picturesFetched = await getPictures('stores/' + service.store_id + '/services/' + service.id + '/')
 
-          var newService = Object.assign({}, service);
-          newService.pictures = pictures;
+          // // if the service doesn't have any pictures, give it default service pictures
+          // if(picturesFetched.length === 0){
+          //   picturesFetched = defaultServicePictures()
+          // }
+
+          // can put/putting this for now so we don't have to interact with s3
+          let picturesFetched = defaultServicePictures()
+
+          newService.pictures = picturesFetched;
           return newService;
         } catch (e) {
-          console.log("Error get service pictures!", e)
-          var newService = Object.assign({}, service);
+          console.log("Error getting service pictures!", e)
           newService.pictures = defaultServicePictures();
           return newService
         }
@@ -149,6 +117,7 @@ class ServiceDashboard extends React.Component {
   render() {
     let services = null;
 
+    // display either no services or service dashboard
     if(this.state.services.length > 0){
       services = <Col>
                     <p className="services_title">My Services </p>
@@ -211,6 +180,7 @@ class ServiceDashboard extends React.Component {
                 </div>
     }
 
+    // display loading screen while the page is loading
     if(this.state.loading){
       return <Row className="vertical-center">
                <Col>
@@ -224,6 +194,7 @@ class ServiceDashboard extends React.Component {
             </Row>
     }
     else{
+      // display the page once finished loading
       return (
         <Container>
           {services}

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Map, InfoWindow, Marker } from 'google-maps-react';
-import SearchCard from '../Search/SearchCard';
 
 class MapContainer extends Component {
   constructor(props) {
@@ -53,22 +52,15 @@ class MapContainer extends Component {
     // window.location.href='/book/' + id
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if(prevProps != this.props){
-      // console.log("BEFORE", prevProps, "AFTER", this.props)
-      // for some reason, center is not updating, the value changes but visually it does not
-    }
-  }
-
   render() {
-
-  const DisplayInfoWindowContents = (props) => {
-    if(this.props.stores) {
-      return <h4 className="mb-0">{this.props.stores[this.state.activeMarkerIndex].name}</h4>
-    } else {
-      return null
+    const DisplayInfoWindowContents = (props) => {
+      if(this.props.stores) {
+        return <h4 className="mb-0">{this.props.stores[this.state.activeMarkerIndex].name}</h4>
+      } else {
+        return null
+      }
     }
-  }
+    
     return (
       <Map
         google={this.props.google}

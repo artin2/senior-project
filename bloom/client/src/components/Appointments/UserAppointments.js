@@ -2,7 +2,7 @@ import React from 'react';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-import { Button, Card, ListGroup, Image } from 'react-bootstrap';
+import { Card, ListGroup, Image } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import { withRouter } from "react-router-dom";
 import {
@@ -11,6 +11,7 @@ import {
 import store from '../../reduxFolder/store';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import { convertMinsToHrsMins } from '../helperFunctions'
 import { css } from '@emotion/core'
 import GridLoader from 'react-spinners/GridLoader'
 const override = css`
@@ -83,32 +84,6 @@ class AppointmentDisplay extends React.Component {
     })
   }
 
-  convertMinsToHrsMins(mins) {
-    let h = Math.floor(mins / 60);
-    let m = mins % 60;
-    let am = false
-    if (h == 24) {
-      am = true
-      h -= 12
-    }
-    else if (h < 12) {
-      am = true
-    } else if (h != 12) {
-      h -= 12
-    }
-    h = h < 10 ? '0' + h : h;
-    if (h == 0) {
-      h = '12'
-    }
-    m = m < 10 ? '0' + m : m;
-    if (am) {
-      return `${h}:${m}am`;
-    } else {
-      return `${h}:${m}pm`;
-    }
-
-  }
-
   componentDidMount() {
     // retrieve the appointment data from the database
     fetch(fetchDomain + '/appointments/' + JSON.parse(Cookies.get('user').substring(2)).id, {
@@ -159,7 +134,7 @@ class AppointmentDisplay extends React.Component {
     const ShowServices = (props) => {
       let listGroupItems = [];
       for (let i = 0; i < this.state.grouped_service_ids[props.index].length; i ++) {
-        listGroupItems.push(<ListGroup.Item key={this.state.grouped_service_ids[props.index][i]}>{this.state.service_name_mappings.find((element) => element.id == this.state.grouped_service_ids[props.index][i]).name}</ListGroup.Item>);
+        listGroupItems.push(<ListGroup.Item key={this.state.grouped_service_ids[props.index][i]}>{this.state.service_name_mappings.find((element) => element.id === this.state.grouped_service_ids[props.index][i]).name}</ListGroup.Item>);
       }
       return listGroupItems;
     }
@@ -168,12 +143,12 @@ class AppointmentDisplay extends React.Component {
       let cards = [];
       for (let i = 0; i < this.state.group_ids.length; i ++) {
         cards.push(<Card style={{cursor: 'pointer'}} key={this.state.group_ids[i]}className="my-5 add-shadow" onClick={() => this.triggerAppointmentDisplay(this.state.group_ids[i])}>
-          <Card.Header as="h4">{this.state.store_name_mappings.find((element) => element.id == this.state.store_ids[i]).name} on {new Date(this.state.dates[i]).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</Card.Header>
+          <Card.Header as="h4">{this.state.store_name_mappings.find((element) => element.id === this.state.store_ids[i]).name} on {new Date(this.state.dates[i]).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</Card.Header>
           <Card.Body>
             <Card.Text as="div">
               <Row>
                 <Col>
-                  <h5>{this.convertMinsToHrsMins(this.state.start_times[i])} - {this.convertMinsToHrsMins(this.state.end_times[i])} </h5>
+                  <h5>{convertMinsToHrsMins(this.state.start_times[i])} - {convertMinsToHrsMins(this.state.end_times[i])} </h5>
                 </Col>
               </Row>
               <Row>
@@ -205,10 +180,6 @@ class AppointmentDisplay extends React.Component {
           </Col>
         </Row>
       } else if (this.state.hasAppointments) {
-        let cancelButton;
-        if (Cookies.get('user') && this.state.user_id == JSON.parse(Cookies.get('user').substring(2)).id) {
-          cancelButton = <Button variant="danger" className="float-left" onClick={() => this.triggerAppointmentCancel()}>Cancel Appointment</Button>
-        }
         return <Row className="justify-content-md-center">
           <Col lg={5}>
             <AppointmentList/>

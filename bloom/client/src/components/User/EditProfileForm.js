@@ -107,7 +107,6 @@ class EditProfileForm extends React.Component {
   }
 
   async componentDidMount(){
-    console.log(this.props)
     if(this.props.picture){
       this.setState({
         picture: this.props.picture,
@@ -213,7 +212,6 @@ class EditProfileForm extends React.Component {
                   }
 
                   this.props.editProfile(values)
-                  console.log("about to send new info: ", values)
                   this.props.updateProfileContent(this.state.selectedFiles.length > 0, values.first_name, values.last_name)
                 }}
               >

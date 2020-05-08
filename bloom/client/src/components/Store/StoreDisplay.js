@@ -2,8 +2,7 @@ import React from 'react';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-import LargeCarousel from '../LargeCarousel';
-import { Button, Carousel, Image  } from 'react-bootstrap';
+import { Carousel, Image  } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import { withRouter } from "react-router-dom";
 import {
@@ -14,6 +13,7 @@ import './StoreDisplay.css'
 import { getPictures, defaultStorePictures } from '../s3'
 import {ListGroup} from 'react-bootstrap'
 import { FaEdit } from 'react-icons/fa';
+import { convertMinsToHrsMins } from '../helperFunctions'
 
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
@@ -42,32 +42,6 @@ class StoreDisplay extends React.Component {
     }
   }
 
-  convertMinsToHrsMins(mins) {
-    let h = Math.floor(mins / 60);
-    let m = mins % 60;
-    let am = false
-    if (h == 24) {
-      am = true
-      h -= 12
-    }
-    else if (h < 12) {
-      am = true
-    } else if (h != 12) {
-      h -= 12
-    }
-    h = h < 10 ? '0' + h : h;
-    if (h == 0) {
-      h = '12'
-    }
-    m = m < 10 ? '0' + m : m;
-    if (am) {
-      return `${h}:${m}am`;
-    } else {
-      return `${h}:${m}pm`;
-    }
-
-  }
-
   triggerStoreEdit() {
     this.props.history.push({
       pathname: '/stores/edit/' + this.props.match.params.store_id,
@@ -87,7 +61,7 @@ class StoreDisplay extends React.Component {
     let pictures
     try {
       pictures = await getPictures('stores/' + this.props.match.params.store_id + '/images/')
-      if(pictures.length == 0){
+      if(pictures.length === 0){
         pictures = defaultStorePictures()
       }
     } catch (e) {
@@ -179,7 +153,7 @@ class StoreDisplay extends React.Component {
         let items = [];
         for (let i = 0; i < props.storeHours.length; i++) {
           if (props.storeHours[i].open_time != null) {
-            items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-2"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: {this.convertMinsToHrsMins(props.storeHours[i].open_time)}-{this.convertMinsToHrsMins(props.storeHours[i].close_time)}</ListGroup.Item></Col>);
+            items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-2"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: {convertMinsToHrsMins(props.storeHours[i].open_time)}-{convertMinsToHrsMins(props.storeHours[i].close_time)}</ListGroup.Item></Col>);
           }
           else {
             items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-2"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: Off</ListGroup.Item></Col>);
@@ -190,7 +164,6 @@ class StoreDisplay extends React.Component {
       return null
     }
 
-    console.log(this.state.store.pictures)
     return (
       <Container fluid>
         <Row className="justify-content-md-center" style={{ marginTop: '20px', marginBottom: '15px'}}>

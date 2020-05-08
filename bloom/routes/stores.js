@@ -106,10 +106,11 @@ async function getStores(req, res, next) {
             for (let i = 0; i < result.rows.length; i++) {
               let pictures
               try {
-                pictures = await s3.getImagesLocal('stores/' + result.rows[i].id + '/images/')
-                if(pictures.length == 0){
-                  pictures = s3.defaultStorePictures()
-                }
+                pictures = s3.defaultStorePictures()
+                // pictures = await s3.getImagesLocal('stores/' + result.rows[i].id + '/images/')
+                // if(pictures.length == 0){
+                //   pictures = s3.defaultStorePictures()
+                // }
               } catch (e) {
                 console.log("Error in getting pictures.")
                 pictures = s3.defaultStorePictures()

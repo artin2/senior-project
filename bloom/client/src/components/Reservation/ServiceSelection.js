@@ -12,7 +12,6 @@ class ServiceSelection extends React.Component {
   }
 
   handleChange(event) {
-    console.log('event is: ', event)
     let currService = this.props.services.find(x => x.name === event.target.id)
     if (this.props.selectedServices.find(x => x.name === currService.name)) {
       this.props.updateReservation(true, currService)
@@ -31,7 +30,7 @@ class ServiceSelection extends React.Component {
               <h4>{category}</h4>
               {
                 this.props.services.map((service) => {
-                  if(service.category == category) {
+                  if(service.category === category) {
                     return <div key={service.name}>
                       <Row>
                         <Col xs='8' sm='10' className="pl-3">
@@ -51,6 +50,9 @@ class ServiceSelection extends React.Component {
                       </Row>
                     </div>
                   }
+                  else{
+                    return null
+                  }
                 })
               }
             </div>
@@ -69,7 +71,7 @@ class ServiceSelection extends React.Component {
           </Row>
           <Row className="justify-content-center">
             <Col md="3">
-            <Button block style={{backgroundColor: '#8CAFCB', border: '0px'}} disabled={this.props.selectedServices.length == 0} onClick={this.props.handleSubmit}>Next</Button>
+            <Button block style={{backgroundColor: '#8CAFCB', border: '0px'}} disabled={this.props.selectedServices.length === 0} onClick={this.props.handleSubmit}>Next</Button>
             </Col>
           </Row>
         

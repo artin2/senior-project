@@ -10,7 +10,8 @@ import { Image } from 'react-bootstrap';
 import ListGroup from 'react-bootstrap/ListGroup'
 import UserDashboardLoader from '../Store/UserStoresDashboardLoader';
 import workerImage from '../../assets/worker.png'
-import { getPictures } from '../s3'
+// import { getPictures } from '../s3'
+import { convertMinsToHrsMins } from '../helperFunctions'
 // import {
 //   addAlert
 // } from '../../reduxFolder/actions'
@@ -27,32 +28,6 @@ class WorkerDashboard extends React.Component {
       loading: true,
       daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     }
-  }
-
-  convertMinsToHrsMins(mins) {
-    let h = Math.floor(mins / 60);
-    let m = mins % 60;
-    let am = false
-    if (h == 24) {
-      am = true
-      h -= 12
-    }
-    else if (h < 12) {
-      am = true
-    } else if (h != 12) {
-      h -= 12
-    }
-    h = h < 10 ? '0' + h : h;
-    if (h == 0) {
-      h = '12'
-    }
-    m = m < 10 ? '0' + m : m;
-    if (am) {
-      return `${h}:${m}am`;
-    } else {
-      return `${h}:${m}pm`;
-    }
-
   }
 
   triggerWorkerEditForm(workerPassed) {
@@ -106,7 +81,6 @@ class WorkerDashboard extends React.Component {
           })
           .then(data => {
             if(data){
-              console.log("got the worker hours", data)
               var stateCopy = Object.assign({}, this.state);
               stateCopy.workers[i].workerHours = data
               this.setState(stateCopy)
@@ -120,7 +94,7 @@ class WorkerDashboard extends React.Component {
       })
     }
     else{
-      let resp = await fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers', {
+      await fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers', {
         method: "GET",
         headers: {
             'Content-type': 'application/json'
@@ -147,17 +121,17 @@ class WorkerDashboard extends React.Component {
       if(this.state.workers.length > 0){
         for (let i = 0; i < this.state.workers.length; i++) {
           let picturesFetched = {}
-          try {
-            picturesFetched = await getPictures('users/' + this.state.workers[i].user_id + '/')
-            if(picturesFetched.length > 0){
-              picturesFetched = picturesFetched[0]
-            }
-            else{
-              picturesFetched = {}
-            }
-          } catch (e) {
-            console.log("Error getting pictures from s3!", e)
-          }
+          // try {
+          //   picturesFetched = await getPictures('users/' + this.state.workers[i].user_id + '/')
+          //   if(picturesFetched.length > 0){
+          //     picturesFetched = picturesFetched[0]
+          //   }
+          //   else{
+          //     picturesFetched = {}
+          //   }
+          // } catch (e) {
+          //   console.log("Error getting pictures from s3!", e)
+          // }
           
           fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/workers/' + this.state.workers[i].id + '/hours', {
             method: "GET",
@@ -185,7 +159,6 @@ class WorkerDashboard extends React.Component {
           });
         }
 
-        console.log(this.state)
         this.setState({
           loading: false
         })
@@ -204,7 +177,7 @@ class WorkerDashboard extends React.Component {
         let items = [];
         for (let i = 0; i < props.workerHours.length; i++) {
           if (props.workerHours[i].start_time != null) {
-            items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-1"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: {this.convertMinsToHrsMins(props.workerHours[i].start_time)}-{this.convertMinsToHrsMins(props.workerHours[i].end_time)}</ListGroup.Item></Col>);
+            items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-1"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: {convertMinsToHrsMins(props.workerHours[i].start_time)}-{convertMinsToHrsMins(props.workerHours[i].end_time)}</ListGroup.Item></Col>);
           }
           else {
             items.push(<Col sm="11" md="10" key={i} style={{backgroundColor: "#bdcddb"}}><ListGroup.Item className={"py-1"} style={{backgroundColor: "#bdcddb"}}>{this.state.daysOfWeek[i]}: Off</ListGroup.Item></Col>);
@@ -223,7 +196,7 @@ class WorkerDashboard extends React.Component {
             </Col>
           </Row>
       } else {
-        if(this.state.workers.length == 0){
+        if(this.state.workers.length === 0){
           return(
             <div>
               <p className="noResults">No Workers!</p>

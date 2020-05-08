@@ -1,6 +1,6 @@
 import React from 'react';
 import './AdvancedSearch.css'
-import { Form, Row, Col, Container} from 'react-bootstrap';
+import { Form, Row } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import { withRouter } from "react-router-dom";
 import { Multiselect } from 'multiselect-react-dropdown';
@@ -50,33 +50,33 @@ class AdvancedSearch extends React.Component {
 
     selectedItem = selectedItem.name;
 
-    if(selectedItem == "Nail Salon"){
+    if(selectedItem === "Nail Salon"){
       this.setState({
         nails: true
       })
     }
-    else if(selectedItem == "Hair Salon"){
+    else if(selectedItem === "Hair Salon"){
       this.setState({
         hair: true
       })
     }
-    else if(selectedItem == "Facials"){
+    else if(selectedItem === "Facials"){
       this.setState({
         facials: true
       })
     }
-    else if(selectedItem == "Spa & Wellness"){
+    else if(selectedItem === "Spa & Wellness"){
       this.setState({
         spa: true
       })
     }
-    else if(selectedItem == "Makeup"){
+    else if(selectedItem === "Makeup"){
       this.setState({
         makeup: true
       })
     }
     else{
-      if(selectedItem == "Barbershops"){
+      if(selectedItem === "Barbershops"){
         this.setState({
           barber: true
         })
@@ -92,32 +92,32 @@ class AdvancedSearch extends React.Component {
 
     removedItem = removedItem.name;
 
-    if(removedItem == "Nail Salon"){
+    if(removedItem === "Nail Salon"){
       this.setState({
         nails: false
       })
     }
-    else if(removedItem == "Hair Salon"){
+    else if(removedItem === "Hair Salon"){
       this.setState({
         hair: false
       })
     }
-    else if(removedItem == "Facials"){
+    else if(removedItem === "Facials"){
       this.setState({
         facials: false
       })
     }
-    else if(removedItem == "Spa & Wellness"){
+    else if(removedItem === "Spa & Wellness"){
       this.setState({
         spa: false
       })
     }
-    else if(removedItem == "Makeup"){
+    else if(removedItem === "Makeup"){
       this.setState({
         makeup: false
       })
     }
-    else if(removedItem == "Barbershops"){
+    else if(removedItem === "Barbershops"){
       this.setState({
         barber: false
       })
@@ -164,14 +164,12 @@ class AdvancedSearch extends React.Component {
     let queryString = helper.queryString;
     let query = queryString(this.state)
 
-    console.log(this.state);
-    console.log(query);
-
-    const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
-    console.log("environment is: ", process.env.NODE_ENV)
-    console.log("fetch prod is: ", process.env.REACT_APP_FETCH_DOMAIN_PROD)
-    console.log("fetch dev is: ", process.env.REACT_APP_FETCH_DOMAIN_DEV)
-    console.log("fetch domain is: ", fetchDomain)
+    // console.log(this.state);
+    // console.log(query);
+    // console.log("environment is: ", process.env.NODE_ENV)
+    // console.log("fetch prod is: ", process.env.REACT_APP_FETCH_DOMAIN_PROD)
+    // console.log("fetch dev is: ", process.env.REACT_APP_FETCH_DOMAIN_DEV)
+    // console.log("fetch domain is: ", fetchDomain)
     fetch(fetchDomain + '/stores' + query, {
       method: "GET",
       headers: {

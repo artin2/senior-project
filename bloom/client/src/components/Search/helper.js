@@ -24,32 +24,32 @@ function getCategoriesAsPairs() {
 }
 
 function shorterVersion(name) {
-  if(name == "Spa & Wellness") {
+  if(name === "Spa & Wellness") {
     return "Spa"
   }
-  else if(name == "Barbershops") {
+  else if(name === "Barbershops") {
     return "Barber"
   }
-  else if(name == "Nail Salon") {
+  else if(name === "Nail Salon") {
     return "Nails"
   }
-  else if(name == "Hair Salon") {
+  else if(name === "Hair Salon") {
     return "Hair"
   }
   return name;
 }
 
 function longerVersion(name) {
-  if(name == "Spa") {
+  if(name === "Spa") {
     return "Spa & Wellness"
   }
-  else if(name == "Barber") {
+  else if(name === "Barber") {
     return "Barbershops"
   }
-  else if(name == "Nails") {
+  else if(name === "Nails") {
     return "Nail Salon"
   }
-  else if(name == "Hair") {
+  else if(name === "Hair") {
     return "Hair Salon"
   }
   return name;

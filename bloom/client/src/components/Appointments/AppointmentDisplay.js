@@ -11,6 +11,7 @@ import {
 import store from '../../reduxFolder/store';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import { convertMinsToHrsMins } from '../helperFunctions'
 import { css } from '@emotion/core'
 import GridLoader from 'react-spinners/GridLoader'
 const override = css`
@@ -73,32 +74,6 @@ class AppointmentDisplay extends React.Component {
         }
       ]
     });
-  }
-
-  convertMinsToHrsMins(mins) {
-    let h = Math.floor(mins / 60);
-    let m = mins % 60;
-    let am = false
-    if (h == 24) {
-      am = true
-      h -= 12
-    }
-    else if (h < 12) {
-      am = true
-    } else if (h != 12) {
-      h -= 12
-    }
-    h = h < 10 ? '0' + h : h;
-    if (h == 0) {
-      h = '12'
-    }
-    m = m < 10 ? '0' + m : m;
-    if (am) {
-      return `${h}:${m}am`;
-    } else {
-      return `${h}:${m}pm`;
-    }
-
   }
 
   componentDidMount() {
@@ -166,7 +141,7 @@ class AppointmentDisplay extends React.Component {
         </Row>
       } else {
         let cancelButton;
-        if (Cookies.get('user') && this.state.user_id == JSON.parse(Cookies.get('user').substring(2)).id) {
+        if (Cookies.get('user') && this.state.user_id === JSON.parse(Cookies.get('user').substring(2)).id) {
           cancelButton = <Button variant="danger" onClick={() => this.triggerAppointmentCancel()}>Cancel Appointment</Button>
         }
         return <Row className="justify-content-md-center">
@@ -177,7 +152,7 @@ class AppointmentDisplay extends React.Component {
                 <Card.Text as="div">
                   <ListGroup as="div" variant="flush">
                     <ListGroup.Item><b>Appointment Date:</b> {new Date(this.state.appointment[0].date).toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} </ListGroup.Item>
-                    <ListGroup.Item><b>Appointment Time:</b> {this.convertMinsToHrsMins(this.state.start_time)}-{this.convertMinsToHrsMins(this.state.end_time)}</ListGroup.Item>
+                    <ListGroup.Item><b>Appointment Time:</b> {convertMinsToHrsMins(this.state.start_time)}-{convertMinsToHrsMins(this.state.end_time)}</ListGroup.Item>
                     <ListGroup.Item><b>Services:</b> {this.state.service_names.toString()}</ListGroup.Item>
                     <ListGroup.Item><b>Scheduled Technicians:</b> {this.state.workers.toString()}</ListGroup.Item>
                     <ListGroup.Item><b>Total Cost:</b> ${this.state.cost}</ListGroup.Item>

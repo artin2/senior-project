@@ -1,14 +1,12 @@
 import React from 'react';
-import { Row, Card, Nav, Form } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
 import Col from 'react-bootstrap/Col'
 import SearchCard from './SearchCard'
 import './SearchDisplay.css'
 import MapContainer from '../Map/MapContainer'
 import SearchDisplayLoader from './SearchDisplayLoader'
 import SearchDisplayLoaderMobile from './SearchDisplayLoaderMobile'
-import Select from 'react-select'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
-
 
 class SearchDisplay extends React.Component {
   constructor(props) {

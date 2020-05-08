@@ -5,7 +5,6 @@ import {
   Route
 } from "react-router-dom";
 import Registration from './components/User/Registration';
-import SignupForm from './components/User/SignupForm';
 import MainNavbar from './components/Navbar/MainNavbar';
 import Homepage from './components/Home/Homepage';
 import StaticPage from './components/StaticPages/StaticPage';

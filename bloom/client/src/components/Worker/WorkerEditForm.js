@@ -6,12 +6,11 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import { Formik } from 'formik';
-import * as Yup from 'yup';
-import Select from 'react-select';
 import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
+import { convertMinsToHrsMins } from '../helperFunctions'
 import GridLoader from 'react-spinners/GridLoader'
 import { css } from '@emotion/core'
 import { withRouter } from "react-router"
@@ -78,37 +77,11 @@ class WorkerEditForm extends React.Component {
     let worker_id = this.props.match.params.worker_id ? this.props.match.params.worker_id : this.props.worker_id;
 
     this.props.history.push({
-      pathname: '/stores/' + this.props.match.params.store_id + '/workers/' + this.props.match.params.worker_id,
+      pathname: '/stores/' + store_id + '/workers/' + worker_id,
       state: {
         worker: returnedWorker
       }
     })
-  }
-
-  convertMinsToHrsMins(mins) {
-    let h = Math.floor(mins / 60);
-    let m = mins % 60;
-    let am = false
-    if (h == 24) {
-      am = true
-      h -= 12
-    }
-    else if (h < 12) {
-      am = true
-    } else if (h != 12) {
-      h -= 12
-    }
-    h = h < 10 ? '0' + h : h;
-    if (h == 0) {
-      h = '12'
-    }
-    m = m < 10 ? '0' + m : m;
-    if (am) {
-      return `${h}:${m}am`;
-    } else {
-      return `${h}:${m}pm`;
-    }
-
   }
 
   handleSelectChange = (event) => {
@@ -253,26 +226,26 @@ class WorkerEditForm extends React.Component {
   render() {
     const CreateStartTimesForDay = (props) => {
       if(this.state.storeHours[props.day].open_time == null){
-        return <option key={"closed"} value={540}>{this.convertMinsToHrsMins(540)}</option>
+        return <option key={"closed"} value={540}>{convertMinsToHrsMins(540)}</option>
       }
       else{
         let items = [];
 
         for (let i = this.state.storeHours[props.day].open_time; i <= 840; i += 60) {
-          items.push(<option key={i} value={i}>{this.convertMinsToHrsMins(i)}</option>);
+          items.push(<option key={i} value={i}>{convertMinsToHrsMins(i)}</option>);
         }
         return items;
       }
     }
     const CreateEndTimesForDay = (props) => {
       if(this.state.storeHours[props.day].close_time == null){
-        return <option key={"closed"} value={1020}>{this.convertMinsToHrsMins(1020)}</option>
+        return <option key={"closed"} value={1020}>{convertMinsToHrsMins(1020)}</option>
       }
       else{
         let items = [];
 
         for (let i = 900; i <= this.state.storeHours[props.day].close_time; i += 60) {
-          items.push(<option key={i} value={i}>{this.convertMinsToHrsMins(i)}</option>);
+          items.push(<option key={i} value={i}>{convertMinsToHrsMins(i)}</option>);
         }
         return items;
       }
@@ -402,13 +375,13 @@ class WorkerEditForm extends React.Component {
                 let worker_id = this.props.match.params.worker_id ? this.props.match.params.worker_id : this.props.worker_id;
 
                 values.newHours = this.state.workerHours.map((day, index) => {
-                  if(this.state.weekIsWorking[index] && (this.state.originalWorkerHours[index].start_time != day.start_time || this.state.originalWorkerHours[index].end_time != day.end_time)){
+                  if(this.state.weekIsWorking[index] && (this.state.originalWorkerHours[index].start_time !== day.start_time || this.state.originalWorkerHours[index].end_time !== day.end_time)){
                     return day
                   } 
-                  else if(this.state.weekIsWorking[index] && (this.state.originalWorkerHours[index].start_time == day.start_time && this.state.originalWorkerHours[index].end_time == day.end_time)){
+                  else if(this.state.weekIsWorking[index] && (this.state.originalWorkerHours[index].start_time === day.start_time && this.state.originalWorkerHours[index].end_time === day.end_time)){
                     return {}
                   }
-                  else if(this.state.weekIsWorking[index] == false && this.state.originalWorkerHours[index].start_time == null){
+                  else if(this.state.weekIsWorking[index] === false && this.state.originalWorkerHours[index].start_time === null){
                     return {}
                   }else {
                     return {start_time: null, end_time: null}

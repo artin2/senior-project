@@ -8,6 +8,7 @@ import './DateSelection.css';
 import { Form, Button } from 'react-bootstrap';
 import store from '../../reduxFolder/store';
 import { addAlert } from '../../reduxFolder/actions/alert'
+import { convertMinsToHrsMins } from '../helperFunctions'
 import GridLoader from 'react-spinners/GridLoader'
 import { css } from '@emotion/core'
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
@@ -30,7 +31,7 @@ class DateSelection extends React.Component {
   }
 
   handleDateChange = date => {
-    if (date.getMonth() != this.state.startDate.getMonth()) {
+    if (date.getMonth() !== this.state.startDate.getMonth()) {
       this.setState({
         loading: true
       })
@@ -78,32 +79,6 @@ class DateSelection extends React.Component {
     this.props.handleSubmit()
   }
 
-  convertMinsToHrsMins(mins) {
-    let h = Math.floor(mins / 60);
-    let m = mins % 60;
-    let am = false
-    if (h == 24) {
-      am = true
-      h -= 12
-    }
-    else if (h < 12) {
-      am = true
-    } else if (h != 12) {
-      h -= 12
-    }
-    h = h < 10 ? '0' + h : h;
-    if (h == 0) {
-      h = '12'
-    }
-    m = m < 10 ? '0' + m : m;
-    if (am) {
-      return `${h}:${m}am`;
-    } else {
-      return `${h}:${m}pm`;
-    }
-
-  }
-
   componentDidMount() {
     fetch(fetchDomain + '/stores/' + this.props.store_id + '/appointments/month/' + (parseInt(this.state.startDate.getMonth()) + 1), {
       method: "GET",
@@ -125,7 +100,6 @@ class DateSelection extends React.Component {
           appointment.date = new Date(appointment.date + ' UTC')
           return appointment
         })
-        console.log("received these appointments: ", parsedData)
         this.setState({
           appointments: parsedData,
           loading: false
@@ -137,7 +111,7 @@ class DateSelection extends React.Component {
     const CreateTimeSelects = (props) => {
       let items = [];
       for (let i = this.props.storeHours[this.state.currDate.getDay()].open_time; i + this.props.time <= this.props.storeHours[this.state.currDate.getDay()].close_time; i += 60) {
-        items.push(<option key={i} value={i}>{this.convertMinsToHrsMins(i)}</option>);
+        items.push(<option key={i} value={i}>{convertMinsToHrsMins(i)}</option>);
       }
       return items;
     }
@@ -150,14 +124,14 @@ class DateSelection extends React.Component {
         let currTime = i
         let foundSchedule = false
         let currSchedule = []
-        let currDaySchedules = this.props.workersSchedules.filter(element => element.day_of_the_week == this.state.currDate.getDay());
+        let currDaySchedules = this.props.workersSchedules.filter(element => element.day_of_the_week === this.state.currDate.getDay());
         let scheduleStillWorks = true
         // We're going to increment through the workers that are scheduled for today and build a schedule bit by bit until we finish or realize there are no more appointments for the day
         // Don't want to lose the original values of currTime, currService, and k when we continue ahead in our schedule
         let currScheduleCurrTime = currTime
         let currScheduleCurrWorkerIndex = 0
         let currScheduleServiceIndex = 0
-        // console.log("current time is: ", this.convertMinsToHrsMins(currTime))
+        // console.log("current time is: ", convertMinsToHrsMins(currTime))
         // Start building our schedule
         while (scheduleStillWorks && !foundSchedule) {
           let available = true
@@ -165,20 +139,20 @@ class DateSelection extends React.Component {
           let currScheduleCurrWorker = currDaySchedules[currScheduleCurrWorkerIndex].worker_id
           // console.log("checking if appointment is in worker's hours: ")
           // console.log("currworker works from: ", currDaySchedules[currScheduleCurrWorkerIndex].start_time, "-",  currDaySchedules[currScheduleCurrWorkerIndex].end_time)
-          // console.log("trying to match with appointment from: ", this.convertMinsToHrsMins(currScheduleCurrTime), "-", this.convertMinsToHrsMins(currScheduleCurrTime + currScheduleCurrService.duration))
+          // console.log("trying to match with appointment from: ", convertMinsToHrsMins(currScheduleCurrTime), "-", convertMinsToHrsMins(currScheduleCurrTime + currScheduleCurrService.duration))
           // Check if appointment is within worker's hours
           if (currDaySchedules[currScheduleCurrWorkerIndex].start_time > currScheduleCurrTime || currDaySchedules[currScheduleCurrWorkerIndex].end_time < (currScheduleCurrTime + currScheduleCurrService.duration)) {
             available = false
           } else {
             let currWorkerAppointments = this.state.appointments.filter((appointment) => {
-              return appointment.worker_id == currScheduleCurrWorker && appointment.date.setHours(0, 0, 0, 0) == this.state.currDate.setHours(0, 0, 0, 0)
+              return appointment.worker_id === currScheduleCurrWorker && appointment.date.setHours(0, 0, 0, 0) === this.state.currDate.setHours(0, 0, 0, 0)
             })
             // console.log("Within bounds, checking for conflicts. ")
             // Check for conflicts via worker's existing appointments for the day
             // console.log("currWorkers appointments: ", currWorkerAppointments)
             for (let m = 0; m < currWorkerAppointments.length; m++) {
               if ((currScheduleCurrTime >= currWorkerAppointments[m].start_time && currScheduleCurrTime < currWorkerAppointments[m].end_time) || (currScheduleCurrTime + currScheduleCurrService.duration > currWorkerAppointments[m].start_time && currScheduleCurrTime + currScheduleCurrService.duration < currWorkerAppointments[m].end_time)) {
-                // console.log("conflict found with because of slot from: ", this.convertMinsToHrsMins(currWorkerAppointments[m].start_time), "-", this.convertMinsToHrsMins(currWorkerAppointments[m].end_time))
+                // console.log("conflict found with because of slot from: ", convertMinsToHrsMins(currWorkerAppointments[m].start_time), "-", convertMinsToHrsMins(currWorkerAppointments[m].end_time))
                 // Worker is unavailable
                 available = false
                 break
@@ -193,7 +167,7 @@ class DateSelection extends React.Component {
             currScheduleServiceIndex += 1
             //NOTE, will always cycle to first worker. What if we want to maintain worker for entire appointment duration? May be worth refactoring for continuity. 
             currScheduleCurrWorkerIndex = 0
-            if (currScheduleServiceIndex == this.props.selectedServices.length) {
+            if (currScheduleServiceIndex === this.props.selectedServices.length) {
               //We've found a worker for each service in the appointment. We're done. 
               foundSchedule = true
             }
@@ -209,12 +183,12 @@ class DateSelection extends React.Component {
 
         if (foundSchedule) {
           schedules.push(currSchedule)
-          slots.push(<Button className="mt-3 mx-2" style={{backgroundColor: '#8CAFCB', border: '0px'}} key={i} onClick={() => this.handleSlotClick(currSchedule)}>{this.convertMinsToHrsMins(i)}</Button>)
+          slots.push(<Button className="mt-3 mx-2" style={{backgroundColor: '#8CAFCB', border: '0px'}} key={i} onClick={() => this.handleSlotClick(currSchedule)}>{convertMinsToHrsMins(i)}</Button>)
         }
       }
-      if (slots.length == 0 && this.props.storeHours[this.state.currDate.getDay()].open_time == null) {
+      if (slots.length === 0 && this.props.storeHours[this.state.currDate.getDay()].open_time === null) {
         return <h2 className="mt-4">This store doesn't work on this day. Select another date. </h2>
-      } else if (slots.length == 0) {
+      } else if (slots.length === 0) {
         return <h2 className="mt-4">No appointments available at this time.</h2>
       }
       return slots

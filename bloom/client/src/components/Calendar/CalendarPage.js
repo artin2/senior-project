@@ -7,8 +7,6 @@ import {  Resources, ConfirmationDialog, Scheduler, AppointmentForm, Appointment
 import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
 import 'react-calendar/dist/Calendar.css';
 import Paper from '@material-ui/core/Paper';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import { Multiselect } from 'multiselect-react-dropdown';
 import { FiSearch} from 'react-icons/fi';
 import { withRouter } from "react-router"
@@ -22,19 +20,19 @@ const isWeekEnd = (date: Date): boolean => date.getDay() === 0 || date.getDay() 
 
 
 
-const Root = ({
-  children, style, ...restProps
-}) => (
-  <div
-    {...restProps}
-    style={{
-      ...style,
-      width: '1000px',
-    }}
-  >
-    {children}
-  </div>
-);
+// const Root = ({
+//   children, style, ...restProps
+// }) => (
+//   <div
+//     {...restProps}
+//     style={{
+//       ...style,
+//       width: '1000px',
+//     }}
+//   >
+//     {children}
+//   </div>
+// );
 
 
 const DayScaleCell = ({
@@ -62,7 +60,8 @@ const TimeTableCell = (
     {...restProps}
   />
 );
-const recurringIcon = () => <div />
+
+// const recurringIcon = () => <div />
 
 const BasicLayout = ({ appointmentData, onFieldChange,
    ...restProps }) => {
@@ -121,29 +120,29 @@ return null;
   // } else {console.log("HELO"); return <AppointmentForm.WeeklyRecurrenceSelectorComponent readOnly={true} {...restProps} />};
 };
 
-const ResourceSwitcher = ({ styles,
-    mainResourceName, onChange, classes, resources,
-  }) => (
-    <div >
-      <Row className="justify-content-center text-xs-center text-sm-left pl-2">
-      <p style={{fontSize: 20, marginRight:10, marginTop:2}}>
-        Filter By:
-      </p>
-      <Select
-        value={mainResourceName}
-        onChange={e => onChange(e.target.value)}
-        style={{paddingLeft: 60, height: 35}}
-      >
-        {resources.map(resource => (
-          <MenuItem key={resource.fieldName} value={resource.fieldName}>
-            {resource.title}
-          </MenuItem>
-        ))}
-      </Select>
-      </Row>
-    </div>
+// const ResourceSwitcher = ({ styles,
+//     mainResourceName, onChange, classes, resources,
+//   }) => (
+//     <div >
+//       <Row className="justify-content-center text-xs-center text-sm-left pl-2">
+//       <p style={{fontSize: 20, marginRight:10, marginTop:2}}>
+//         Filter By:
+//       </p>
+//       <Select
+//         value={mainResourceName}
+//         onChange={e => onChange(e.target.value)}
+//         style={{paddingLeft: 60, height: 35}}
+//       >
+//         {resources.map(resource => (
+//           <MenuItem key={resource.fieldName} value={resource.fieldName}>
+//             {resource.title}
+//           </MenuItem>
+//         ))}
+//       </Select>
+//       </Row>
+//     </div>
 
-  );
+//   );
 
 
 const RecurrenceLayout = ({
@@ -271,74 +270,61 @@ class Calendar extends React.Component {
     }
 
     getAppointments = (store_id) => {
+      fetch(fetchDomain + '/stores/' + store_id + '/appointments' , {
+        method: "GET",
+        headers: {
+          'Content-type': 'application/json'
+        },
+        credentials: 'include'
+      }).then(value => value.json())
+      .then(data => {
+        // console.log(data)
+        let appointments = []
 
-        fetch(fetchDomain + '/stores/' + store_id + '/appointments' , {
-          method: "GET",
-          headers: {
-            'Content-type': 'application/json'
-          },
-          credentials: 'include'
-        }).then(value => value.json())
-        .then(data => {
+        data.map((appointment, indx) => {
+          if(!this.props.id || (this.props.id && appointment.worker_id === this.props.id)) {
 
+            let date = new Date(appointment.date);
+            let startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), this.timeConvert(appointment.start_time)[0], this.timeConvert(appointment.start_time)[1]);
+            let endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), this.timeConvert(appointment.end_time)[0], this.timeConvert(appointment.end_time)[1]);
 
-          // console.log(data)
-          let appointments = []
-
-          data.map((appointment, indx) => {
-
-              if(!this.props.id || (this.props.id && appointment.worker_id==this.props.id)) {
-
-              let date = new Date(appointment.date);
-              let startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), this.timeConvert(appointment.start_time)[0], this.timeConvert(appointment.start_time)[1]);
-              let endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), this.timeConvert(appointment.end_time)[0], this.timeConvert(appointment.end_time)[1]);
-
-              appointments.push({
-                id: appointment.id,
-                title: this.state.service_map[appointment.service_id] + " with " + this.state.worker_map[appointment.worker_id],
-                workers: [appointment.worker_id],
-                services: appointment.service_id,
-                price: appointment.price,
-                startDate: startDate,
-                endDate: endDate,
-                users: appointment.user_id,
-                group_id: appointment.group_id
-              })
-            }
+            appointments.push({
+              id: appointment.id,
+              title: this.state.service_map[appointment.service_id] + " with " + this.state.worker_map[appointment.worker_id],
+              workers: [appointment.worker_id],
+              services: appointment.service_id,
+              price: appointment.price,
+              startDate: startDate,
+              endDate: endDate,
+              users: appointment.user_id,
+              group_id: appointment.group_id
             })
+          }
+          return appointment
+        })
 
-            this.setState({
-                appointments: appointments,
-                selectedAppointments: appointments
-
-            })
-
+        this.setState({
+            appointments: appointments,
+            selectedAppointments: appointments
 
         })
+      })
     }
+
     onAppointmentChanges(key, string) {
-
-      // console.log("++++++++++++++", key)
-
-      if(!key.hasOwnProperty("services"))
-      {
+      if(!key.hasOwnProperty("services")){
         return;
       }
 
-        let resources = this.state.resources
+      let resources = this.state.resources
+      resources[1].instances = this.state.workers.filter(worker => this.state.worker_to_services[worker.id] && this.state.worker_to_services[worker.id].includes(key.services) ? worker : null);
 
-        resources[1].instances = this.state.workers.filter(worker => this.state.worker_to_services[worker.id].includes(key.services));
-
-        console.log(this.state.worker_to_services, resources)
-
-        this.setState({
-          resources: resources
-        })
-
+      this.setState({
+        resources: resources
+      })
     }
 
     async componentDidMount() {
-
       let store_id = (this.props.match.params.store_id) ? (this.props.match.params.store_id) : this.props.store_id;
       let workers = []
       let services = []
@@ -348,8 +334,6 @@ class Calendar extends React.Component {
       let new_users = []
       let worker_to_services = {}
 
-      // console.log(store_id)
-
           await fetch(fetchDomain + '/stores/' + store_id + "/services", {
           method: "GET",
           headers: {
@@ -358,34 +342,30 @@ class Calendar extends React.Component {
           credentials: 'include'
         }).then(function (response) {
             if (response.status !== 200) {
-              throw("error")
+              console.log("Error!", response)
             }
             else {
               return response.json();
             }
           })
           .then(async data => {
-
             if (data) {
               services = data;
 
               let service_instances = []
               let service_map = {}
-              // console.log("here!!", services);
 
               services.map((service, indx) => {
-                    service_instances.push({id: service.id, text: service.name})
-                    service_map[service.id] = service.name
+                service_instances.push({id: service.id, text: service.name})
+                service_map[service.id] = service.name
+
+                return service
               })
-              // console.log(service_instances)
 
               this.setState({
-                  services: service_instances,
-                  service_map: service_map
+                services: service_instances,
+                service_map: service_map
               })
-
-              // console.log(this.state)
-              // return new_services;
             }
           });
 
@@ -414,9 +394,11 @@ class Calendar extends React.Component {
               let worker_instances = []
               let worker_map = {}
               workers.map((worker, indx) => {
-                  worker_instances.push({id: worker.id, text: worker.first_name + ' ' + worker.last_name})
-                  worker_map[worker.id] = worker.first_name + ' ' + worker.last_name
-                  worker_to_services[worker.id] = worker.services
+                worker_instances.push({id: worker.id, text: worker.first_name + ' ' + worker.last_name})
+                worker_map[worker.id] = worker.first_name + ' ' + worker.last_name
+                worker_to_services[worker.id] = worker.services
+
+                return worker
               })
               this.setState({
                 workers: worker_instances,
@@ -449,9 +431,11 @@ class Calendar extends React.Component {
                   let user_instances = []
 
                   users.map((user, indx) => {
-                      user_instances.push({id: user.id, text: user.first_name + ' ' + user.last_name})
-
+                    user_instances.push({id: user.id, text: user.first_name + ' ' + user.last_name})
+                    
+                    return user
                   })
+
                   this.setState({
                     users: user_instances,
 
@@ -504,37 +488,35 @@ class Calendar extends React.Component {
     let newSelected = [];
 
     this.state.appointments.map(appointment => {
-      includeWorker = (this.state.selectedWorkers.length==0) ? true : false;
-      includeService= (this.state.selectedServices.length==0) ? true : false;
+      includeWorker = (this.state.selectedWorkers.length === 0) ? true : false;
+      includeService= (this.state.selectedServices.length === 0) ? true : false;
 
       // console.log(this.state.selectedWorkers, this.state.selectedServices);
 
       this.state.selectedWorkers.map(worker => {
-
         if(appointment.workers.includes(worker.id)) {
           includeWorker = true;
         }
 
-        // console.log(worker)
-
+        return worker
       })
 
-      // console.log(includeWorker, appointment)
-
       this.state.selectedServices.map(service => {
-
-        if(appointment.services == service.id) {
+        if(appointment.services === service.id) {
           includeService = true;
         }
+
+        return service
       })
 
       if(includeService && includeWorker) {
         newSelected.push(appointment);
       }
-    })
-    // console.log(newSelected)
-    this.setState({ selectedAppointments: newSelected });
 
+      return appointment
+    })
+
+    this.setState({ selectedAppointments: newSelected });
   }
 
 
@@ -543,18 +525,16 @@ class Calendar extends React.Component {
     let store_id = (this.props.match.params.store_id) ? (this.props.match.params.store_id) : this.props.store_id;
 
     if(deleted !== undefined) {
-
       let selectedAppointments = this.state.selectedAppointments;
       let appointment_id = null;
 
       selectedAppointments.map((appointment, indx) => {
           // id = deleted[appointment.id] ? appointment.id : id;
-          appointment_id = deleted == appointment.id ? indx : appointment_id;
+          appointment_id = deleted === appointment.id ? indx : appointment_id;
+          return appointment
       });
 
-
       let group_id = selectedAppointments[appointment_id].group_id;
-
 
       fetch(fetchDomain + '/appointments/delete/' + group_id, {
         method: "GET",
@@ -579,25 +559,20 @@ class Calendar extends React.Component {
             // console.log(data)
           }
         });
-
     }
 
-
     await this.setState((state) => {
-      let { selectedAppointments, appointments } = state;
+      let { selectedAppointments, /*appointments*/ } = state;
 
       if (added) {
         added.title = this.state.service_map[added.services] + " with " + this.state.worker_map[added.workers];
         const startingAddedId = selectedAppointments.length > 0 ? selectedAppointments[selectedAppointments.length - 1].id + 1 : 0;
         selectedAppointments = [...selectedAppointments, { id: startingAddedId, ...added }];
-        appointments = selectedAppointments
+        // appointments = selectedAppointments
       }
+
       if (changed) {
-
-
         selectedAppointments = selectedAppointments.map(appointment => {
-
-
           if(changed[appointment.id]) {
             if(changed[appointment.id].hasOwnProperty("services") && !changed[appointment.id].hasOwnProperty("workers")) {
               changed[appointment.id].title = this.state.service_map[changed[appointment.id].services] + " with " + this.state.worker_map[appointment.workers[0]];
@@ -606,29 +581,28 @@ class Calendar extends React.Component {
               changed[appointment.id].title = this.state.service_map[appointment.services] + " with " + this.state.worker_map[changed[appointment.id].workers[0]];
             }
             if(changed[appointment.id].hasOwnProperty("workers") && changed[appointment.id].hasOwnProperty("services")) {
-
               changed[appointment.id].title = this.state.service_map[changed[appointment.id].services] + " with " + this.state.worker_map[changed[appointment.id].workers[0]];
             }
 
             return { ...appointment, ...changed[appointment.id] }
-
           }
-        else {
-          return appointment;
-        }
-      });
-      appointments = selectedAppointments
+          else {
+            return appointment;
+          }
+        });
+
+        // appointments = selectedAppointments
       }
+
       if (deleted !== undefined) {
         selectedAppointments = selectedAppointments.filter(appointment => appointment.id !== deleted);
-        appointments = selectedAppointments;
+        // appointments = selectedAppointments;
       }
+
       return { selectedAppointments };
     });
 
     if(added) {
-
-
       let values = {
         appointments: [{
           price: added.price,
@@ -639,9 +613,7 @@ class Calendar extends React.Component {
           date: added.startDate
         }],
         user_id: added.users,
-
       }
-
 
       fetch(fetchDomain + '/stores/' + store_id + '/appointments/new', {
         method: "POST",
@@ -652,35 +624,35 @@ class Calendar extends React.Component {
         credentials: 'include',
         body: JSON.stringify(values)
       })
-        .then(function (response) {
-          if (response.status !== 200) {
-            // throw an error alert
-            // store.dispatch(addAlert(response))
-          }
-          else {
-            return response.json();
-          }
-        })
-        .then(async data => {
-          if (data) {
-            // console.log(data)
-          }
-        });
-
+      .then(function (response) {
+        if (response.status !== 200) {
+          // throw an error alert
+          // store.dispatch(addAlert(response))
+        }
+        else {
+          return response.json();
+        }
+      })
+      .then(async data => {
+        if (data) {
+          // console.log(data)
+        }
+      });
     }
-    if(changed) {
 
+    if(changed) {
       // console.log(changed.id);
       let selectedAppointments = this.state.selectedAppointments;
       let appointment_id = null, id = null;
 
       selectedAppointments.map((appointment, indx) => {
-          id = changed[appointment.id] ? appointment.id : id;
-          appointment_id = changed[appointment.id] ? indx : appointment_id;
+        id = changed[appointment.id] ? appointment.id : id;
+        appointment_id = changed[appointment.id] ? indx : appointment_id;
+
+        return appointment
       });
 
       // console.log(id, appointment_id)
-
       let values = {
         appointment: [{
           price: selectedAppointments[appointment_id].price,
@@ -693,7 +665,6 @@ class Calendar extends React.Component {
           store_id: parseInt(store_id)
         }],
         user_id: selectedAppointments[appointment_id].users,
-
       }
 
       // console.log(values)
@@ -707,33 +678,29 @@ class Calendar extends React.Component {
         credentials: 'include',
         body: JSON.stringify(values)
       })
-        .then(function (response) {
-          if (response.status !== 200) {
-            // throw an error alert
-            // store.dispatch(addAlert(response))
-          }
-          else {
-            return response.json();
-          }
-        })
-        .then(async data => {
-          if (data) {
-            // console.log(data)
-          }
-        });
-
+      .then(function (response) {
+        if (response.status !== 200) {
+          // throw an error alert
+          // store.dispatch(addAlert(response))
+        }
+        else {
+          return response.json();
+        }
+      })
+      .then(async data => {
+        if (data) {
+          // console.log(data)
+        }
+      });
     }
-
   }
-
-
 
   render() {
 
     // console.log("---", this.state.resources);
     let resources;
     if(this.state.resources[1].instances.length>0) {
-      console.log(this.state.resources)
+      // console.log(this.state.resources)
       resources = [this.state.resources[0], this.state.resources[1], this.state.resources[2]]
     }
     else {

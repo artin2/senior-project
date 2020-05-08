@@ -117,9 +117,7 @@ class AddServiceForm extends React.Component {
     })
     .then(data => {
       if(data){
-        console.log("data is", data)
         let convertedCategory = data[0].category.map((category, indx) => ({ value: indx, label: helper.longerVersion(category)}));
-        console.log("converted category is", convertedCategory)
         this.setState({
           category: convertedCategory,
           isLoading: false

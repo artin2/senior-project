@@ -1,5 +1,4 @@
 import React from 'react';
-import LargeCarousel from '../LargeCarousel';
 import Card from 'react-bootstrap/Card'
 import { Button, Carousel, Image, Col } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row'
@@ -17,7 +16,6 @@ class SearchCard extends React.Component {
   componentDidMount(){
     if(this.props.store && this.props.store.address){
       let shortAddress = this.props.store.address.split(",").splice(0, 4).join(", ")
-      console.log("short:", shortAddress, "split", this.props.store.address.split(","))
       this.setState({
         addressDisplay: shortAddress
       })
@@ -25,7 +23,6 @@ class SearchCard extends React.Component {
   }
 
   render() {
-    console.log(this.props.store)
     return (
       <Col xs={12} className="my-3 px-0 h-100">
         <Card className="add-shadow" style={{height: '100%'}}>

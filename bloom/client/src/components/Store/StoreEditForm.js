@@ -15,6 +15,7 @@ import store from '../../reduxFolder/store';
 import { getPictures, deleteHandler, uploadHandler } from '../s3'
 import { Multiselect } from 'multiselect-react-dropdown';
 import { withRouter } from "react-router-dom";
+import { convertMinsToHrsMins } from '../helperFunctions'
 import { css } from '@emotion/core'
 import { Image } from 'react-bootstrap';
 import GridLoader from 'react-spinners/GridLoader'
@@ -93,8 +94,6 @@ class StoreEditForm extends React.Component {
     this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
     this.triggerStoreDisplay = this.triggerStoreDisplay.bind(this);
     this.onChange = this.onChange.bind(this);
-    this.shorterVersion = this.shorterVersion.bind(this);
-    this.longerVersion = this.longerVersion.bind(this);
     this.triggerStoreDisplayNoResp = this.triggerStoreDisplayNoResp.bind(this);
     this.autocompleteChange = this.autocompleteChange.bind(this)
   }
@@ -135,64 +134,6 @@ class StoreEditForm extends React.Component {
     this.props.history.push({
       pathname: '/stores/' + this.props.match.params.store_id
     })
-  }
-
-  convertMinsToHrsMins(mins) {
-    let h = Math.floor(mins / 60);
-    let m = mins % 60;
-    let am = false
-    if (h == 24) {
-      am = true
-      h -= 12
-    }
-    else if (h < 12) {
-      am = true
-    } else if (h != 12) {
-      h -= 12
-    }
-    h = h < 10 ? '0' + h : h;
-    if(h == 0) {
-      h = '12'
-    }
-    m = m < 10 ? '0' + m : m;
-    if (am) {
-      return `${h}:${m}am`;
-    } else {
-      return `${h}:${m}pm`;
-    }
-
-  }
-
-  shorterVersion(name) {
-    if(name == "Spa & Wellness") {
-      return "Spa"
-    }
-    else if(name == "Barbershops") {
-      return "Barber"
-    }
-    else if(name == "Nail Salon") {
-      return "Nails"
-    }
-    else if(name == "Hair Salon") {
-      return "Hair"
-    }
-    return name;
-  }
-
-  longerVersion(name) {
-    if(name == "Spa") {
-      return "Spa & Wellness"
-    }
-    else if(name == "Barber") {
-      return "Barbershops"
-    }
-    else if(name == "Nails") {
-      return "Nail Salon"
-    }
-    else if(name == "Hair") {
-      return "Hair Salon"
-    }
-    return name;
   }
 
   handleDayStatusChange = (day) => {
@@ -283,7 +224,7 @@ class StoreEditForm extends React.Component {
     // if we were given the existing data from calling component use that, else fetch
     // check if categories are empty, if they are then cache/store needs to be updated.
     if (this.props.location.state && this.props.location.state.store) {
-      let convertedCategory = this.props.location.state.store.category.map((str, indx) => ({ id: indx, name: this.longerVersion(str)}));
+      let convertedCategory = this.props.location.state.store.category.map((str, indx) => ({ id: indx, name: helper.longerVersion(str)}));
 
       await fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + '/storeHours', {
         method: "GET",
@@ -343,7 +284,7 @@ class StoreEditForm extends React.Component {
         const response1 = allResponses[0]
         const response2 = allResponses[1]
 
-        let convertedCategory = response1.category.map((str, indx) => ({ id: indx, name: this.longerVersion(str)}) );
+        let convertedCategory = response1.category.map((str, indx) => ({ id: indx, name: helper.longerVersion(str)}) );
 
         let oldWeekIsWorking = this.state.weekIsWorking
         for(let i = 0; i < response2.length; i++){
@@ -406,7 +347,7 @@ class StoreEditForm extends React.Component {
             }}
             validationSchema={this.yupValidationSchema}
             onSubmit={async (values) => {
-              let shorterVersion = this.shorterVersion
+              let shorterVersion = helper.shorterVersion
 
               values.category = values.category.map(function (val) {
                 return shorterVersion(val.name)
@@ -423,9 +364,9 @@ class StoreEditForm extends React.Component {
                 if(this.state.weekIsWorking[index] && (this.state.originalStoreHours[index].open_time !== day.open_time || this.state.originalStoreHours[index].close_time !== day.close_time)){
                   return day
                 } 
-                else if(this.state.weekIsWorking[index] && (this.state.originalStoreHours[index].open_time == day.open_time && this.state.originalStoreHours[index].close_time == day.close_time)){
+                else if(this.state.weekIsWorking[index] && (this.state.originalStoreHours[index].open_time === day.open_time && this.state.originalStoreHours[index].close_time === day.close_time)){
                   return {}
-                }else if(this.state.weekIsWorking[index] == false && this.state.originalStoreHours[index].open_time == null){
+                }else if(this.state.weekIsWorking[index] === false && this.state.originalStoreHours[index].open_time === null){
                   return {}
                 }
                 else{
@@ -477,7 +418,7 @@ class StoreEditForm extends React.Component {
                 }
                 else{
                   console.log("should not be here, but going to redirect until this is fixed")
-                  // this.triggerStoreDisplayNoResp()
+                  triggerStoreDisplayNoResp()
                 }
               });
             }}
@@ -609,35 +550,35 @@ class StoreEditForm extends React.Component {
                     <Form.Row>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[0]} value={this.state.storeHours[0].open_time === null ? 540 : this.state.storeHours[0].open_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={0}>{this.convertMinsToHrsMins(0)}</option>
-                          <option value={60}>{this.convertMinsToHrsMins(60)}</option>
-                          <option value={120}>{this.convertMinsToHrsMins(120)}</option>
-                          <option value={180}>{this.convertMinsToHrsMins(180)}</option>
-                          <option value={240}>{this.convertMinsToHrsMins(240)}</option>
-                          <option value={300}>{this.convertMinsToHrsMins(300)}</option>
-                          <option value={360}>{this.convertMinsToHrsMins(360)}</option>
-                          <option value={420}>{this.convertMinsToHrsMins(420)}</option>
-                          <option value={480}>{this.convertMinsToHrsMins(480)}</option>
-                          <option value={540}>{this.convertMinsToHrsMins(540)}</option>
-                          <option value={600}>{this.convertMinsToHrsMins(600)}</option>
-                          <option value={660}>{this.convertMinsToHrsMins(660)}</option>
-                          <option value={720}>{this.convertMinsToHrsMins(720)}</option>
-                          <option value={780}>{this.convertMinsToHrsMins(780)}</option>
-                          <option value={840}>{this.convertMinsToHrsMins(840)}</option>
+                          <option value={0}>{convertMinsToHrsMins(0)}</option>
+                          <option value={60}>{convertMinsToHrsMins(60)}</option>
+                          <option value={120}>{convertMinsToHrsMins(120)}</option>
+                          <option value={180}>{convertMinsToHrsMins(180)}</option>
+                          <option value={240}>{convertMinsToHrsMins(240)}</option>
+                          <option value={300}>{convertMinsToHrsMins(300)}</option>
+                          <option value={360}>{convertMinsToHrsMins(360)}</option>
+                          <option value={420}>{convertMinsToHrsMins(420)}</option>
+                          <option value={480}>{convertMinsToHrsMins(480)}</option>
+                          <option value={540}>{convertMinsToHrsMins(540)}</option>
+                          <option value={600}>{convertMinsToHrsMins(600)}</option>
+                          <option value={660}>{convertMinsToHrsMins(660)}</option>
+                          <option value={720}>{convertMinsToHrsMins(720)}</option>
+                          <option value={780}>{convertMinsToHrsMins(780)}</option>
+                          <option value={840}>{convertMinsToHrsMins(840)}</option>
                         </Form.Control>
                       </Col>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[0]} value={this.state.storeHours[0].close_time === null ? 1020 : this.state.storeHours[0].close_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={900}>{this.convertMinsToHrsMins(900)}</option>
-                          <option value={960}>{this.convertMinsToHrsMins(960)}</option>
-                          <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
-                          <option value={1080}>{this.convertMinsToHrsMins(1080)}</option>
-                          <option value={1140}>{this.convertMinsToHrsMins(1140)}</option>
-                          <option value={1200}>{this.convertMinsToHrsMins(1200)}</option>
-                          <option value={1260}>{this.convertMinsToHrsMins(1260)}</option>
-                          <option value={1320}>{this.convertMinsToHrsMins(1320)}</option>
-                          <option value={1380}>{this.convertMinsToHrsMins(1380)}</option>
-                          <option value={1440}>{this.convertMinsToHrsMins(1440)}</option>
+                          <option value={900}>{convertMinsToHrsMins(900)}</option>
+                          <option value={960}>{convertMinsToHrsMins(960)}</option>
+                          <option value={1020}>{convertMinsToHrsMins(1020)}</option>
+                          <option value={1080}>{convertMinsToHrsMins(1080)}</option>
+                          <option value={1140}>{convertMinsToHrsMins(1140)}</option>
+                          <option value={1200}>{convertMinsToHrsMins(1200)}</option>
+                          <option value={1260}>{convertMinsToHrsMins(1260)}</option>
+                          <option value={1320}>{convertMinsToHrsMins(1320)}</option>
+                          <option value={1380}>{convertMinsToHrsMins(1380)}</option>
+                          <option value={1440}>{convertMinsToHrsMins(1440)}</option>
                         </Form.Control>
                       </Col>
                     </Form.Row>
@@ -657,35 +598,35 @@ class StoreEditForm extends React.Component {
                     <Form.Row>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[1]} value={this.state.storeHours[1].open_time === null ? 540 : this.state.storeHours[1].open_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={0}>{this.convertMinsToHrsMins(0)}</option>
-                          <option value={60}>{this.convertMinsToHrsMins(60)}</option>
-                          <option value={120}>{this.convertMinsToHrsMins(120)}</option>
-                          <option value={180}>{this.convertMinsToHrsMins(180)}</option>
-                          <option value={240}>{this.convertMinsToHrsMins(240)}</option>
-                          <option value={300}>{this.convertMinsToHrsMins(300)}</option>
-                          <option value={360}>{this.convertMinsToHrsMins(360)}</option>
-                          <option value={420}>{this.convertMinsToHrsMins(420)}</option>
-                          <option value={480}>{this.convertMinsToHrsMins(480)}</option>
-                          <option value={540}>{this.convertMinsToHrsMins(540)}</option>
-                          <option value={600}>{this.convertMinsToHrsMins(600)}</option>
-                          <option value={660}>{this.convertMinsToHrsMins(660)}</option>
-                          <option value={720}>{this.convertMinsToHrsMins(720)}</option>
-                          <option value={780}>{this.convertMinsToHrsMins(780)}</option>
-                          <option value={840}>{this.convertMinsToHrsMins(840)}</option>
+                          <option value={0}>{convertMinsToHrsMins(0)}</option>
+                          <option value={60}>{convertMinsToHrsMins(60)}</option>
+                          <option value={120}>{convertMinsToHrsMins(120)}</option>
+                          <option value={180}>{convertMinsToHrsMins(180)}</option>
+                          <option value={240}>{convertMinsToHrsMins(240)}</option>
+                          <option value={300}>{convertMinsToHrsMins(300)}</option>
+                          <option value={360}>{convertMinsToHrsMins(360)}</option>
+                          <option value={420}>{convertMinsToHrsMins(420)}</option>
+                          <option value={480}>{convertMinsToHrsMins(480)}</option>
+                          <option value={540}>{convertMinsToHrsMins(540)}</option>
+                          <option value={600}>{convertMinsToHrsMins(600)}</option>
+                          <option value={660}>{convertMinsToHrsMins(660)}</option>
+                          <option value={720}>{convertMinsToHrsMins(720)}</option>
+                          <option value={780}>{convertMinsToHrsMins(780)}</option>
+                          <option value={840}>{convertMinsToHrsMins(840)}</option>
                         </Form.Control>
                       </Col>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[1]} value={this.state.storeHours[1].close_time === null ? 1020 : this.state.storeHours[1].close_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={900}>{this.convertMinsToHrsMins(900)}</option>
-                          <option value={960}>{this.convertMinsToHrsMins(960)}</option>
-                          <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
-                          <option value={1080}>{this.convertMinsToHrsMins(1080)}</option>
-                          <option value={1140}>{this.convertMinsToHrsMins(1140)}</option>
-                          <option value={1200}>{this.convertMinsToHrsMins(1200)}</option>
-                          <option value={1260}>{this.convertMinsToHrsMins(1260)}</option>
-                          <option value={1320}>{this.convertMinsToHrsMins(1320)}</option>
-                          <option value={1380}>{this.convertMinsToHrsMins(1380)}</option>
-                          <option value={1440}>{this.convertMinsToHrsMins(1440)}</option>
+                          <option value={900}>{convertMinsToHrsMins(900)}</option>
+                          <option value={960}>{convertMinsToHrsMins(960)}</option>
+                          <option value={1020}>{convertMinsToHrsMins(1020)}</option>
+                          <option value={1080}>{convertMinsToHrsMins(1080)}</option>
+                          <option value={1140}>{convertMinsToHrsMins(1140)}</option>
+                          <option value={1200}>{convertMinsToHrsMins(1200)}</option>
+                          <option value={1260}>{convertMinsToHrsMins(1260)}</option>
+                          <option value={1320}>{convertMinsToHrsMins(1320)}</option>
+                          <option value={1380}>{convertMinsToHrsMins(1380)}</option>
+                          <option value={1440}>{convertMinsToHrsMins(1440)}</option>
                         </Form.Control>
                       </Col>
                     </Form.Row>
@@ -706,35 +647,35 @@ class StoreEditForm extends React.Component {
                     <Form.Row>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[2]} value={this.state.storeHours[2].open_time === null ? 540 : this.state.storeHours[2].open_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={0}>{this.convertMinsToHrsMins(0)}</option>
-                          <option value={60}>{this.convertMinsToHrsMins(60)}</option>
-                          <option value={120}>{this.convertMinsToHrsMins(120)}</option>
-                          <option value={180}>{this.convertMinsToHrsMins(180)}</option>
-                          <option value={240}>{this.convertMinsToHrsMins(240)}</option>
-                          <option value={300}>{this.convertMinsToHrsMins(300)}</option>
-                          <option value={360}>{this.convertMinsToHrsMins(360)}</option>
-                          <option value={420}>{this.convertMinsToHrsMins(420)}</option>
-                          <option value={480}>{this.convertMinsToHrsMins(480)}</option>
-                          <option value={540}>{this.convertMinsToHrsMins(540)}</option>
-                          <option value={600}>{this.convertMinsToHrsMins(600)}</option>
-                          <option value={660}>{this.convertMinsToHrsMins(660)}</option>
-                          <option value={720}>{this.convertMinsToHrsMins(720)}</option>
-                          <option value={780}>{this.convertMinsToHrsMins(780)}</option>
-                          <option value={840}>{this.convertMinsToHrsMins(840)}</option>
+                          <option value={0}>{convertMinsToHrsMins(0)}</option>
+                          <option value={60}>{convertMinsToHrsMins(60)}</option>
+                          <option value={120}>{convertMinsToHrsMins(120)}</option>
+                          <option value={180}>{convertMinsToHrsMins(180)}</option>
+                          <option value={240}>{convertMinsToHrsMins(240)}</option>
+                          <option value={300}>{convertMinsToHrsMins(300)}</option>
+                          <option value={360}>{convertMinsToHrsMins(360)}</option>
+                          <option value={420}>{convertMinsToHrsMins(420)}</option>
+                          <option value={480}>{convertMinsToHrsMins(480)}</option>
+                          <option value={540}>{convertMinsToHrsMins(540)}</option>
+                          <option value={600}>{convertMinsToHrsMins(600)}</option>
+                          <option value={660}>{convertMinsToHrsMins(660)}</option>
+                          <option value={720}>{convertMinsToHrsMins(720)}</option>
+                          <option value={780}>{convertMinsToHrsMins(780)}</option>
+                          <option value={840}>{convertMinsToHrsMins(840)}</option>
                         </Form.Control>
                       </Col>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[2]} value={this.state.storeHours[2].close_time === null ? 1020 : this.state.storeHours[2].close_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={900}>{this.convertMinsToHrsMins(900)}</option>
-                          <option value={960}>{this.convertMinsToHrsMins(960)}</option>
-                          <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
-                          <option value={1080}>{this.convertMinsToHrsMins(1080)}</option>
-                          <option value={1140}>{this.convertMinsToHrsMins(1140)}</option>
-                          <option value={1200}>{this.convertMinsToHrsMins(1200)}</option>
-                          <option value={1260}>{this.convertMinsToHrsMins(1260)}</option>
-                          <option value={1320}>{this.convertMinsToHrsMins(1320)}</option>
-                          <option value={1380}>{this.convertMinsToHrsMins(1380)}</option>
-                          <option value={1440}>{this.convertMinsToHrsMins(1440)}</option>
+                          <option value={900}>{convertMinsToHrsMins(900)}</option>
+                          <option value={960}>{convertMinsToHrsMins(960)}</option>
+                          <option value={1020}>{convertMinsToHrsMins(1020)}</option>
+                          <option value={1080}>{convertMinsToHrsMins(1080)}</option>
+                          <option value={1140}>{convertMinsToHrsMins(1140)}</option>
+                          <option value={1200}>{convertMinsToHrsMins(1200)}</option>
+                          <option value={1260}>{convertMinsToHrsMins(1260)}</option>
+                          <option value={1320}>{convertMinsToHrsMins(1320)}</option>
+                          <option value={1380}>{convertMinsToHrsMins(1380)}</option>
+                          <option value={1440}>{convertMinsToHrsMins(1440)}</option>
                         </Form.Control>
                       </Col>
                     </Form.Row>
@@ -754,35 +695,35 @@ class StoreEditForm extends React.Component {
                     <Form.Row>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[3]} value={this.state.storeHours[3].open_time === null ? 540 : this.state.storeHours[3].open_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={0}>{this.convertMinsToHrsMins(0)}</option>
-                          <option value={60}>{this.convertMinsToHrsMins(60)}</option>
-                          <option value={120}>{this.convertMinsToHrsMins(120)}</option>
-                          <option value={180}>{this.convertMinsToHrsMins(180)}</option>
-                          <option value={240}>{this.convertMinsToHrsMins(240)}</option>
-                          <option value={300}>{this.convertMinsToHrsMins(300)}</option>
-                          <option value={360}>{this.convertMinsToHrsMins(360)}</option>
-                          <option value={420}>{this.convertMinsToHrsMins(420)}</option>
-                          <option value={480}>{this.convertMinsToHrsMins(480)}</option>
-                          <option value={540}>{this.convertMinsToHrsMins(540)}</option>
-                          <option value={600}>{this.convertMinsToHrsMins(600)}</option>
-                          <option value={660}>{this.convertMinsToHrsMins(660)}</option>
-                          <option value={720}>{this.convertMinsToHrsMins(720)}</option>
-                          <option value={780}>{this.convertMinsToHrsMins(780)}</option>
-                          <option value={840}>{this.convertMinsToHrsMins(840)}</option>
+                          <option value={0}>{convertMinsToHrsMins(0)}</option>
+                          <option value={60}>{convertMinsToHrsMins(60)}</option>
+                          <option value={120}>{convertMinsToHrsMins(120)}</option>
+                          <option value={180}>{convertMinsToHrsMins(180)}</option>
+                          <option value={240}>{convertMinsToHrsMins(240)}</option>
+                          <option value={300}>{convertMinsToHrsMins(300)}</option>
+                          <option value={360}>{convertMinsToHrsMins(360)}</option>
+                          <option value={420}>{convertMinsToHrsMins(420)}</option>
+                          <option value={480}>{convertMinsToHrsMins(480)}</option>
+                          <option value={540}>{convertMinsToHrsMins(540)}</option>
+                          <option value={600}>{convertMinsToHrsMins(600)}</option>
+                          <option value={660}>{convertMinsToHrsMins(660)}</option>
+                          <option value={720}>{convertMinsToHrsMins(720)}</option>
+                          <option value={780}>{convertMinsToHrsMins(780)}</option>
+                          <option value={840}>{convertMinsToHrsMins(840)}</option>
                         </Form.Control>
                       </Col>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[3]} value={this.state.storeHours[3].close_time === null ? 1020 : this.state.storeHours[3].close_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={900}>{this.convertMinsToHrsMins(900)}</option>
-                          <option value={960}>{this.convertMinsToHrsMins(960)}</option>
-                          <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
-                          <option value={1080}>{this.convertMinsToHrsMins(1080)}</option>
-                          <option value={1140}>{this.convertMinsToHrsMins(1140)}</option>
-                          <option value={1200}>{this.convertMinsToHrsMins(1200)}</option>
-                          <option value={1260}>{this.convertMinsToHrsMins(1260)}</option>
-                          <option value={1320}>{this.convertMinsToHrsMins(1320)}</option>
-                          <option value={1380}>{this.convertMinsToHrsMins(1380)}</option>
-                          <option value={1440}>{this.convertMinsToHrsMins(1440)}</option>
+                          <option value={900}>{convertMinsToHrsMins(900)}</option>
+                          <option value={960}>{convertMinsToHrsMins(960)}</option>
+                          <option value={1020}>{convertMinsToHrsMins(1020)}</option>
+                          <option value={1080}>{convertMinsToHrsMins(1080)}</option>
+                          <option value={1140}>{convertMinsToHrsMins(1140)}</option>
+                          <option value={1200}>{convertMinsToHrsMins(1200)}</option>
+                          <option value={1260}>{convertMinsToHrsMins(1260)}</option>
+                          <option value={1320}>{convertMinsToHrsMins(1320)}</option>
+                          <option value={1380}>{convertMinsToHrsMins(1380)}</option>
+                          <option value={1440}>{convertMinsToHrsMins(1440)}</option>
                         </Form.Control>
                       </Col>
                     </Form.Row>
@@ -803,35 +744,35 @@ class StoreEditForm extends React.Component {
                     <Form.Row>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[4]} value={this.state.storeHours[4].open_time === null ? 540 : this.state.storeHours[4].open_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={0}>{this.convertMinsToHrsMins(0)}</option>
-                          <option value={60}>{this.convertMinsToHrsMins(60)}</option>
-                          <option value={120}>{this.convertMinsToHrsMins(120)}</option>
-                          <option value={180}>{this.convertMinsToHrsMins(180)}</option>
-                          <option value={240}>{this.convertMinsToHrsMins(240)}</option>
-                          <option value={300}>{this.convertMinsToHrsMins(300)}</option>
-                          <option value={360}>{this.convertMinsToHrsMins(360)}</option>
-                          <option value={420}>{this.convertMinsToHrsMins(420)}</option>
-                          <option value={480}>{this.convertMinsToHrsMins(480)}</option>
-                          <option value={540}>{this.convertMinsToHrsMins(540)}</option>
-                          <option value={600}>{this.convertMinsToHrsMins(600)}</option>
-                          <option value={660}>{this.convertMinsToHrsMins(660)}</option>
-                          <option value={720}>{this.convertMinsToHrsMins(720)}</option>
-                          <option value={780}>{this.convertMinsToHrsMins(780)}</option>
-                          <option value={840}>{this.convertMinsToHrsMins(840)}</option>
+                          <option value={0}>{convertMinsToHrsMins(0)}</option>
+                          <option value={60}>{convertMinsToHrsMins(60)}</option>
+                          <option value={120}>{convertMinsToHrsMins(120)}</option>
+                          <option value={180}>{convertMinsToHrsMins(180)}</option>
+                          <option value={240}>{convertMinsToHrsMins(240)}</option>
+                          <option value={300}>{convertMinsToHrsMins(300)}</option>
+                          <option value={360}>{convertMinsToHrsMins(360)}</option>
+                          <option value={420}>{convertMinsToHrsMins(420)}</option>
+                          <option value={480}>{convertMinsToHrsMins(480)}</option>
+                          <option value={540}>{convertMinsToHrsMins(540)}</option>
+                          <option value={600}>{convertMinsToHrsMins(600)}</option>
+                          <option value={660}>{convertMinsToHrsMins(660)}</option>
+                          <option value={720}>{convertMinsToHrsMins(720)}</option>
+                          <option value={780}>{convertMinsToHrsMins(780)}</option>
+                          <option value={840}>{convertMinsToHrsMins(840)}</option>
                         </Form.Control>
                       </Col>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[4]} value={this.state.storeHours[4].close_time === null ? 1020 : this.state.storeHours[4].close_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={900}>{this.convertMinsToHrsMins(900)}</option>
-                          <option value={960}>{this.convertMinsToHrsMins(960)}</option>
-                          <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
-                          <option value={1080}>{this.convertMinsToHrsMins(1080)}</option>
-                          <option value={1140}>{this.convertMinsToHrsMins(1140)}</option>
-                          <option value={1200}>{this.convertMinsToHrsMins(1200)}</option>
-                          <option value={1260}>{this.convertMinsToHrsMins(1260)}</option>
-                          <option value={1320}>{this.convertMinsToHrsMins(1320)}</option>
-                          <option value={1380}>{this.convertMinsToHrsMins(1380)}</option>
-                          <option value={1440}>{this.convertMinsToHrsMins(1440)}</option>
+                          <option value={900}>{convertMinsToHrsMins(900)}</option>
+                          <option value={960}>{convertMinsToHrsMins(960)}</option>
+                          <option value={1020}>{convertMinsToHrsMins(1020)}</option>
+                          <option value={1080}>{convertMinsToHrsMins(1080)}</option>
+                          <option value={1140}>{convertMinsToHrsMins(1140)}</option>
+                          <option value={1200}>{convertMinsToHrsMins(1200)}</option>
+                          <option value={1260}>{convertMinsToHrsMins(1260)}</option>
+                          <option value={1320}>{convertMinsToHrsMins(1320)}</option>
+                          <option value={1380}>{convertMinsToHrsMins(1380)}</option>
+                          <option value={1440}>{convertMinsToHrsMins(1440)}</option>
                         </Form.Control>
                       </Col>
                     </Form.Row>
@@ -851,35 +792,35 @@ class StoreEditForm extends React.Component {
                     <Form.Row>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[5]} value={this.state.storeHours[5].open_time === null ? 540 : this.state.storeHours[5].open_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={0}>{this.convertMinsToHrsMins(0)}</option>
-                          <option value={60}>{this.convertMinsToHrsMins(60)}</option>
-                          <option value={120}>{this.convertMinsToHrsMins(120)}</option>
-                          <option value={180}>{this.convertMinsToHrsMins(180)}</option>
-                          <option value={240}>{this.convertMinsToHrsMins(240)}</option>
-                          <option value={300}>{this.convertMinsToHrsMins(300)}</option>
-                          <option value={360}>{this.convertMinsToHrsMins(360)}</option>
-                          <option value={420}>{this.convertMinsToHrsMins(420)}</option>
-                          <option value={480}>{this.convertMinsToHrsMins(480)}</option>
-                          <option value={540}>{this.convertMinsToHrsMins(540)}</option>
-                          <option value={600}>{this.convertMinsToHrsMins(600)}</option>
-                          <option value={660}>{this.convertMinsToHrsMins(660)}</option>
-                          <option value={720}>{this.convertMinsToHrsMins(720)}</option>
-                          <option value={780}>{this.convertMinsToHrsMins(780)}</option>
-                          <option value={840}>{this.convertMinsToHrsMins(840)}</option>
+                          <option value={0}>{convertMinsToHrsMins(0)}</option>
+                          <option value={60}>{convertMinsToHrsMins(60)}</option>
+                          <option value={120}>{convertMinsToHrsMins(120)}</option>
+                          <option value={180}>{convertMinsToHrsMins(180)}</option>
+                          <option value={240}>{convertMinsToHrsMins(240)}</option>
+                          <option value={300}>{convertMinsToHrsMins(300)}</option>
+                          <option value={360}>{convertMinsToHrsMins(360)}</option>
+                          <option value={420}>{convertMinsToHrsMins(420)}</option>
+                          <option value={480}>{convertMinsToHrsMins(480)}</option>
+                          <option value={540}>{convertMinsToHrsMins(540)}</option>
+                          <option value={600}>{convertMinsToHrsMins(600)}</option>
+                          <option value={660}>{convertMinsToHrsMins(660)}</option>
+                          <option value={720}>{convertMinsToHrsMins(720)}</option>
+                          <option value={780}>{convertMinsToHrsMins(780)}</option>
+                          <option value={840}>{convertMinsToHrsMins(840)}</option>
                         </Form.Control>
                       </Col>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[5]} value={this.state.storeHours[5].close_time === null ? 1020 : this.state.storeHours[5].close_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={900}>{this.convertMinsToHrsMins(900)}</option>
-                          <option value={960}>{this.convertMinsToHrsMins(960)}</option>
-                          <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
-                          <option value={1080}>{this.convertMinsToHrsMins(1080)}</option>
-                          <option value={1140}>{this.convertMinsToHrsMins(1140)}</option>
-                          <option value={1200}>{this.convertMinsToHrsMins(1200)}</option>
-                          <option value={1260}>{this.convertMinsToHrsMins(1260)}</option>
-                          <option value={1320}>{this.convertMinsToHrsMins(1320)}</option>
-                          <option value={1380}>{this.convertMinsToHrsMins(1380)}</option>
-                          <option value={1440}>{this.convertMinsToHrsMins(1440)}</option>
+                          <option value={900}>{convertMinsToHrsMins(900)}</option>
+                          <option value={960}>{convertMinsToHrsMins(960)}</option>
+                          <option value={1020}>{convertMinsToHrsMins(1020)}</option>
+                          <option value={1080}>{convertMinsToHrsMins(1080)}</option>
+                          <option value={1140}>{convertMinsToHrsMins(1140)}</option>
+                          <option value={1200}>{convertMinsToHrsMins(1200)}</option>
+                          <option value={1260}>{convertMinsToHrsMins(1260)}</option>
+                          <option value={1320}>{convertMinsToHrsMins(1320)}</option>
+                          <option value={1380}>{convertMinsToHrsMins(1380)}</option>
+                          <option value={1440}>{convertMinsToHrsMins(1440)}</option>
                         </Form.Control>
                       </Col>
                     </Form.Row>
@@ -900,35 +841,35 @@ class StoreEditForm extends React.Component {
                     <Form.Row>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[6]} value={this.state.storeHours[6].open_time === null ? 540 : this.state.storeHours[6].open_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={0}>{this.convertMinsToHrsMins(0)}</option>
-                          <option value={60}>{this.convertMinsToHrsMins(60)}</option>
-                          <option value={120}>{this.convertMinsToHrsMins(120)}</option>
-                          <option value={180}>{this.convertMinsToHrsMins(180)}</option>
-                          <option value={240}>{this.convertMinsToHrsMins(240)}</option>
-                          <option value={300}>{this.convertMinsToHrsMins(300)}</option>
-                          <option value={360}>{this.convertMinsToHrsMins(360)}</option>
-                          <option value={420}>{this.convertMinsToHrsMins(420)}</option>
-                          <option value={480}>{this.convertMinsToHrsMins(480)}</option>
-                          <option value={540}>{this.convertMinsToHrsMins(540)}</option>
-                          <option value={600}>{this.convertMinsToHrsMins(600)}</option>
-                          <option value={660}>{this.convertMinsToHrsMins(660)}</option>
-                          <option value={720}>{this.convertMinsToHrsMins(720)}</option>
-                          <option value={780}>{this.convertMinsToHrsMins(780)}</option>
-                          <option value={840}>{this.convertMinsToHrsMins(840)}</option>
+                          <option value={0}>{convertMinsToHrsMins(0)}</option>
+                          <option value={60}>{convertMinsToHrsMins(60)}</option>
+                          <option value={120}>{convertMinsToHrsMins(120)}</option>
+                          <option value={180}>{convertMinsToHrsMins(180)}</option>
+                          <option value={240}>{convertMinsToHrsMins(240)}</option>
+                          <option value={300}>{convertMinsToHrsMins(300)}</option>
+                          <option value={360}>{convertMinsToHrsMins(360)}</option>
+                          <option value={420}>{convertMinsToHrsMins(420)}</option>
+                          <option value={480}>{convertMinsToHrsMins(480)}</option>
+                          <option value={540}>{convertMinsToHrsMins(540)}</option>
+                          <option value={600}>{convertMinsToHrsMins(600)}</option>
+                          <option value={660}>{convertMinsToHrsMins(660)}</option>
+                          <option value={720}>{convertMinsToHrsMins(720)}</option>
+                          <option value={780}>{convertMinsToHrsMins(780)}</option>
+                          <option value={840}>{convertMinsToHrsMins(840)}</option>
                         </Form.Control>
                       </Col>
                       <Col>
                         <Form.Control as="select" disabled={!this.state.weekIsWorking[6]} value={this.state.storeHours[6].close_time === null ? 1020 : this.state.storeHours[6].close_time} onChange={this.handleSelectChange.bind(this)}>
-                          <option value={900}>{this.convertMinsToHrsMins(900)}</option>
-                          <option value={960}>{this.convertMinsToHrsMins(960)}</option>
-                          <option value={1020}>{this.convertMinsToHrsMins(1020)}</option>
-                          <option value={1080}>{this.convertMinsToHrsMins(1080)}</option>
-                          <option value={1140}>{this.convertMinsToHrsMins(1140)}</option>
-                          <option value={1200}>{this.convertMinsToHrsMins(1200)}</option>
-                          <option value={1260}>{this.convertMinsToHrsMins(1260)}</option>
-                          <option value={1320}>{this.convertMinsToHrsMins(1320)}</option>
-                          <option value={1380}>{this.convertMinsToHrsMins(1380)}</option>
-                          <option value={1440}>{this.convertMinsToHrsMins(1440)}</option>
+                          <option value={900}>{convertMinsToHrsMins(900)}</option>
+                          <option value={960}>{convertMinsToHrsMins(960)}</option>
+                          <option value={1020}>{convertMinsToHrsMins(1020)}</option>
+                          <option value={1080}>{convertMinsToHrsMins(1080)}</option>
+                          <option value={1140}>{convertMinsToHrsMins(1140)}</option>
+                          <option value={1200}>{convertMinsToHrsMins(1200)}</option>
+                          <option value={1260}>{convertMinsToHrsMins(1260)}</option>
+                          <option value={1320}>{convertMinsToHrsMins(1320)}</option>
+                          <option value={1380}>{convertMinsToHrsMins(1380)}</option>
+                          <option value={1440}>{convertMinsToHrsMins(1440)}</option>
                         </Form.Control>
                       </Col>
                     </Form.Row>

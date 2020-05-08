@@ -1,28 +1,22 @@
 import React from 'react';
-// import Container from 'react-bootstrap/Container'
 import { Row, Col, Container, Button } from 'react-bootstrap'
 import AdvancedSearch from '../Search/AdvancedSearch';
 import './Homepage.css';
 import paint from '../../assets/abstract-painting.jpg';
 import barber from '../../assets/barber.jpg';
-// import bride_hair from '../../assets/bride_hair.jpg';
 import facials from '../../assets/facials.jpg';
 import hair from '../../assets/hair.jpg';
 import lipstics from '../../assets/lipstics2.jpg';
 import massage from '../../assets/massage3.jpg';
 import nails from '../../assets/nails3.jpg';
 import salon from '../../assets/salon.jpg';
-import paint_line from '../../assets/paint_line.png';
 import Typist from 'react-typist';
 import { useState, useEffect } from 'react'
-// import { useSpring, animated as a } from 'react-spring'
-// import TrackVisibility from 'react-on-screen';
 import VizSensor from 'react-visibility-sensor';
-// import Typing from 'react-typing-animation';
 import Category from './Category.js';
 
 const calc = (x, y) => [-(y - window.innerHeight / 2) / 20, (x - window.innerWidth / 2) / 80, 1.04]
-const trans = (x, y, s) => `perspective(600px) scale(${s})`
+// const trans = (x, y, s) => `perspective(600px) scale(${s})`
 
 
 function useScreenWidth(): number {
@@ -32,11 +26,11 @@ function useScreenWidth(): number {
   useEffect(() => {
     let mounted = true
     let setFromEvent;
-    let setLeaveEvent;
+    // let setLeaveEvent;
 
     if (mounted) {
       setFromEvent = e => setPosition({ xys: calc(e.clientX, e.clientY) });
-      setLeaveEvent = e => setPosition({ xys: [0, 0, 1] })
+      // setLeaveEvent = e => setPosition({ xys: [0, 0, 1] })
       window.addEventListener("mousemove", setFromEvent);
     }
 
@@ -49,66 +43,59 @@ function useScreenWidth(): number {
   return position;
 }
 
-function useScroll(): number {
-  const [scrollPosition, setSrollPosition] = useState(0);
-  const handleScroll = () => {
-    const position = window.pageYOffset;
-    setSrollPosition(position);
-  };
+// function useScroll(): number {
+//   const [scrollPosition, setSrollPosition] = useState(0);
+//   const handleScroll = () => {
+//     const position = window.pageYOffset;
+//     setSrollPosition(position);
+//   };
 
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+//   useEffect(() => {
+//     window.addEventListener('scroll', handleScroll);
+//     return () => {
+//       window.removeEventListener('scroll', handleScroll);
+//     };
+//   }, []);
 
-  return scrollPosition;
-}
+//   return scrollPosition;
+// }
 
-function useResizeWidth(): number {
+// function useResizeWidth(): number {
+//   const [width, setWidth] = useState(window.innerWidth)
+//   useEffect(() => {
+//     let mounted = true
+//     let handleResize;
 
-  const [width, setWidth] = useState(window.innerWidth)
-
-  useEffect(() => {
-    let mounted = true
-    let handleResize;
-
-    if (mounted) {
-      handleResize = () => {
-        setWidth(window.innerWidth)
-      }
-      window.addEventListener('resize', handleResize)
-    }
-    return () => {
-      mounted = false;
-      window.removeEventListener('resize', handleResize)
-    }
-
-  })
-
-  return width;
-}
+//     if (mounted) {
+//       handleResize = () => {
+//         setWidth(window.innerWidth)
+//       }
+//       window.addEventListener('resize', handleResize)
+//     }
+//     return () => {
+//       mounted = false;
+//       window.removeEventListener('resize', handleResize)
+//     }
+//   })
+//   return width;
+// }
 
 function ScreenWidth({ listen, children }) {
   const screenWidth: number = useScreenWidth();
-  // console.log(screenWidth);
   return children(screenWidth);
 
 };
 
-function ScreenResize({ listen, children }) {
-  const resize: number = useResizeWidth();
-  // console.log(screenWidth);
-  return children(resize);
-};
+// function ScreenResize({ listen, children }) {
+//   const resize: number = useResizeWidth();
+//   return children(resize);
+// };
 
-function ScreenScroll({ listen, children }) {
-  const scroll: number = useScroll();
-  // console.log(scroll);
-  return children(scroll);
+// function ScreenScroll({ listen, children }) {
+//   const scroll: number = useScroll();
+//   return children(scroll);
 
-};
+// };
 
 
 class Homepage extends React.Component {

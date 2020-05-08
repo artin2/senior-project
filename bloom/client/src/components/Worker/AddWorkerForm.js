@@ -9,20 +9,18 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import { FaEnvelope } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import Select from 'react-select';
 import {
   addAlert
 } from '../../reduxFolder/actions/alert'
 import store from '../../reduxFolder/store';
-import GridLoader from 'react-spinners/GridLoader'
 import { css } from '@emotion/core'
-
-const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
-
+import GridLoader from 'react-spinners/GridLoader'
+import { convertMinsToHrsMins } from '../helperFunctions'
 const override = css`
   display: block;
   margin: 0 auto;
 `;
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 class AddWorkerForm extends React.Component {
   constructor(props) {
@@ -47,41 +45,8 @@ class AddWorkerForm extends React.Component {
     this.triggerWorkerDisplay = this.triggerWorkerDisplay.bind(this);
   }
 
-  convertMinsToHrsMins(mins) {
-    let h = Math.floor(mins / 60);
-    let m = mins % 60;
-    let am = false
-    if (h == 24) {
-      am = true
-      h -= 12
-    }
-    else if (h < 12) {
-      am = true
-    } else if (h != 12) {
-      h -= 12
-    }
-    h = h < 10 ? '0' + h : h;
-    if (h == 0) {
-      h = '12'
-    }
-    m = m < 10 ? '0' + m : m;
-    if (am) {
-      return `${h}:${m}am`;
-    } else {
-      return `${h}:${m}pm`;
-    }
-
-  }
-
-  handleChange = (event) => {
-
-    this.setState({
-      email: event.target.value
-    })
-  }
-
+  // handle changes in the hours selection
   handleSelectChange = (event) => {
-
     var days = ['formHoursMonday', 'formHoursTuesday', 'formHoursWednesday', 'formHoursThursday', 'formHoursFriday', 'formHoursSaturday', 'formHoursSunday']
     var day = days.indexOf(event.target.id)
     var old_start_time = 0
@@ -108,6 +73,7 @@ class AddWorkerForm extends React.Component {
     })
   };
 
+  // handle change in working day toggle
   handleDayStatusChange = (day) => {
     var updateWeekIsWorking = [
       ...this.state.weekIsWorking.slice(0, day),
@@ -131,6 +97,7 @@ class AddWorkerForm extends React.Component {
   }
 
   componentDidMount() {
+    // fetch store hours on mounting
     fetch(fetchDomain + '/stores/' + this.props.match.params.store_id + "/storeHours", {
       method: "GET",
       headers: {
@@ -138,59 +105,61 @@ class AddWorkerForm extends React.Component {
       },
       credentials: 'include'
     })
-      .then(function (response) {
-        if (response.status !== 200) {
-          // throw an error alert
-          store.dispatch(addAlert(response))
-        }
-        else {
-          return response.json();
-        }
-      })
-      .then(data => {
-        if (data) {
-          let receivedWorkerHours = data.map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
-          let oldWeekIsWorking = this.state.weekIsWorking
-          for(let i = 0; i < receivedWorkerHours.length; i++){
-            if(receivedWorkerHours[i].start_time == null){
-              oldWeekIsWorking[i] = false
-            }
+    .then(function (response) {
+      if (response.status !== 200) {
+        // throw an error alert
+        store.dispatch(addAlert(response))
+      }
+      else {
+        return response.json();
+      }
+    })
+    .then(data => {
+      // on successful retrieval of store data, map worker's potential valid hours accordingly
+      if (data) {
+        let receivedWorkerHours = data.map((day) => ({ start_time: day.open_time, end_time: day.close_time }));
+        let oldWeekIsWorking = this.state.weekIsWorking
+
+        for(let i = 0; i < receivedWorkerHours.length; i++){
+          if(receivedWorkerHours[i].start_time == null){
+            oldWeekIsWorking[i] = false
           }
-
-          let storeWeekIsWorking = JSON.parse(JSON.stringify(oldWeekIsWorking))
-
-          this.setState({
-            storeHours: data,
-            weekIsWorking: oldWeekIsWorking,
-            workerHours: receivedWorkerHours,
-            storeWeekIsWorking: storeWeekIsWorking,
-            loading: false
-          })
         }
-      });
+
+        let storeWeekIsWorking = JSON.parse(JSON.stringify(oldWeekIsWorking))
+
+        this.setState({
+          storeHours: data,
+          weekIsWorking: oldWeekIsWorking,
+          workerHours: receivedWorkerHours,
+          storeWeekIsWorking: storeWeekIsWorking,
+          loading: false
+        })
+      }
+    });
   }
 
   render() {
     const CreateStartTimesForDay = (props) => {
       if(this.state.storeHours[props.day].open_time == null){
-        return <option key={"closed"} value={540}>{this.convertMinsToHrsMins(540)}</option>
+        return <option key={"closed"} value={540}>{convertMinsToHrsMins(540)}</option>
       }
       else{
         let items = [];
         for (let i = this.state.storeHours[props.day].open_time; i <= 840; i += 60) {
-          items.push(<option key={i} value={i}>{this.convertMinsToHrsMins(i)}</option>);
+          items.push(<option key={i} value={i}>{convertMinsToHrsMins(i)}</option>);
         }
         return items;
       }
     }
     const CreateEndTimesForDay = (props) => {
       if(this.state.storeHours[props.day].open_time == null){
-        return <option key={"closed"} value={1020}>{this.convertMinsToHrsMins(1020)}</option>
+        return <option key={"closed"} value={1020}>{convertMinsToHrsMins(1020)}</option>
       }
       else{
         let items = [];
         for (let i = 900; i <= this.state.storeHours[props.day].close_time; i += 60) {
-          items.push(<option key={i} value={i}>{this.convertMinsToHrsMins(i)}</option>);
+          items.push(<option key={i} value={i}>{convertMinsToHrsMins(i)}</option>);
         }
         return items;
       }
@@ -208,6 +177,7 @@ class AddWorkerForm extends React.Component {
           </Col>
         </Row>
       } else {
+        // only display checkboxes for days that the store is open
         let mondayCheckBox = <p>(Closed)</p>
         let tuesdayCheckBox = <p>(Closed)</p>
         let wednesdayCheckBox = <p>(Closed)</p>
@@ -300,6 +270,7 @@ class AddWorkerForm extends React.Component {
                           />
         }
 
+        // worker form after loading
         return <Row className="justify-content-center my-5">
           <Col xs={12} lg={5}>
             <Formik
@@ -312,6 +283,7 @@ class AddWorkerForm extends React.Component {
                 let store_id = this.props.match.params.store_id
                 let triggerWorkerDisplay = this.triggerWorkerDisplay
 
+                // modify worker hours for db
                 values.workerHours = this.state.workerHours.map((day, index) => {
                   if(this.state.weekIsWorking[index]){
                     return day
@@ -321,6 +293,7 @@ class AddWorkerForm extends React.Component {
                   }
                 })
 
+                // upload worker to db
                 fetch(fetchDomain + '/stores/addWorker/' + store_id, {
                   method: "POST",
                   headers: {
@@ -329,20 +302,20 @@ class AddWorkerForm extends React.Component {
                   credentials: 'include',
                   body: JSON.stringify(values)
                 })
-                  .then(function (response) {
-                    if (response.status !== 200) {
-                      store.dispatch(addAlert(response))
-                    }
-                    else {
-                      return response.json();
-                    }
-                  })
-                  .then(function (data) {
-                    // redirect to home page signed in
-                    if (data) {
-                      triggerWorkerDisplay(data)
-                    }
-                  })
+                .then(function (response) {
+                  if (response.status !== 200) {
+                    store.dispatch(addAlert(response))
+                  }
+                  else {
+                    return response.json();
+                  }
+                })
+                .then(function (data) {
+                  // upon successful worker upload, show the worker
+                  if (data) {
+                    triggerWorkerDisplay(data)
+                  }
+                })
               }}
 
             >
@@ -369,7 +342,7 @@ class AddWorkerForm extends React.Component {
                           placeholder="Email"
                           name="email"
                           autoFocus
-                          onChange={this.handleChange}
+                          onChange={handleChange}
                           onBlur={handleBlur}
                           className={touched.email && errors.email ? "error" : null}
                         />

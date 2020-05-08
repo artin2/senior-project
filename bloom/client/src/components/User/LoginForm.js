@@ -1,7 +1,5 @@
 import React from 'react';
 import './LoginForm.css'
-import Container from 'react-bootstrap/Container'
-import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
@@ -10,12 +8,9 @@ import { FaEnvelope, FaLock } from 'react-icons/fa';
 import GoogleLogin from 'react-google-login';
 import FacebookLogin from 'react-facebook-login';
 import {TiSocialFacebookCircular, TiSocialGooglePlus} from 'react-icons/ti';
-import paint from '../../assets/abstract-painting.jpg';
-import { Link } from "react-router-dom";
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import {login} from '../../reduxFolder/redux.js'
-// import ReactDOM from 'react-dom';
 // import { useGoogleLogin } from 'react-google-login';
 // import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 

@@ -173,12 +173,11 @@ class ServiceEditForm extends React.Component {
         let preselectedCategories = []
 
         data[0].category.map((category, indx) => {
-
           convertedCategory.push({ value: indx, label: helper.longerVersion(category)})
-          if(this.state.service.category == category) {
+          if(this.state.service.category === category) {
             preselectedCategories.push({ value: indx, label: helper.longerVersion(category)})
           }
-
+          return category
         });
 
         this.setState({
@@ -212,7 +211,7 @@ class ServiceEditForm extends React.Component {
         if(this.state.service.workers.includes(worker.id)) {
           preselectedWorkers.push({value: worker.id, label: worker.first_name + " " + worker.last_name})
         }
-
+        return worker
       });
 
       this.setState({
@@ -274,7 +273,7 @@ class ServiceEditForm extends React.Component {
                     return val.value;
                   })
   
-                  if(values.category.length == 0 || values.workers.length == 0) {
+                  if(values.category.length === 0 || values.workers.length === 0) {
                     return;
                   }
   
