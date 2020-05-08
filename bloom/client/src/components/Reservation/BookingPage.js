@@ -210,8 +210,14 @@ class BookingPage extends React.Component {
                           <div className="error-message">{errors.email}</div>
                         ) : null}
                       </Form.Group>
-
-                      <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
+                      <Row className="justify-content-center">
+                        <Col xs="11" lg="3" className="mb-3">
+                        <Button block style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={() => this.props.handleSubmit(false)}>Previous</Button>
+                        </Col>
+                        <Col xs="11" lg="3">
+                        <Button block style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
+                        </Col>
+                      </Row>
                     </Form>
                   )}
               </Formik>

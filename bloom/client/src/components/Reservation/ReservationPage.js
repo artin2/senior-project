@@ -10,6 +10,7 @@ import GridLoader from 'react-spinners/GridLoader'
 import BookingPage from './BookingPage';
 import RedirectToLogin from './RedirectToLogin'
 import Cookies from 'js-cookie';
+import HorizontalLinearStepper from './BookingStepper';
 const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 const override = css`
@@ -34,6 +35,7 @@ class ReservationPage extends React.Component {
       storeHours: [],
       appointments: "original value"
     };
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   updateReservation = (removal, currService) => {
@@ -60,9 +62,16 @@ class ReservationPage extends React.Component {
     })
   }
 
-  handleSubmit = () => {
-    if (this.state.currentStep < 4) {
+  handleSubmit = (goNext) => {
+    console.log("goNext is: ", goNext)
+    console.log("currentstep is: ", this.state.currentStep)
+    if (goNext && this.state.currentStep < 4) {
       var newStep = this.state.currentStep + 1
+      this.setState({
+        currentStep: newStep
+      })
+    } else if(!goNext && this.state.currentStep > 1) {
+      var newStep = this.state.currentStep - 1
       this.setState({
         currentStep: newStep
       })
@@ -191,9 +200,9 @@ class ReservationPage extends React.Component {
           return <DateSelection time={this.state.time}  store_id={this.props.match.params.store_id} selectedServices={this.state.selectedServices} storeHours={this.state.storeHours} workersSchedules={this.state.workersSchedules} handleSubmit={this.handleSubmit} updateAppointments={this.updateAppointments}/>
         } else {
           if(Cookies.get('user')){
-            return <BookingPage appointments={this.state.appointments} store_id={this.props.match.params.store_id} history={this.props.history}/>
+            return <BookingPage handleSubmit={this.handleSubmit} appointments={this.state.appointments} store_id={this.props.match.params.store_id} history={this.props.history}/>
           } else {
-            return <RedirectToLogin appointments={this.state.appointments} store_id={this.props.match.params.store_id} history={this.props.history}/>
+            return <RedirectToLogin handleSubmit={this.handleSubmit} appointments={this.state.appointments} store_id={this.props.match.params.store_id} history={this.props.history}/>
           }
         }
       }
@@ -238,23 +247,17 @@ class ReservationPage extends React.Component {
 
     return (
       <Container fluid>
-        <Row noGutters className="pt-3 pb-0">
-          <Col xs="1">
-            <DisplayBackButton />
-          </Col>
-          <Col xs="11" className="text-left">
-            <h2>Step {this.state.currentStep}</h2>
-          </Col>
-        </Row>
-
         <Row>
           <Col xs={12} lg={8} className="largeMarginBottom">
+            <Row noGutters className="pt-3 pb-0">
+              <HorizontalLinearStepper currentStep={this.state.currentStep}/>
+            </Row>
             <DisplayByStep />
           </Col>
           <Col xs={12} lg={4} className="d-none d-lg-block">
             <Card
               text='dark'
-              className='shoppingCart mt-0 add-shadow'
+              className='shoppingCart mt-3 add-shadow'
             >
               <Card.Header>Shopping Cart</Card.Header>
               <Card.Body className='pt-0'>

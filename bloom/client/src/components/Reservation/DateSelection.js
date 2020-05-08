@@ -76,7 +76,7 @@ class DateSelection extends React.Component {
 
   handleSlotClick = (schedule) => {
     this.props.updateAppointments(schedule)
-    this.props.handleSubmit()
+    this.props.handleSubmit(true)
   }
 
   componentDidMount() {
@@ -251,6 +251,11 @@ class DateSelection extends React.Component {
               </Col>
             </Row>
             <DisplayWithLoading />
+            <Row className="justify-content-center mt-4">
+              <Col md="3">
+                <Button block style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={() => this.props.handleSubmit(false)}>Previous</Button>
+              </Col>
+            </Row>
           </Card.Body>
         </div>
       </Card>
