@@ -270,7 +270,7 @@ class Profile extends React.Component {
       } else if(this.props.user.role == '2') {
         {/* CITATION: https://bootsnipp.com/snippets/M48pA */}
         return <Row className="justify-content-center my-4 mx-1">
-        <Col xs="11" md="3" className="mb-4">
+        <Col xs="11" lg="3" className="mb-4">
         <div className="profile-sidebar">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
@@ -314,7 +314,7 @@ class Profile extends React.Component {
           </div>
         </Col>
 
-        <Col xs="11" md="9">
+        <Col xs="11" lg="9">
         <div className="profile-content">
             <RenderProfileContent/>
           </div>
@@ -329,11 +329,11 @@ class Profile extends React.Component {
         }
         
         return <Row className="justify-content-center my-5">
-        <Col xs="11" md="3">
+        <Col xs="11" lg="3">
         <div className="profile-sidebar mb-5">
             {/* <!-- SIDEBAR USERPIC --> */}
             <div className="profile-userpic">
-              <Image style={{height: '300px', width: '300px'}} src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
+              <Image style={{height: '200px', width: '200px'}} src={this.state.picture != null ? this.state.picture.url : "https://i.redd.it/v0caqchbtn741.jpg"} className="img-responsive" alt="" rounded />
             </div>
             {/* <!-- END SIDEBAR USERPIC --> */}
 
@@ -358,7 +358,7 @@ class Profile extends React.Component {
           </div>
         </Col>
 
-        <Col xs="11" md="9">
+        <Col xs="11" lg="9">
         <div className="profile-content">
             <RenderProfileContent/>
           </div>
