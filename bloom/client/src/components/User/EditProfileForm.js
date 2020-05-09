@@ -16,6 +16,47 @@ import { connect } from 'react-redux';
 import { css } from '@emotion/core'
 import GridLoader from 'react-spinners/GridLoader'
 import { Image } from 'react-bootstrap';
+import { FilePond, registerPlugin } from 'react-filepond';
+import 'filepond/dist/filepond.min.css';
+import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
+import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
+import FilePondPluginImagePreview from "filepond-plugin-image-preview";
+import FilePondPluginImageCrop from "filepond-plugin-image-crop";
+import FilePondPluginImageResize from "filepond-plugin-image-resize";
+import FilePondPluginImageTransform from "filepond-plugin-image-transform";
+import FilePondPluginImageEdit from "filepond-plugin-image-edit";
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+
+// Register the plugins for filepond
+registerPlugin(
+  FilePondPluginFileValidateType,
+  FilePondPluginImageExifOrientation,
+  FilePondPluginImagePreview,
+  FilePondPluginImageCrop,
+  FilePondPluginImageResize,
+  FilePondPluginImageTransform,
+  FilePondPluginImageEdit
+);
+// FilePond.create(
+//   document.querySelector('input'),
+//   {
+//     labelIdle: `Drag & Drop your picture or <span class="filepond--label-action">Browse</span>`,
+//     imagePreviewHeight: 170,
+//     imageCropAspectRatio: '1:1',
+//     imageResizeTargetWidth: 200,
+//     imageResizeTargetHeight: 200,
+//     stylePanelLayout: 'compact circle',
+//     styleLoadIndicatorPosition: 'center bottom',
+//     styleProgressIndicatorPosition: 'right bottom',
+//     styleButtonRemoveItemPosition: 'left bottom',
+//     styleButtonProcessItemPosition: 'right bottom',
+
+//     // // Use Doka.js as image editor
+//     // imageEditEditor: Doka.create({
+//     //   utils: ['crop', 'filter', 'color']
+//     // })
+//   }
+// );
 const override = css`
   display: block;
   margin: 0 auto;
@@ -33,6 +74,7 @@ class EditProfileForm extends React.Component {
         password_confirmation: '',
         id: ''
       },
+      files: [],
       picture: null,
       toUpload: 0,
       uploaded: 0,
@@ -72,6 +114,10 @@ class EditProfileForm extends React.Component {
       .min(1, "Must upload a picture")
       .max(1, "Too many pictures!")
     });
+  }
+
+  handleInit() {
+    console.log('FilePond instance has initialised', this.pond);
   }
 
   deleteFileChangeHandler = async (event) => {
@@ -146,7 +192,9 @@ class EditProfileForm extends React.Component {
               <Form.Row className="justify-content-center">
                 <Form.Label><h5>Delete Profile Picture</h5></Form.Label>
               </Form.Row>
-              <Image style={{height: "400px", width: "400px"}} fluid src={this.state.picture.url} alt={"Pic 1"} />
+              <div className="profile-userpic">
+                <Image style={{height: "300px", width: "300px"}} fluid src={this.state.picture.url} alt={"Pic 1"} />
+              </div>
               <Form.Check
                 // style={{marginLeft: 30}}
                 custom
@@ -223,6 +271,45 @@ class EditProfileForm extends React.Component {
                   handleSubmit}) => (
                 <Form className="rounded">
                   <h3>Edit Profile</h3>
+                  {del}
+    
+                  <Form.Group controlId="picture">
+                    <Form.Label><h5>Add Profile Picture</h5></Form.Label>
+                    <br/>
+                    {/* <input
+                      onChange={event => this.fileChangedHandler(event)}
+                      type="file"
+                      className={touched.picture && errors.picture ? "error" : null}
+                    /> */}
+                      <FilePond ref={ref => this.pond = ref}
+                        files={this.state.files}
+                        // allowMultiple={false}
+                        // server="http://localhost/endpoint"
+                        labelIdle={`Drag & Drop your picture or <span class="filepond--label-action">Browse</span>`}
+                        imagePreviewHeight={170}
+                        allowImageCrop={true}
+                        allowImageTransform={true}
+                        imageCropAspectRatio={'1:1'}
+                        imageResizeTargetWidth={200}
+                        imageResizeTargetHeight={200}
+                        stylePanelLayout='compact circle'
+                        styleLoadIndicatorPosition='center bottom'
+                        styleProgressIndicatorPosition='right bottom'
+                        styleButtonRemoveItemPosition='left bottom'
+                        styleButtonProcessItemPosition='right bottom'
+                        oninit={() => this.handleInit() }
+                        onupdatefiles={(fileItems) => {
+                          console.log("filename is: ", fileItems[0])
+                            // Set current file objects to this.state
+                            this.setState({
+                                files: fileItems.map(fileItem => {console.log("file is: ", fileItem); return fileItem.file})
+                            });
+                        }}>
+                    </FilePond>
+                    {touched.pictureCount && errors.pictureCount ? (
+                      <div className="error-message">{errors.pictureCount}</div>
+                    ): null}
+                  </Form.Group>
 
                   <Form.Group controlId="formFirstName">
                     <InputGroup>
@@ -326,22 +413,6 @@ class EditProfileForm extends React.Component {
                       <div className="error-message">{errors.password_confirmation}</div>
                     ): null}
                   </Form.Group>
-
-                  {del}
-    
-                    <Form.Group controlId="picture">
-                      <Form.Label><h5>Add Profile Picture</h5></Form.Label>
-                      <br/>
-                      <input
-                        onChange={event => this.fileChangedHandler(event)}
-                        type="file"
-                        className={touched.picture && errors.picture ? "error" : null}
-                      />
-                      {touched.pictureCount && errors.pictureCount ? (
-                        <div className="error-message">{errors.pictureCount}</div>
-                      ): null}
-                    </Form.Group>
-
                   <Button style={{backgroundColor: '#8CAFCB', border: '0px'}} onClick={handleSubmit}>Submit</Button>
                 </Form>
               )}
