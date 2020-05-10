@@ -15,9 +15,10 @@ import { getPictures, deleteHandler, uploadHandler } from '../s3'
 import { connect } from 'react-redux';
 import { css } from '@emotion/core'
 import GridLoader from 'react-spinners/GridLoader'
-import { Image } from 'react-bootstrap';
-import { FilePond, registerPlugin } from 'react-filepond';
+import { Image, Modal } from 'react-bootstrap';
+import { FilePond, registerPlugin, File } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
+import CropperEditor from './Cropper';
 import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
 import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
@@ -26,6 +27,7 @@ import FilePondPluginImageResize from "filepond-plugin-image-resize";
 import FilePondPluginImageTransform from "filepond-plugin-image-transform";
 import FilePondPluginImageEdit from "filepond-plugin-image-edit";
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+const fetchDomain = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_FETCH_DOMAIN_PROD : process.env.REACT_APP_FETCH_DOMAIN_DEV;
 
 // Register the plugins for filepond
 registerPlugin(
@@ -35,8 +37,10 @@ registerPlugin(
   FilePondPluginImageCrop,
   FilePondPluginImageResize,
   FilePondPluginImageTransform,
-  FilePondPluginImageEdit
+  FilePondPluginImageEdit,
 );
+
+const pond = React.createRef();
 // FilePond.create(
 //   document.querySelector('input'),
 //   {
@@ -76,6 +80,31 @@ class EditProfileForm extends React.Component {
       },
       files: [],
       picture: null,
+      image: null,
+      modalShow: false,
+      editor: {
+        // Called by FilePond to edit the image
+        // - should open your image editor
+        // - receives file object and image edit instructions
+        open: (file, instructions) => {
+          console.log(instructions);
+          this.setModalShow(true);
+          this.setState({image: (URL.createObjectURL(file))});
+        },
+      
+        // Callback set by FilePond
+        // - should be called by the editor when user confirms editing
+        // - should receive output object, resulting edit information
+        onconfirm: output => {},
+      
+        // Callback set by FilePond
+        // - should be called by the editor when user cancels editing
+        oncancel: () => {},
+      
+        // Callback set by FilePond
+        // - should be called by the editor when user closes the editor
+        onclose: () => {}
+      },
       toUpload: 0,
       uploaded: 0,
       deleted: 0,
@@ -114,11 +143,20 @@ class EditProfileForm extends React.Component {
       .min(1, "Must upload a picture")
       .max(1, "Too many pictures!")
     });
+    this.handleEdit = this.handleEdit.bind(this);
   }
 
   handleInit() {
     console.log('FilePond instance has initialised', this.pond);
   }
+
+  handleEdit (data) {
+    console.log('submit');
+    console.log("data is: ", data)
+    this.state.editor.onconfirm({
+      data
+    });
+  };
 
   deleteFileChangeHandler = async (event) => {
     if(event.target.checked){
@@ -150,6 +188,12 @@ class EditProfileForm extends React.Component {
         pathname: '/users/' + this.props.user.id,
       })
     }
+  }
+
+  setModalShow(condition) {
+    this.setState({
+      modalShow: condition
+    })
   }
 
   async componentDidMount(){
@@ -281,31 +325,29 @@ class EditProfileForm extends React.Component {
                       type="file"
                       className={touched.picture && errors.picture ? "error" : null}
                     /> */}
-                      <FilePond ref={ref => this.pond = ref}
-                        files={this.state.files}
+
+                    <div style={{ margin: 10 }}>
+                      <FilePond
+                        ref={pond}
+                        name={"file"}
                         // allowMultiple={false}
-                        // server="http://localhost/endpoint"
-                        labelIdle={`Drag & Drop your picture or <span class="filepond--label-action">Browse</span>`}
-                        imagePreviewHeight={170}
-                        allowImageCrop={true}
-                        allowImageTransform={true}
-                        imageCropAspectRatio={'1:1'}
-                        imageResizeTargetWidth={200}
-                        imageResizeTargetHeight={200}
-                        stylePanelLayout='compact circle'
-                        styleLoadIndicatorPosition='center bottom'
-                        styleProgressIndicatorPosition='right bottom'
-                        styleButtonRemoveItemPosition='left bottom'
-                        styleButtonProcessItemPosition='right bottom'
-                        oninit={() => this.handleInit() }
-                        onupdatefiles={(fileItems) => {
-                          console.log("filename is: ", fileItems[0])
-                            // Set current file objects to this.state
-                            this.setState({
-                                files: fileItems.map(fileItem => {console.log("file is: ", fileItem); return fileItem.file})
-                            });
-                        }}>
-                    </FilePond>
+                        // allowImageCrop={true}
+                        // allowImageTransform={true}
+                        // imageCropAspectRatio={'1:1'}
+                        // imageResizeTargetWidth={200}
+                        // imageResizeTargetHeight={200}
+                        // imageEditEditor={this.state.editor}
+                        instantUpload={false}
+                        // stylePanelLayout='compact circle'
+                        // styleLoadIndicatorPosition='center bottom'
+                        // styleProgressIndicatorPosition='right bottom'
+                        // styleButtonRemoveItemPosition='left bottom'
+                        // styleButtonProcessItemPosition='right bottom'
+                        server={fetchDomain + "/profiles/" + this.props.user.id}
+                      >
+                      </FilePond>
+                    </div>
+                    <CropperEditor image={this.state.image} show={this.state.modalShow} onCrop={this.handleEdit} onHide={() => {this.setModalShow(false)}} pond={pond}/>
                     {touched.pictureCount && errors.pictureCount ? (
                       <div className="error-message">{errors.pictureCount}</div>
                     ): null}

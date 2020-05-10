@@ -57,7 +57,8 @@ async function getImages(req, res) {
         url: signedUrl
       })
     }
-
+    console.log("signed urlls is: ")
+    console.log(signedUrls)
     helper.querySuccess(res, signedUrls, "Successfuly got pictures")
   } catch (e) {
     console.log("Error getting images", e)

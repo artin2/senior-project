@@ -254,6 +254,13 @@ app.post('/deleteImages', withAuth, async (req, res) => {
   await s3.deleteImages(req, res);
 });
 
+app.post('/profiles/:user_id', async(req, res) => {
+  console.log("hit the get profile pic route")
+  console.log("req.files is: ", req.files)
+  helper.querySuccess(res, 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg', "Successfuly got profile")
+  // await s3.getProfilePic(req, res);
+})
+
 
 //Need to fix this: not sure what name of cookie is
 // EDIT: don't think we even need this..
