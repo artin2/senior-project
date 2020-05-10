@@ -41,26 +41,6 @@ registerPlugin(
 );
 
 const pond = React.createRef();
-// FilePond.create(
-//   document.querySelector('input'),
-//   {
-//     labelIdle: `Drag & Drop your picture or <span class="filepond--label-action">Browse</span>`,
-//     imagePreviewHeight: 170,
-//     imageCropAspectRatio: '1:1',
-//     imageResizeTargetWidth: 200,
-//     imageResizeTargetHeight: 200,
-//     stylePanelLayout: 'compact circle',
-//     styleLoadIndicatorPosition: 'center bottom',
-//     styleProgressIndicatorPosition: 'right bottom',
-//     styleButtonRemoveItemPosition: 'left bottom',
-//     styleButtonProcessItemPosition: 'right bottom',
-
-//     // // Use Doka.js as image editor
-//     // imageEditEditor: Doka.create({
-//     //   utils: ['crop', 'filter', 'color']
-//     // })
-//   }
-// );
 const override = css`
   display: block;
   margin: 0 auto;
@@ -78,7 +58,13 @@ class EditProfileForm extends React.Component {
         password_confirmation: '',
         id: ''
       },
-      files: [],
+      files:
+        [{
+        source: this.props.picture.url,
+        options: {
+            type: 'local'
+        }
+      }],
       picture: null,
       image: null,
       modalShow: false,
@@ -231,24 +217,11 @@ class EditProfileForm extends React.Component {
     
   render() {
     let del = true
-    if(this.state.picture){
-      del = <Form.Group controlId="pictureCount">
-              <Form.Row className="justify-content-center">
-                <Form.Label><h5>Delete Profile Picture</h5></Form.Label>
-              </Form.Row>
-              <div className="profile-userpic">
-                <Image style={{height: "300px", width: "300px"}} fluid src={this.state.picture.url} alt={"Pic 1"} />
-              </div>
-              <Form.Check
-                // style={{marginLeft: 30}}
-                custom
-                className="form-custom"
-                id={this.state.picture.key}
-                label={this.state.picture.key.split('/').slice(-1)[0]}
-                onChange={event => this.deleteFileChangeHandler(event)}
-              />
-            </Form.Group>
-    }
+    const onProcessFile = (error, file) => {
+      console.log("onProcessFile", file); // prints file ok
+      console.log("onProcessFile id", file.id); // prints file.id ok
+      console.log("onProcessFile serverId", file.serverId); // it prints undefined
+    };
 
     if(this.state.isLoading){
       return <Row className="vertical-center">
@@ -263,6 +236,9 @@ class EditProfileForm extends React.Component {
             </Row>
     }
     else{
+      // lord forgive me for writing this hack
+      {document.getElementsByClassName("filepond--file-wrapper")[0] && (document.getElementsByClassName("filepond--file-wrapper")[0].style['background-image'] = 'url(' + this.props.picture.url + ')')}
+      {document.getElementsByClassName("filepond--file-wrapper")[0] && (document.getElementsByClassName("filepond--file-wrapper")[0].style['backgroundSize'] = 'cover')}
       return (
         <Container fluid>
           <Row className="justify-content-center my-5">
@@ -314,44 +290,55 @@ class EditProfileForm extends React.Component {
                   handleBlur,
                   handleSubmit}) => (
                 <Form className="rounded">
-                  <h3>Edit Profile</h3>
-                  {del}
-    
                   <Form.Group controlId="picture">
-                    <Form.Label><h5>Add Profile Picture</h5></Form.Label>
-                    <br/>
-                    {/* <input
-                      onChange={event => this.fileChangedHandler(event)}
-                      type="file"
-                      className={touched.picture && errors.picture ? "error" : null}
-                    /> */}
-
-                    <div style={{ margin: 10 }}>
-                      <FilePond
-                        ref={pond}
-                        name={"file"}
-                        // allowMultiple={false}
-                        // allowImageCrop={true}
-                        // allowImageTransform={true}
-                        // imageCropAspectRatio={'1:1'}
-                        // imageResizeTargetWidth={200}
-                        // imageResizeTargetHeight={200}
-                        // imageEditEditor={this.state.editor}
-                        instantUpload={false}
-                        // stylePanelLayout='compact circle'
-                        // styleLoadIndicatorPosition='center bottom'
-                        // styleProgressIndicatorPosition='right bottom'
-                        // styleButtonRemoveItemPosition='left bottom'
-                        // styleButtonProcessItemPosition='right bottom'
-                        server={fetchDomain + "/profiles/" + this.props.user.id}
-                      >
-                      </FilePond>
-                    </div>
+                    <FilePond
+                      ref={pond}
+                      allowMultiple={false}
+                      allowImageCrop={true}
+                      allowImageTransform={true}
+                      imageCropAspectRatio={'1:1'}
+                      imageResizeTargetWidth={200}
+                      imageResizeTargetHeight={200}
+                      imageEditEditor={this.state.editor}
+                      instantUpload={false}
+                      files={this.state.files}
+                      stylePanelLayout='compact circle'
+                      styleLoadIndicatorPosition='center bottom'
+                      styleProgressIndicatorPosition='right bottom'
+                      styleButtonRemoveItemPosition='left bottom'
+                      styleButtonProcessItemPosition='right bottom'
+                      onupdatefiles={fileItems => {
+                        // Set currently active file objects to this.state
+                        this.setState({
+                          files: fileItems.map(fileItem => fileItem.file)
+                        });
+                      }}
+                      server={{
+                        load: (source, load, error, progress, abort, headers) => {
+                          var myRequest = new Request(source);
+                          console.log("fetching")
+                          const options = {
+                            method: 'get',
+                            headers: new Headers({'content-type': 'application/json'}),
+                            mode: 'no-cors'}
+                          fetch(myRequest, options).then(function(response) {
+                            response.blob().then(function(myBlob) {
+                              load(myBlob);
+                            });
+                          });
+                        }
+                      }}
+                      onprocessfile={onProcessFile}
+                      onwarning={(error) => {console.log(error)}}
+                    >
+                    </FilePond>
                     <CropperEditor image={this.state.image} show={this.state.modalShow} onCrop={this.handleEdit} onHide={() => {this.setModalShow(false)}} pond={pond}/>
                     {touched.pictureCount && errors.pictureCount ? (
                       <div className="error-message">{errors.pictureCount}</div>
                     ): null}
                   </Form.Group>
+
+                  <h1>Edit Profile</h1>
 
                   <Form.Group controlId="formFirstName">
                     <InputGroup>
