@@ -4,10 +4,6 @@ import "cropperjs/dist/cropper.css";
 import "./Cropper.css"
 import { Modal, Button } from "react-bootstrap";
 class CropperEditor extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   setCroppedData (pond) {
     let absLeft = pond.current.getCropBoxData().left - pond.current.getCanvasData().left
     let absTop = pond.current.getCropBoxData().top - pond.current.getCanvasData().top
@@ -15,9 +11,6 @@ class CropperEditor extends React.Component {
     let naturalHeight = pond.current.getImageData().height
   
     /* Center point of crop area in percent. */
-    console.log("abs left is: ", absLeft)
-    console.log("cropped width is: ", pond.current.getCropBoxData().width)
-    console.log("natural width is: ", naturalWidth)
     const percentX = (absLeft + pond.current.getCropBoxData().width / 2) / naturalWidth
     const percentY = (absTop + pond.current.getCropBoxData().height / 2) / naturalHeight
   
@@ -36,7 +29,6 @@ class CropperEditor extends React.Component {
     const rectHeight = cy * 2 * height
   
     const zoom = Math.max(rectWidth / pond.current.getCropBoxData().width, rectHeight / pond.current.getCropBoxData().height)
-    console.log("zoom is: ", zoom)
     /* Callback filepond. */
     let data = { crop: {
           center: {
@@ -52,8 +44,10 @@ class CropperEditor extends React.Component {
           aspectRatio: 1
         }
     }
-    console.log("data in modal is: ", data)
-    this.props.onCrop(data)
+    pond.current.getCroppedCanvas().toBlob((blob) => {
+      this.props.onCrop(data, blob)
+      }
+    )
     this.props.onHide()
   }
 

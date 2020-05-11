@@ -16,3 +16,7 @@ and (min-width : 992px) {
     width: 200px;
   }
 }
+
+button.filepond--file-action-button.filepond--action-process-item {
+  display: none;
+}

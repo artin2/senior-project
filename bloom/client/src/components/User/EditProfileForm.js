@@ -15,8 +15,7 @@ import { getPictures, deleteHandler, uploadHandler } from '../s3'
 import { connect } from 'react-redux';
 import { css } from '@emotion/core'
 import GridLoader from 'react-spinners/GridLoader'
-import { Image, Modal } from 'react-bootstrap';
-import { FilePond, registerPlugin, File } from 'react-filepond';
+import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
 import CropperEditor from './Cropper';
 import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
@@ -58,14 +57,8 @@ class EditProfileForm extends React.Component {
         password_confirmation: '',
         id: ''
       },
-      files:
-        [{
-        source: this.props.picture.url,
-        options: {
-            type: 'local'
-        }
-      }],
-      picture: null,
+      files: [],
+      originalFiles: [],
       image: null,
       modalShow: false,
       editor: {
@@ -73,7 +66,6 @@ class EditProfileForm extends React.Component {
         // - should open your image editor
         // - receives file object and image edit instructions
         open: (file, instructions) => {
-          console.log(instructions);
           this.setModalShow(true);
           this.setState({image: (URL.createObjectURL(file))});
         },
@@ -124,24 +116,19 @@ class EditProfileForm extends React.Component {
       password_confirmation: Yup.string()
       .oneOf([Yup.ref('password')], 'Passwords do not match')
       .required("Password confirmation is required"),
-      pictureCount: Yup.number()
-      .required("Pictures are required")
-      .min(1, "Must upload a picture")
-      .max(1, "Too many pictures!")
     });
     this.handleEdit = this.handleEdit.bind(this);
   }
 
-  handleInit() {
-    console.log('FilePond instance has initialised', this.pond);
-  }
-
-  handleEdit (data) {
-    console.log('submit');
+  handleEdit (data, item) {
     console.log("data is: ", data)
+    console.log("item is: ", item)
     this.state.editor.onconfirm({
       data
     });
+    this.setState({
+      croppedFile: item
+    })
   };
 
   deleteFileChangeHandler = async (event) => {
@@ -185,8 +172,19 @@ class EditProfileForm extends React.Component {
   async componentDidMount(){
     if(this.props.picture){
       this.setState({
-        picture: this.props.picture,
-        uploaded: 1,
+        files: [{
+          source: this.props.picture.url,
+          options: {
+              type: 'local'
+          }
+        }],
+        originalFiles: [{
+          source: this.props.picture.url,
+          options: {
+              type: 'local'
+          }
+        }],
+        key: this.props.picture.key,
         isLoading: false
       })
     }
@@ -198,14 +196,24 @@ class EditProfileForm extends React.Component {
         if(picturesFetched.length > 0){
           // check count!!!!!
           await this.setState({
-            picture: picturesFetched[0],
-            uploaded: 1,
+            files: [{
+              source: picturesFetched[0].url,
+              options: {
+                  type: 'local'
+              }
+            }],
+            originalFiles: [{
+              source: this.props.picture.url,
+              options: {
+                  type: 'local'
+              }
+            }],
+            key: this.props.picture.key,
             isLoading: false
           })
         }
         else{
           await this.setState({
-            uploaded: 0,
             isLoading: false
           })
         }
@@ -216,13 +224,6 @@ class EditProfileForm extends React.Component {
   }
     
   render() {
-    let del = true
-    const onProcessFile = (error, file) => {
-      console.log("onProcessFile", file); // prints file ok
-      console.log("onProcessFile id", file.id); // prints file.id ok
-      console.log("onProcessFile serverId", file.serverId); // it prints undefined
-    };
-
     if(this.state.isLoading){
       return <Row className="vertical-center">
                <Col>
@@ -236,9 +237,11 @@ class EditProfileForm extends React.Component {
             </Row>
     }
     else{
-      // lord forgive me for writing this hack
-      {document.getElementsByClassName("filepond--file-wrapper")[0] && (document.getElementsByClassName("filepond--file-wrapper")[0].style['background-image'] = 'url(' + this.props.picture.url + ')')}
-      {document.getElementsByClassName("filepond--file-wrapper")[0] && (document.getElementsByClassName("filepond--file-wrapper")[0].style['backgroundSize'] = 'cover')}
+      // lord forgive me for writing this hack, fix getting s3 images on load to avoid this
+      document.getElementsByClassName("filepond--file-wrapper")[0] && this.props.picture && (document.getElementsByClassName("filepond--file-wrapper")[0].style['background-image'] = 'url(' + this.props.picture.url + ')')
+      document.getElementsByClassName("filepond--file-wrapper")[0] && (document.getElementsByClassName("filepond--file-wrapper")[0].style['backgroundSize'] = 'cover')
+      // remove this whence they allow you customize buttons more with filepond. EditItem prop doesn't exist as of rn
+      document.getElementsByClassName("filepond--action-edit-item")[0] && (document.getElementsByClassName("filepond--action-edit-item")[0].dataset.align = "bottom right")
       return (
         <Container fluid>
           <Row className="justify-content-center my-5">
@@ -252,35 +255,46 @@ class EditProfileForm extends React.Component {
                   password: '',
                   password_confirmation: '',
                   id: 0,
-                  picture: [],
-                  pictureCount: this.state.uploaded + this.state.toUpload - this.state.deleted,
                 }}
                 validationSchema={this.yupValidationSchema}
                 onSubmit={async (values) => {
                   values.id = this.props.user.id
                   values.role = this.props.user.role
-
-                  // remove files from s3
-                  if(this.state.keys.length > 0){
-                    try {
-                      await deleteHandler(this.state.keys)
-                    } catch (e) {
-                      console.log("Error! Could not delete images from s3", e)
+                  let needsUpdate = false
+                  if(this.state.key) {
+                    let query = this.state.originalFiles[0].source.split('/')[5]
+                    let name = query.split('?')[0]
+                    if(name !== this.state.files[0].name) {
+                      needsUpdate = true
+                      // remove files from s3
+                      try {
+                        await deleteHandler([this.state.key])
+                      } catch (e) {
+                        console.log("Error! Could not delete images from s3", e)
+                      }
                     }
                   }
-
-                  // upload new images to s3 from client to avoid burdening back end
-                  if(this.state.selectedFiles.length > 0){
+                  if(needsUpdate || (!this.state.key && this.state.files.length > 0)){
+                    //set this to true for updateProfileContent function
+                    needsUpdate = true
+                    // upload new images to s3 from client to avoid burdening back end
                     let prefix = 'users/' + this.props.user.id + '/'
-                    try {
-                      await uploadHandler(prefix, this.state.selectedFiles)
-                    } catch (e) {
-                      console.log("Error! Could not upload images to s3", e)
+                    if(this.state.croppedFile) {
+                      try {
+                        await uploadHandler(prefix, [this.state.croppedFile])
+                      } catch (e) {
+                        console.log("Error! Could not upload images to s3", e)
+                      }
+                    } else {
+                      try {
+                        await uploadHandler(prefix, this.state.files)
+                      } catch (e) {
+                        console.log("Error! Could not upload images to s3", e)
+                      }
                     }
                   }
-
                   this.props.editProfile(values)
-                  this.props.updateProfileContent(this.state.selectedFiles.length > 0, values.first_name, values.last_name)
+                  this.props.updateProfileContent(needsUpdate, values.first_name, values.last_name)
                 }}
               >
               {( {values,
@@ -303,10 +317,7 @@ class EditProfileForm extends React.Component {
                       instantUpload={false}
                       files={this.state.files}
                       stylePanelLayout='compact circle'
-                      styleLoadIndicatorPosition='center bottom'
-                      styleProgressIndicatorPosition='right bottom'
                       styleButtonRemoveItemPosition='left bottom'
-                      styleButtonProcessItemPosition='right bottom'
                       onupdatefiles={fileItems => {
                         // Set currently active file objects to this.state
                         this.setState({
@@ -314,9 +325,9 @@ class EditProfileForm extends React.Component {
                         });
                       }}
                       server={{
-                        load: (source, load, error, progress, abort, headers) => {
+                        // fetch the image from our server, a little buggy bc of s3 permissions issues related to cors and maybe browser caching. 
+                        load: (source, load) => {
                           var myRequest = new Request(source);
-                          console.log("fetching")
                           const options = {
                             method: 'get',
                             headers: new Headers({'content-type': 'application/json'}),
@@ -326,16 +337,14 @@ class EditProfileForm extends React.Component {
                               load(myBlob);
                             });
                           });
-                        }
+                        },
+                        process: `${fetchDomain}/profiles/${this.props.user.id}`,
+                        revert: `${fetchDomain}/profiles/${this.props.user.id}`
                       }}
-                      onprocessfile={onProcessFile}
                       onwarning={(error) => {console.log(error)}}
                     >
                     </FilePond>
                     <CropperEditor image={this.state.image} show={this.state.modalShow} onCrop={this.handleEdit} onHide={() => {this.setModalShow(false)}} pond={pond}/>
-                    {touched.pictureCount && errors.pictureCount ? (
-                      <div className="error-message">{errors.pictureCount}</div>
-                    ): null}
                   </Form.Group>
 
                   <h1>Edit Profile</h1>

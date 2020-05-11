@@ -34,7 +34,6 @@ import {
 } from './reduxFolder/actions/user'
 import store from './reduxFolder/store';
 import UserAppointments from './components/Appointments/UserAppointments';
-import FilePondTest from './components/User/FilePondTest';
 
 function App() {
   function handleLogout() {
@@ -76,7 +75,6 @@ function App() {
             <Route path="/stores/:store_id/workers/:worker_id" component={WorkerDisplay}/>
             <Route path="/stores/:store_id/workers" component={redirectWithoutAuth(WorkerDashboard)}/>
             <Route path="/stores/:store_id" component={StoreDisplay}/>
-            <Route path="/test" component={FilePondTest}/>
 
             <Route path="/appointments/:group_id" component={redirectWithoutAuth(AppointmentDisplay)}/>
 
